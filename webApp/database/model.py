@@ -1,0 +1,62 @@
+from sqlalchemy import Column, String, Integer, Text, ForeignKey, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
+
+Base = declarative_base()
+
+class User(Base):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String(50), unique=True, nullable=False)
+    display_name = Column(String(50), nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    password_hash = Column(String(128), nullable=False)
+    bio = Column(Text)
+    token = Column(String(100), nullable=True, unique=True)
+
+    def __init__(self, username, email, password_hash, token, bio=None):
+        self.username = username
+        self.email = email
+        self.password_hash = password_hash
+        self.bio = bio
+        self.token = token
+
+    def __repr__(self):
+        return f"<User(username='{self.username}', email='{self.email}', token='{self.token}')>"
+
+class SESSION_LOGIN(Base):
+    __tablename__ = 'SESSION'
+    ID = Column(String, primary_key=True)
+    email = Column(String(20), ForeignKey('users.email', ondelete="CASCADE"))
+    session_id = Column(String(50))
+
+    def __init__(self, ID, email, session_id):
+        self.ID = ID
+        self.email = email
+        self.session_id = session_id
+
+    def __repr__(self):
+        return f"[{self.ID},{self.email},{self.session_id}]"
+
+class service_linkes(Base):
+    __tablename__ = "service_linkes"
+
+    ID = Column(Integer,primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, ondelete="CASCADE")
+    service_link = Column(String,nullable=False, unique=True)
+    status = Column(String,nullable=False, default='offline')
+    create_at = Column(DateTime,nullable=False)
+    update_at = Column(DateTime,nullable=False)
+
+    def __init__(self, ID, user_id, service_link, status=None, create_at=None, update_at=None):
+        self.ID = ID
+        self.user_id = user_id
+        self.service_link = service_link
+        self.status = status if status else 'offline'
+        self.create_at = create_at if create_at else datetime()
+        self.update_at = update_at if update_at else datetime()
+    def __repr__(self):
+        return f"<service_linkes(ID='{self.ID}', user_id='{self.user_id}', service_link='{self.service_link}', status='{self.status}', create_at='{self.create_at}', update_at='{self.update_at}')>"
+
+
