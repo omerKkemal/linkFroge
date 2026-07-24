@@ -124,9 +124,7 @@ class Setting:
         self.HOST = "0.0.0.0"
         self.PORT = 5000
         self.OPENROUTER_API_URL_MODELS_LIST = "https://openrouter.ai/api/v1/models"
-        self.API_KEY_AI = os.getenv("OPENROUTER_API_KEY")
-        if not self.API_KEY_AI:
-            raise RuntimeError("OPENROUTER_API_KEY is required")
+
 
     def ID(self, n=5):
         """
