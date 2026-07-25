@@ -15,7 +15,7 @@ import traceback
 
 
 
-from webApp.database.manage_db import config
+from database.manage_db import config
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

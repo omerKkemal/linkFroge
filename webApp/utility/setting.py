@@ -89,15 +89,15 @@ class Setting:
         # Set up directory structure
         # self.DB_DIR = os.path.join(self.APP_DIR, "db")
         # self.LOG_DIR = os.path.join(self.APP_DIR, "logs")
-        self.DB_DIR = "database"
-        self.LOG_DIR = "logs"
+        self.DB_DIR = "webApp/database"
+        self.LOG_DIR = "webApp/logs"
 
         # Logging configuration
         self.LOG_FILE_NAME = "log.txt"
         self.LOG_FILE_PATH = os.path.join(self.LOG_DIR, self.LOG_FILE_NAME)
 
         # Database configuration
-        self.DB_NAME = "SpecterPanel.db"
+        self.DB_NAME = "linkFroge.db"
         self.DB_URI = f"sqlite:///{os.path.join(self.DB_DIR, self.DB_NAME)}"
         self.DB_ECHO = False  # Set to True for SQLAlchemy query logging
 

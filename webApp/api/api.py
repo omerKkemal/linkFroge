@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy.orm import Session
-from webApp.database.manage_db import get_session, SESSION
-from webApp.database.model import User, service_linkes
+from database.manage_db import get_session, SESSION
+from database.model import User, service_linkes
 from datetime import datetime
 import secrets
 

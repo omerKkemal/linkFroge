@@ -1,10 +1,10 @@
 from flask import Flask
 
-from webApp.api import api
-from webApp.view.login_view import login_view
-from webApp.view.auth_view import auth_view
-from webApp.utility.setting import Setting
-from webApp.database.manage_db import create_all_tables
+from api.api import api
+from view.login_view import login_view
+from view.auth_view import auth_view
+from utility.setting import Setting
+from database.manage_db import create_all_tables
 
 create_all_tables()  # Ensure all tables are created before the app starts
 app = Flask(__name__)

@@ -2,14 +2,14 @@
 from sqlalchemy import create_engine, engine
 from sqlalchemy.orm import sessionmaker
 
-from webApp.database.model import Base, SESSION_LOGIN
-from webApp.utility.setting import Setting
+from database.model import Base, SESSION_LOGIN
+from utility.setting import Setting
 
 config = Setting()
 config.setting_var()
 
 def get_engine():
-    engine = create_engine(config.DB_URL, echo=config.DB_ECHO)
+    engine = create_engine(config.DB_URI, echo=config.DB_ECHO)
     Base.metadata.create_all(engine)
     return engine
 
@@ -25,7 +25,7 @@ def get_session():
 
 Session = get_session()
 
-def SESSION(user_email, flage, session_id=None):
+def SESSION(username, flage, session_id=None):
     """
     Manage user sessions in the database.
     
@@ -34,7 +34,7 @@ def SESSION(user_email, flage, session_id=None):
     to persist session information.
     
     Args:
-        user_email (str): The email address of the user for which to manage the session.
+        username (str): The username of the user for which to manage the session.
         flage (str): The operation to perform on the session. Valid values are:
             - 'create': Create a new session entry for the user.
             - 'delete': Delete an existing session entry for the user.
@@ -76,7 +76,7 @@ def SESSION(user_email, flage, session_id=None):
     _session = Session()
     if flage == 'delete':
         _session.query(SESSION_LOGIN).filter_by(
-            email=user_email,
+            username=username,
             session_id=session_id
         ).delete()
         _session.commit()
@@ -84,7 +84,7 @@ def SESSION(user_email, flage, session_id=None):
     elif flage == 'create':
         new_session = SESSION_LOGIN(
             ID=config.ID(10), 
-            email=user_email, 
+            username=username, 
             session_id=session_id or config.ID(20)
         )
         _session.add(new_session)
@@ -93,7 +93,7 @@ def SESSION(user_email, flage, session_id=None):
         return True
     elif flage == 'check':
         is_login = _session.query(SESSION_LOGIN).filter_by(
-            email=user_email,
+            username=username,
             session_id=session_id
         ).first()
         if is_login:
