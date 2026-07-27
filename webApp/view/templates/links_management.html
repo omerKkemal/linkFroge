@@ -115,12 +115,13 @@
                     </span>
                 </div>
                 <div class="mb-2">
-                    <a href="{{ link.service_link }}" 
+                    <a href="/{{ link.ID }}" 
                        target="_blank" 
+                       data-original-url="{{ link.service_link }}"
                        class="text-green-600 hover:text-green-700 font-medium hover:underline break-all text-sm">
                         {{ link.service_link }}
+                        <span class="sarcastic-xs block">(Click to test your luck)</span>
                     </a>
-                    <span class="sarcastic-xs block">(Click to test your luck)</span>
                 </div>
                 <div class="flex justify-between items-center text-xs text-green-600 mb-3">
                     <span>Created: {{ link.create_at.strftime('%Y-%m-%d') if link.create_at else 'N/A' }}</span>
@@ -160,8 +161,9 @@
                         data-status="{{ link.status }}" data-link-id="{{ link.ID }}">
                         <td class="py-3 px-3 text-sm text-green-700">{{ loop.index }}</td>
                         <td class="py-3 px-3">
-                            <a href="{{ link.service_link }}" 
+                            <a href="/{{ link.ID }}" 
                                target="_blank" 
+                               data-original-url="{{ link.service_link }}"
                                class="text-green-600 hover:text-green-700 font-medium hover:underline truncate block max-w-[200px] md:max-w-[300px] group-hover:text-blue-600 transition-colors">
                                 {{ link.service_link }}
                                 <span class="sarcastic-xs block">(Click to test your luck)</span>
@@ -482,7 +484,6 @@
 
     // ============================================================
     // REFRESH LINKS USING BACKEND API
-    // Updates BOTH mobile and desktop badges
     // ============================================================
     async function refreshAllLinks() {
         const button = document.getElementById('refreshButton');
@@ -498,7 +499,6 @@
             return;
         }
 
-        // Disable button and show progress
         button.disabled = true;
         button.style.opacity = '0.7';
         icon.className = 'fas fa-sync fa-spin';
@@ -512,7 +512,6 @@
         document.getElementById('lastUpdated').textContent = now.toLocaleString();
 
         try {
-            // Call the backend endpoint
             const response = await fetch('/is_the_like_alive', {
                 method: 'GET',
                 headers: {
@@ -525,7 +524,6 @@
 
             console.log('Full response from backend:', result);
 
-            // Handle different response codes
             if (response.status === 401) {
                 progressText.textContent = 'Please login first: ' + (result.message || '');
                 progressBar.style.width = '100%';
@@ -576,20 +574,20 @@
                 console.log('Online links from backend:', onlineLinks);
                 console.log('Offline links from backend:', offlineLinks);
 
-                // Normalize URL for comparison - remove protocol, trailing slashes, and www
+                // Aggressive URL normalization
                 function normalizeUrl(url) {
                     if (!url) return '';
                     let normalized = url.trim().toLowerCase();
-                    // Remove trailing slash
                     normalized = normalized.replace(/\/+$/, '');
-                    // Remove protocol
                     normalized = normalized.replace(/^https?:\/\//, '');
-                    // Remove www.
                     normalized = normalized.replace(/^www\./, '');
+                    normalized = normalized.replace(/:80$/, '').replace(/:443$/, '');
+                    const parts = normalized.split('/');
+                    normalized = parts[0];
+                    normalized = normalized.replace(/:\d+$/, '');
                     return normalized;
                 }
 
-                // Create normalized sets for quick lookup
                 const onlineSet = new Set();
                 const offlineSet = new Set();
                 
@@ -601,40 +599,39 @@
                     offlineSet.add(normalizeUrl(url));
                 });
 
-                console.log('Normalized online set:', [...onlineSet]);
-                console.log('Normalized offline set:', [...offlineSet]);
-
-                // Update each row based on the report
                 let checked = 0;
                 let online = 0;
                 let offline = 0;
 
                 rows.forEach(row => {
-                    // Get the link URL from the row
+                    // Get the original URL from the data-original-url attribute
                     let linkUrl = '';
                     const linkElement = row.querySelector('td:nth-child(2) a');
                     if (linkElement) {
-                        linkUrl = linkElement.getAttribute('href') || linkElement.textContent.trim();
-                    } else {
-                        const mobileLink = row.querySelector('a');
-                        if (mobileLink) {
-                            linkUrl = mobileLink.getAttribute('href') || mobileLink.textContent.trim();
+                        linkUrl = linkElement.dataset.originalUrl || '';
+                    }
+                    
+                    // If we don't have the URL from data attribute, try to get it from edit button
+                    if (!linkUrl) {
+                        const editBtn = row.querySelector('.btn-warning');
+                        if (editBtn) {
+                            const onclickAttr = editBtn.getAttribute('onclick');
+                            if (onclickAttr) {
+                                const match = onclickAttr.match(/openEditModal\('([^']+)',\s*'([^']+)'\)/);
+                                if (match && match[2]) {
+                                    linkUrl = match[2];
+                                }
+                            }
                         }
                     }
 
                     const normalizedLinkUrl = normalizeUrl(linkUrl);
                     
                     const linkId = row.dataset.linkId;
-                    
-                    // Get BOTH badges using different IDs
                     const mobileBadge = document.getElementById(`status-badge-mobile-${linkId}`);
                     const desktopBadge = document.getElementById(`status-badge-desktop-${linkId}`);
                     const statusCodeSpan = document.getElementById(`status-code-${linkId}`);
 
-                    console.log(`Link ${linkId}: mobile badge found:`, !!mobileBadge);
-                    console.log(`Link ${linkId}: desktop badge found:`, !!desktopBadge);
-
-                    // Check if this link is online using the normalized sets
                     let isOnline = false;
                     let statusText = '';
 
@@ -645,21 +642,33 @@
                         isOnline = false;
                         statusText = 'Offline or unreachable';
                     } else {
-                        // Fallback: check the original arrays directly
-                        const urlMatch = onlineLinks.some(url => normalizeUrl(url) === normalizedLinkUrl);
-                        if (urlMatch) {
-                            isOnline = true;
-                            statusText = 'HTTP 200 OK';
-                        } else {
+                        let found = false;
+                        for (const onlineUrl of onlineLinks) {
+                            if (normalizeUrl(onlineUrl) === normalizedLinkUrl) {
+                                isOnline = true;
+                                statusText = 'HTTP 200 OK';
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            for (const offlineUrl of offlineLinks) {
+                                if (normalizeUrl(offlineUrl) === normalizedLinkUrl) {
+                                    isOnline = false;
+                                    statusText = 'Offline or unreachable';
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!found) {
                             isOnline = false;
                             statusText = 'Status unknown';
                         }
                     }
                     
-                    // Update row dataset
                     row.dataset.status = isOnline ? 'online' : 'offline';
 
-                    // Helper function to update a badge
                     function updateBadge(badgeElement, isOnline) {
                         if (badgeElement) {
                             badgeElement.classList.remove('updating');
@@ -673,56 +682,42 @@
                         }
                     }
 
-                    // Update BOTH mobile and desktop badges
                     updateBadge(mobileBadge, isOnline);
                     updateBadge(desktopBadge, isOnline);
 
-                    // Update status code display
                     if (statusCodeSpan) {
                         statusCodeSpan.textContent = statusText;
                         statusCodeSpan.className = 'status-code text-xs';
                         statusCodeSpan.style.color = isOnline ? '#2E7D32' : '#C62828';
                     }
 
-                    console.log(`Link ${linkId}: ${linkUrl} -> ${isOnline ? 'ONLINE' : 'OFFLINE'} (${statusText})`);
-
-                    if (isOnline) {
-                        online++;
-                    } else {
-                        offline++;
-                    }
+                    if (isOnline) online++;
+                    else offline++;
 
                     checked++;
                     const percent = Math.round((checked / rows.length) * 100);
                     progressBar.style.width = `${percent}%`;
-                    progressText.textContent = `Updating statuses... ${checked}/${rows.length}`;
+                    progressText.textContent = `Updating... ${checked}/${rows.length}`;
                     statusCount.textContent = `${checked}/${rows.length}`;
                 });
 
-                // Show summary
-                const summaryText = `Done! ${online} online, ${offline} offline`;
-                progressText.textContent = summaryText;
+                progressText.textContent = `Done! ${online} online, ${offline} offline`;
                 progressBar.style.width = '100%';
                 statusCount.textContent = `${rows.length}/${rows.length}`;
-
-                console.log(`Summary: ${online} online, ${offline} offline`);
-
-                // Force a re-filter to update the display
                 filterLinks();
 
             } else {
-                progressText.textContent = 'Error: Unexpected response from server';
+                progressText.textContent = 'Error: Unexpected response';
                 progressBar.style.width = '100%';
                 console.error('Unexpected response:', result);
             }
 
         } catch (error) {
-            console.error('Error checking link statuses:', error);
+            console.error('Error:', error);
             progressText.textContent = 'Error: ' + (error.message || 'Could not reach server');
             progressBar.style.width = '100%';
         }
 
-        // Reset button
         button.disabled = false;
         button.style.opacity = '1';
         icon.className = 'fas fa-check-circle';
@@ -738,10 +733,6 @@
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         console.log('FrogLink Link Management loaded.');
-        console.log('Click "Check Status" to call backend API and check all links.');
-        console.log('Both mobile and desktop badges will be updated.');
-        
-        // Auto-refresh on page load
         setTimeout(refreshAllLinks, 1000);
     });
 </script>

@@ -3,9 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}FrogLink - Because ngrok URLs Are Ugly{% endblock %}</title>
+    
+    <!-- ============================================================ -->
+    <!-- BASIC META TAGS -->
+    <!-- ============================================================ -->
+    <title>{% block title %}FrogLink - Because ngrok URLs Are Ugly and You Know It{% endblock %}</title>
+    <meta name="description" content="FrogLink - The link management system that gives permanent, stable URLs for dynamic services like ngrok tunnels. Because ngrok URLs are ugly and you know it.">
+    <meta name="keywords" content="link management, ngrok, permanent links, URL shortener, dynamic URLs, dev tools, developer tools, link shortener">
+    <meta name="author" content="Omer Kemal">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- ============================================================ -->
+    <!-- OPEN GRAPH / SOCIAL MEDIA META TAGS -->
+    <!-- ============================================================ -->
+    <meta property="og:title" content="FrogLink - Because ngrok URLs Are Ugly">
+    <meta property="og:site_name" content="FrogLink">
+    <meta property="og:description" content="Stop explaining ugly ngrok URLs. Permanent links. Dynamic updates. Less embarrassment. Built for developers who are tired of explaining why their API endpoint keeps changing.">
+    <meta property="og:image" content="{{ url_for('static', filename='img/cute.jpg', _external=True) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="FrogLink - The cutest link management system you'll ever use. Also not a C2. We swear.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- ============================================================ -->
+    <!-- TWITTER CARD META TAGS -->
+    <!-- ============================================================ -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FrogLink - Because ngrok URLs Are Ugly">
+    <meta name="twitter:description" content="Permanent links for dynamic services. Because ngrok URLs are ugly and you know it. Built with spite. Powered by sarcasm. Sustained by coffee.">
+    <meta name="twitter:image" content="{{ url_for('static', filename='img/cute.jpg', _external=True) }}">
+    <meta name="twitter:image:alt" content="A cute frog - the mascot of FrogLink. Also a warning that this is not a C2. Seriously.">
+    <meta name="twitter:creator" content="@yourtwitterhandle">
+    <meta name="twitter:site" content="@yourtwitterhandle">
+    
+    <!-- ============================================================ -->
+    <!-- THEME & BROWSER META TAGS -->
+    <!-- ============================================================ -->
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="msapplication-TileColor" content="#4CAF50">
+    <meta name="msapplication-TileImage" content="{{ url_for('static', filename='img/cute.jpg') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FrogLink">
+    
+    <!-- ============================================================ -->
+    <!-- SARCASTIC/HUMOROUS META TAGS (Hidden Gems) -->
+    <!-- ============================================================ -->
+    <meta name="frog-approval" content="100%">
+    <meta name="c2-warning" content="This is not a C2. We swear. It's just for managing links. Don't use it for illegal stuff. We don't have time for that.">
+    <meta name="coffee-required" content="true">
+    <meta name="developer-sarcasm-level" content="expert">
+    <meta name="emotional-support-frog" content="available upon request">
+    <meta name="url-ugliness-score" content="0 - We fixed it. You're welcome.">
+    
+    <!-- ============================================================ -->
+    <!-- JSON-LD STRUCTURED DATA (For SEO) -->
+    <!-- ============================================================ -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "FrogLink",
+        "description": "A link management system that gives permanent, stable URLs for dynamic services like ngrok tunnels.",
+        "applicationCategory": "Developer Tools",
+        "operatingSystem": "All",
+        "browserRequirements": "Requires JavaScript",
+        "author": {
+            "@type": "Person",
+            "name": "Omer Kemal"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "slogan": "Because ngrok URLs are ugly and you know it.",
+        "keywords": "link management, ngrok, permanent links, URL shortener, dynamic URLs"
+    }
+    </script>
+    
+    <!-- ============================================================ -->
+    <!-- FAVICON META TAGS -->
+    <!-- ============================================================ -->
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='img/cute.jpg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/cute.jpg') }}">
+    <link rel="shortcut icon" type="image/jpeg" href="{{ url_for('static', filename='img/cute.jpg') }}">
+    
+    <!-- ============================================================ -->
+    <!-- SCRIPTS & STYLES -->
+    <!-- ============================================================ -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
         

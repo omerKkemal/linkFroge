@@ -41,14 +41,15 @@ def dashboard():
     session_manger = Session()
     if 'user' in session:
         if SESSION(session.get('user'), 'check', session.get('session_id')):
+            user = session_manger.query(User).filter_by(username=session.get('user')).first()
             number_of_links = session_manger.query(service_linkes).filter_by(
-                user_id=session.get('user')
+                user_id=user.id
             ).count()
             online_links = session_manger.query(service_linkes).filter_by(
-                user_id=session.get('user'), status='online'
+                user_id=user.id, status='online'
             ).count()
             offline_links = session_manger.query(service_linkes).filter_by(
-                user_id=session.get('user'), status='offline'
+                user_id=user.id, status='offline'
             ).count()
             return render_template(
                 'dashboard.html', 
@@ -95,11 +96,17 @@ def links_management():
                     user = session_manger.query(User).filter_by(
                         username=session.get('user')
                     ).first()
+                    r = requests.head(service_link, timeout=5, allow_redirects=True)
+                    if r.status_code == 200:
+                        status = 'online'
+                    else:
+                        status = 'offline'
                     if user:
                         new_link = service_linkes(
                             ID=None,
                             user_id=user.id,
-                            service_link=service_link
+                            service_link=service_link,
+                            status=status
                         )
                         session_manger.add(new_link)
                         session_manger.commit()
