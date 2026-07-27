@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Omer Kemal · CLI Portfolio</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <!-- JetBrains Mono font -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        * {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        /* Custom scrollbar */
+        .terminal-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #0e111a;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #2a3148;
+            border-radius: 10px;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #3f4b6b;
+        }
+
+        /* Blinking cursor */
+        .cursor-blink {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: #4cd9a0;
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 2px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Fade-in animation */
+        .fade-in {
+            animation: fadeIn 0.15s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(3px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modal Scale-in */
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Help grid */
+        .help-grid {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 0.15rem 1.5rem;
+            margin: 0.3rem 0;
+        }
+        @media (max-width: 600px) {
+            .help-grid {
+                grid-template-columns: 1fr;
+                gap: 0.05rem;
+            }
+        }
+
+        /* Hide the actual input cursor */
+        #hiddenInput {
+            caret-color: transparent;
+            opacity: 0;
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            pointer-events: none;
+        }
+
+        /* Selection */
+        ::selection {
+            background: #2a3148;
+            color: #e4e6f0;
+        }
+
+        /* Command block hover */
+        .command-block {
+            transition: background 0.15s;
+            padding: 0.1rem 0;
+        }
+        .command-block:hover {
+            background: rgba(122, 162, 247, 0.03);
+        }
+
+        /* Output pre block */
+        .output-pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #c8d0e6;
+        }
+
+        /* Clickable terminal area */
+        #terminalBody {
+            cursor: text;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(8px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-overlay.active .modal-content {
+            animation: scaleIn 0.2s ease-out forwards;
+        }
+        .modal-content {
+            background: #0e111a;
+            border: 1px solid #2a3148;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+        }
+        .modal-header {
+            background: #141824;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #1f253b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h2 {
+            color: #e4e6f0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .modal-header h2 i {
+            color: #7aa2f7;
+            margin-right: 8px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: #6d7a9e;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal-close:hover {
+            color: #f07178;
+            transform: rotate(90deg);
+        }
+        .modal-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #0a0c12;
+            border-bottom: 1px solid #1a1f2e;
+            flex-wrap: wrap;
+        }
+        .modal-tab {
+            background: transparent;
+            border: 1px solid #1f253b;
+            color: #6d7a9e;
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal-tab:hover {
+            border-color: #3f4b6b;
+            color: #b9c2d9;
+        }
+        .modal-tab.active {
+            background: #1a2236;
+            border-color: #7aa2f7;
+            color: #7aa2f7;
+        }
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: 55vh;
+        }
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #2a3148;
+            border-radius: 10px;
+        }
+        .modal-body .project-title {
+            color: #e4e6f0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+        .modal-body .project-tech {
+            color: #6d7a9e;
+            font-size: 0.85rem;
+            margin-bottom: 0.8rem;
+        }
+        .modal-body .project-desc {
+            color: #b9c2d9;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .modal-body .project-badges {
+            margin-bottom: 1.2rem;
+        }
+        .modal-body .project-badges span {
+            display: inline-block;
+            background: #1a2236;
+            padding: 0.2rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            color: #7aa2f7;
+            margin-right: 6px;
+        }
+        .modal-body .command-section {
+            margin-top: 1.5rem;
+            border-top: 1px solid #1f253b;
+            padding-top: 1rem;
+        }
+        .modal-body .command-section h3 {
+            color: #4cd9a0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+        .modal-body .command-section .cmd-item {
+            display: flex;
+            gap: 0.5rem 1.5rem;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid #141824;
+            flex-wrap: wrap;
+        }
+        .modal-body .command-section .cmd-item .cmd {
+            color: #7aa2f7;
+            font-weight: 500;
+            font-size: 0.8rem;
+            min-width: 140px;
+        }
+        .modal-body .command-section .cmd-item .desc {
+            color: #b9c2d9;
+            font-size: 0.8rem;
+            flex: 1;
+        }
+        .modal-body .version-list {
+            margin-top: 0.5rem;
+        }
+        .modal-body .version-list .ver-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.4rem 0;
+            font-size: 0.8rem;
+            border-bottom: 1px solid #0d111e;
+        }
+        .modal-body .version-list .ver-item .ver {
+            color: #7aa2f7;
+            font-weight: 500;
+            min-width: 70px;
+        }
+        .modal-body .version-list .ver-item .change {
+            color: #b9c2d9;
+        }
+
+        /* Terminal container - FIXED: cursor line stays at bottom */
+        #terminalBody {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 12rem);
+            overflow-y: auto;
+        }
+        #terminalContent {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        #commandHistory {
+            flex: 1;
+        }
+        #currentLine {
+            flex-shrink: 0;
+            margin-top: 0.5rem;
+            padding-top: 0.3rem;
+            min-height: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-[#0a0c12] text-[#c8d0e6] min-h-screen flex items-center justify-center p-3 md:p-6">
+
+    <!-- MODAL -->
+    <div id="projectModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-code-branch"></i> <span id="modalTitle">Project Details</span></h2>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-tabs" id="modalTabs"></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- TERMINAL CONTAINER -->
+    <div class="max-w-5xl w-full">
+
+        <div class="bg-[#0e111a] border border-[#1f253b] rounded-2xl shadow-2xl overflow-hidden shadow-[#00000080]">
+
+            <!-- TERMINAL HEADER -->
+            <div class="bg-[#141824] px-4 py-3 flex flex-wrap items-center justify-between border-b border-[#1f253b] gap-2">
+                <div class="flex items-center gap-3">
+                    <div class="flex gap-2">
+                        <div class="w-3.5 h-3.5 rounded-full bg-rose-500 hover:bg-rose-400 transition-colors cursor-pointer"></div>
+                        <div class="w-3.5 h-3.5 rounded-full bg-amber-500 hover:bg-amber-400 transition-colors cursor-pointer"></div>
+                        <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 transition-colors cursor-pointer"></div>
+                    </div>
+                    <div class="text-xs font-mono text-[#6d7a9e] ml-3">
+                        <i class="fas fa-terminal text-[#4cd9a0] mr-2"></i>
+                        CLI Portfolio v2.0
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span class="text-[10px] text-emerald-400 font-mono tracking-wider">READY</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TERMINAL BODY -->
+            <div id="terminalBody" class="bg-[#0a0c12] p-4 md:p-6 font-mono text-sm terminal-scroll relative" onclick="focusInput()">
+
+                <input type="text" id="hiddenInput" autofocus autocomplete="off" spellcheck="false" />
+
+                <div id="terminalContent">
+                    <!-- Welcome Message -->
+                    <div id="welcomeMessage" class="mb-4 p-4 md:p-5 bg-[#0d111e] rounded-lg border border-[#1f253b]">
+                        <div class="text-emerald-400 text-base md:text-lg font-bold mb-2 flex items-center gap-2">
+                            <i class="fas fa-terminal"></i> Omer Kemal · CLI Portfolio
+                        </div>
+                        <div class="text-[#b9c2d9] text-xs md:text-sm mb-3">
+                            Full-Stack Developer &amp; Security Engineer
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] md:text-xs">
+                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">help</span> - Show available commands</div>
+                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">about</span> - About me</div>
+                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">projects</span> - List all projects</div>
+                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">project &lt;name&gt;</span> - Show project details</div>
+                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">skills</span> - Technical skills</div>
+                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">version &lt;project&gt;</span> - Version history</div>
+                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">clear</span> - Clear terminal</div>
+                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">exit</span> - Exit CLI</div>
+                        </div>
+                    </div>
+
+                    <!-- Command History -->
+                    <div id="commandHistory"></div>
+
+                    <!-- Current Command Line (stays at bottom) -->
+                    <div id="currentLine" class="flex items-center gap-2">
+                        <span class="text-emerald-400 font-bold whitespace-nowrap">omer@portfolio:~$</span>
+                        <span id="currentCommandDisplay" class="text-emerald-400"></span>
+                        <span class="cursor-blink"></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TERMINAL FOOTER -->
+            <div class="bg-[#0e111a] px-4 py-2 border-t border-[#1f253b] flex flex-wrap justify-between items-center text-[10px] text-[#6d7a9e]">
+                <div>
+                    <i class="fas fa-circle text-emerald-500 text-[6px] mr-2"></i>
+                    SECURE CONNECTION
+                </div>
+                <div>
+                    <i class="fas fa-copyright mr-1"></i>
+                    2026 Omer Kemal
+                </div>
+                <div class="hidden md:block">
+                    <i class="fas fa-code mr-1"></i>
+                    Python · Go · Java · PHP · Node
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        //  DATA
+        // ============================================================
+
+        const PROJECTS = {
+            'phantomgate': {
+                title: 'PhantomGate C2',
+                tech: 'Python · Flask · SQLAlchemy · AES',
+                desc: 'Multi-purpose remote administration tool and botnet utility. Features remote command execution, UDP flood, SQLite persistence, code injection, and a full web panel. Started as a reverse shell, evolved into a modern C2 framework.',
+                badges: ['c2', 'botnet', 'injection', 'fullstack'],
+                commands: [
+                    { cmd: 'bot start <thread_id>', desc: 'Start a botnet attack (UDP flood, brute force, etc.)' },
+                    { cmd: 'bot stop <thread_id>', desc: 'Stop a running botnet attack' },
+                    { cmd: 'db_info', desc: 'Display database information about targets and permissions' },
+                    { cmd: 'sys_info', desc: 'Display system information (OS, CPU, memory, network)' },
+                    { cmd: 'server <IP:PORT>', desc: 'Start an HTTP server on the target machine' },
+                    { cmd: 'download <file_path>', desc: 'Download a file from the target machine' }
+                ],
+                tabs: ['overview', 'netcat', 'reverse-shell', 'phantomgate']
+            },
+            'ghosttrigger': {
+                title: 'GhostTrigger',
+                tech: 'Python · sockets · threading · bcrypt',
+                desc: 'A network utility that does things. Some of them are even intentional. Built from scratch with low-level networking, authentication, and concurrency.',
+                badges: ['network', 'utility'],
+                commands: [
+                    { cmd: 'scan <host>', desc: 'Scan a host for open ports' },
+                    { cmd: 'connect <host> <port>', desc: 'Connect to a remote host' }
+                ]
+            },
+            'pslms': {
+                title: 'pslms',
+                tech: 'Flask · SQLite',
+                desc: 'Primary school management system. Handles student records, attendance, and grades.',
+                badges: ['fullstack', 'flask'],
+                commands: [
+                    { cmd: 'student add <name> <grade>', desc: 'Add a new student' },
+                    { cmd: 'student list', desc: 'List all students' }
+                ]
+            },
+            'post-app': {
+                title: 'post-app',
+                tech: 'Laravel · PHP · MySQL',
+                desc: 'A blog application with MVC architecture, authentication, and responsive UI.',
+                badges: ['laravel', 'php'],
+                commands: [
+                    { cmd: 'post create <title>', desc: 'Create a new blog post' },
+                    { cmd: 'post list', desc: 'List all blog posts' }
+                ]
+            }
+        };
+
+        const VERSION_DATA = {
+            'phantomgate': [
+                { ver: 'v1.0', change: 'Initial release - Multi-threaded agent architecture with AES encryption' },
+                { ver: 'v1.5', change: 'Code injection and execution capability' },
+                { ver: 'v1.7', change: 'Full Flask web panel with authentication' },
+                { ver: 'v1.9', change: 'Web terminal and real-time command execution' }
+            ]
+        };
+
+        // ============================================================
+        //  STATE & REFS
+        // ============================================================
+
+        let history = [];
+        let historyIndex = -1;
+
+        const terminalBody = document.getElementById('terminalBody');
+        const commandHistory = document.getElementById('commandHistory');
+        const currentCommandDisplay = document.getElementById('currentCommandDisplay');
+        const hiddenInput = document.getElementById('hiddenInput');
+        const modal = document.getElementById('projectModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalTabs = document.getElementById('modalTabs');
+        const modalBody = document.getElementById('modalBody');
+        const modalClose = document.getElementById('modalClose');
+
+        // ============================================================
+        //  CORE FUNCTIONS
+        // ============================================================
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function scrollToBottom() {
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+
+        function focusInput() {
+            if(!hiddenInput.disabled) hiddenInput.focus();
+        }
+
+        function appendOutput(html, className = '') {
+            const div = document.createElement('div');
+            div.className = 'command-block fade-in' + (className ? ' ' + className : '');
+            div.innerHTML = html;
+            commandHistory.appendChild(div);
+            scrollToBottom();
+        }
+
+        function printCommand(cmd) {
+            const html = `
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-emerald-400 font-bold">omer@portfolio:~$</span>
+                    <span class="text-emerald-400 break-all">${escapeHtml(cmd)}</span>
+                </div>
+            `;
+            appendOutput(html);
+        }
+
+        function printOutput(text, type = 'default') {
+            const colorMap = {
+                'highlight': 'text-[#7aa2f7]',
+                'success': 'text-[#4cd9a0]',
+                'warning': 'text-[#f0a030]',
+                'error': 'text-[#f07178]',
+                'dim': 'text-[#6d7a9e]',
+                'default': 'text-[#b9c2d9]'
+            };
+            const cls = colorMap[type] || colorMap['default'];
+            const lines = text.split('\n');
+            let html = lines.map(line => `<span class="${cls}">${escapeHtml(line)}</span>`).join('<br />');
+
+            const outputHtml = `
+                <div class="mt-1 ml-4 p-2 md:p-3 bg-[#0d111e] rounded-lg border-l-2 border-[#2a3148]">
+                    <pre class="output-pre">${html}</pre>
+                </div>
+            `;
+            appendOutput(outputHtml);
+        }
+
+        // ============================================================
+        //  MODAL LOGIC
+        // ============================================================
+
+        function openModal(projectKey) {
+            const p = PROJECTS[projectKey];
+            if (!p) return;
+
+            modalTitle.textContent = p.title + ' — Project Details';
+            modal.classList.add('active');
+
+            const tabs = p.tabs || ['overview'];
+            modalTabs.innerHTML = '';
+            tabs.forEach((tab, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'modal-tab' + (index === 0 ? ' active' : '');
+                btn.textContent = tab.charAt(0).toUpperCase() + tab.slice(1).replace('-', ' ');
+                btn.dataset.tab = tab;
+                btn.addEventListener('click', () => switchTab(projectKey, tab));
+                modalTabs.appendChild(btn);
+            });
+
+            switchTab(projectKey, tabs[0]);
+        }
+
+        function switchTab(projectKey, tabName) {
+            const p = PROJECTS[projectKey];
+            if (!p) return;
+
+            document.querySelectorAll('.modal-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tabName);
+            });
+
+            let html = '';
+
+            if (tabName === 'overview') {
+                html = `
+                    <div class="project-title">${p.title}</div>
+                    <div class="project-tech"><i class="fas fa-tag"></i> ${p.tech}</div>
+                    <div class="project-desc">${p.desc}</div>
+                    <div class="project-badges">
+                        ${p.badges.map(b => `<span>#${b}</span>`).join('')}
+                    </div>
+                    ${p.commands ? `
+                        <div class="command-section">
+                            <h3><i class="fas fa-terminal"></i> Available Commands</h3>
+                            ${p.commands.map(c => `
+                                <div class="cmd-item">
+                                    <span class="cmd">${escapeHtml(c.cmd)}</span>
+                                    <span class="desc">${escapeHtml(c.desc)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+            } else {
+                const versions = VERSION_DATA[tabName] || [{ver: 'v1.0', change: 'No version history available.'}];
+                html = `
+                    <div class="project-title">${tabName.toUpperCase()}</div>
+                    <div class="project-tech">Version History</div>
+                    <div class="command-section">
+                        <div class="version-list">
+                            ${versions.map(v => `
+                                <div class="ver-item">
+                                    <span class="ver">${v.ver}</span>
+                                    <span class="change">${escapeHtml(v.change)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            modalBody.innerHTML = html;
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            focusInput();
+        }
+
+        modalClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+        
+        document.addEventListener('keydown', e => { 
+            if (e.key === 'Escape' && modal.classList.contains('active')) closeModal(); 
+        });
+
+        // ============================================================
+        //  COMMAND PARSING & EVENT LISTENERS
+        // ============================================================
+
+        hiddenInput.addEventListener('input', () => {
+            currentCommandDisplay.textContent = hiddenInput.value;
+        });
+
+        hiddenInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const rawCmd = hiddenInput.value.trim();
+                if (rawCmd) {
+                    history.push(rawCmd);
+                    historyIndex = history.length;
+                    printCommand(rawCmd);
+                    processCommand(rawCmd);
+                } else {
+                    printCommand('');
+                }
+                hiddenInput.value = '';
+                currentCommandDisplay.textContent = '';
+                scrollToBottom();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    hiddenInput.value = history[historyIndex];
+                    currentCommandDisplay.textContent = hiddenInput.value;
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < history.length - 1) {
+                    historyIndex++;
+                    hiddenInput.value = history[historyIndex];
+                    currentCommandDisplay.textContent = hiddenInput.value;
+                } else {
+                    historyIndex = history.length;
+                    hiddenInput.value = '';
+                    currentCommandDisplay.textContent = '';
+                }
+            }
+        });
+
+        function processCommand(rawCmd) {
+            const args = rawCmd.split(' ').filter(Boolean);
+            const cmd = args[0].toLowerCase();
+
+            switch(cmd) {
+                case 'help':
+                    printOutput(`Available commands:
+  help               - Show this help message
+  about              - Display information about me
+  projects           - List all available projects
+  project <name>     - Open details for a specific project
+  skills             - Display technical skills
+  version <project>  - Show version history for a project
+  clear              - Clear the terminal screen
+  exit               - Close the terminal`);
+                    break;
+                case 'about':
+                    printOutput(`Hi, I'm Omer Kemal.
+A Full-Stack Developer & Security Engineer passionate about building
+secure, scalable applications and exploring low-level networking.
+I specialize in Python, Go, Java, and modern web frameworks.`);
+                    break;
+                case 'projects':
+                    const pList = Object.keys(PROJECTS).map(k => `  ${k.padEnd(15)} - ${PROJECTS[k].title}`).join('\n');
+                    printOutput(`Available projects:\n${pList}`);
+                    break;
+                case 'project':
+                    if (args[1] && PROJECTS[args[1].toLowerCase()]) {
+                        printOutput(`Opening GUI window for ${args[1]}...`, 'success');
+                        setTimeout(() => openModal(args[1].toLowerCase()), 300);
+                    } else {
+                        printOutput(`Usage: project <name>\nUse 'projects' to see a list of available projects.`, 'error');
+                    }
+                    break;
+                case 'skills':
+                    printOutput(`Technical Skills:
+  Languages : Python, Go, Java, PHP, JavaScript/Node.js
+  Web       : Flask, Laravel, HTML/CSS, Tailwind, React
+  Security  : Network Analysis, C2 Frameworks, Cryptography
+  Databases : PostgreSQL, MySQL, SQLite
+  Tools     : Git, Docker, Linux, Bash`, 'highlight');
+                    break;
+                case 'version':
+                    if (args[1] && VERSION_DATA[args[1].toLowerCase()]) {
+                        const vData = VERSION_DATA[args[1].toLowerCase()];
+                        const vList = vData.map(v => `  ${v.ver.padEnd(6)} - ${v.change}`).join('\n');
+                        printOutput(`Version history for ${args[1]}:\n${vList}`);
+                    } else {
+                        printOutput(`No version history found for '${args[1] || 'undefined'}'.\nAvailable logs: phantomgate`, 'error');
+                    }
+                    break;
+                case 'clear':
+                    commandHistory.innerHTML = '';
+                    break;
+                case 'exit':
+                    printOutput('Connection closed by foreign host.', 'error');
+                    hiddenInput.disabled = true;
+                    document.querySelector('.cursor-blink').style.display = 'none';
+                    break;
+                case 'sudo':
+                    printOutput(`omer is not in the sudoers file. This incident will be reported.`, 'warning');
+                    break;
+                default:
+                    printOutput(`Command not found: ${cmd}. Type 'help' for available commands.`, 'error');
+            }
+        }
+
+        // Initialize focus
+        focusInput();
+    </script>
+</body>
+</html>

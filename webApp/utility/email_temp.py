@@ -14,8 +14,15 @@ import logging
 import traceback
 
 
-
+# for prodi=uction or deployment, ensure the Setting class is imported correctly from the utility module
 from database.manage_db import config
+
+# for testint uncomment the following line and ensure the Setting class is accessible
+# from setting import Setting
+
+# config = Setting()
+# config.setting_var()
+
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -489,7 +496,7 @@ if __name__ == "__main__":
             print("SMTP configuration test failed. Please check your settings.")
             return
         
-        test_email = 'testuser@example.com'
+        test_email = 'omerkemal2023@gmail.com'
         templates_to_test = [
             ('Welcome to LinkFroge', email_bot.welcome_email('TestUser', test_email)),
             ('New Link Created', email_bot.link_created('TestUser', 'My Website', 'https://example.com', 'my-link')),

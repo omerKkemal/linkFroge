@@ -1,6 +1,5 @@
-import email
-
 from flask import Blueprint, flash, flash, render_template, request, redirect, url_for, session, flash
+import traceback
 
 from database.model import User
 from database.manage_db import get_engine as engine
@@ -33,7 +32,6 @@ def login():
             session['user'] = username
             session['session_id'] = config.ID(20)  # Generate a random session ID
             SESSION(user.username, 'create', session['session_id'])
-            # EmailTemplate.send_email(user.email, 'Welcome!', 'You have successfully registered.')
             return redirect(url_for('auth_view.dashboard'))  # Redirect to a dashboard or home page
         else:
             flash('Invalid credentials. Please try again.')
@@ -43,6 +41,7 @@ def login():
 
 @login_view.route('/register', methods=['GET', 'POST'])
 def register():
+    email_bot = EmailTemplate('https://linkfroge.com')
     session = Session()  # Create a new session for database operations
     try:    
         if request.method == 'POST':
@@ -62,12 +61,19 @@ def register():
                     return render_template('register.html', error=error)
 
                 token = f"linkFrog-v1-sp{config.ID(30)}"  # Generate a random token for the user
-
-                new_user = User(username=username, display_name=display_name, email=email, password_hash=password, token=token)
-                session.add(new_user)
-                session.commit()
-                print(f"New user registered: {new_user}")
-                return redirect(url_for('login_view.login'))
+                try:
+                    new_user = User(username=username, display_name=display_name, email=email, password_hash=password, token=token)
+                    session.add(new_user)
+                    session.commit()
+                    welcom_email = 'Welcome to LinkFroge'
+                    email_bot.send_email(welcom_email, email_bot.welcome_email(username, email), email)
+                    print(f"New user registered: {new_user}")
+                    return redirect(url_for('login_view.login'))
+                except Exception as e:
+                    print(f"Error during user registration: {traceback.format_exc()}")
+                    session.rollback()  # Rollback the session in case of an error
+                    error = 'An error occurred during registration. Please try again.'
+                    return render_template('register.html', error=error)
             else:
                 error = 'Please fill in all fields.'
                 return render_template('register.html', error=error)

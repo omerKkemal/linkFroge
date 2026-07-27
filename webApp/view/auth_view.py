@@ -1,3 +1,15 @@
+"""
+This module defines the authentication-related views for the web application using Flask's Blueprint feature. 
+It includes routes for the dashboard, links management, and API endpoints for deleting and updating service links.
+The views handle user authentication, session management, and interaction with the database to manage user-specific service links.
+warning: This module assumes that the user is authenticated and has a valid session for accessing the dashboard and managing links.
+what it does:
+- Provides a dashboard view that displays the number of links, online links, and offline links for the authenticated user.
+- Provides a links management view that allows users to view, add, update, and delete their service links.
+- Implements API endpoints for deleting and updating service links, ensuring that only authenticated users can perform these actions.
+- Redirects unauthenticated users to the login page when they attempt to access protected routes.
+"""
+
 from flask import Blueprint, render_template, request, redirect, url_for, session
 
 from database.model import User, service_linkes
@@ -14,6 +26,17 @@ auth_view = Blueprint(
 
 @auth_view.route('/dashboard', methods=['GET'])
 def dashboard():
+    """
+    Renders the dashboard page for authenticated users.
+    What it does:
+    - Checks if the user is logged in by verifying the session.
+    - If the user is logged in, it retrieves the number of links, online links, and offline links associated with the user from the database.
+    - Renders the 'dashboard.html' template with the retrieved data.
+    - If the user is not logged in or the session is invalid, it redirects to the login page.
+    Returns:
+    - The rendered 'dashboard.html' template with the user's link statistics if the user is authenticated.
+    - A redirect to the login page if the user is not authenticated or the session is invalid
+    """
     session_manger = Session()
     if 'user' in session:
         if SESSION(session.get('user'), 'check', session.get('session_id')):
@@ -40,6 +63,20 @@ def dashboard():
 
 @auth_view.route('/links_management', methods=['GET', 'POST'])
 def links_management():
+    """
+    Handles the management of service links for authenticated users.
+    What it does:
+    - Checks if the user is logged in by verifying the session.
+    - If the user is logged in, it allows them to view, add, update, or delete service links associated with their account.
+    - For GET requests, it retrieves and displays the user's existing service links.
+    - For POST requests, it allows the user to add a new service link to their account.
+    - If the user is not logged in or the session is invalid, it redirects to the login page.
+    Returns:
+    - The rendered 'links_management.html' template with the user's service links for GET requests.
+    - A redirect to the 'links_management' page after successfully adding a new service link for POST requests.
+    - A redirect to the login page if the user is not authenticated or the session is invalid.
+    - An error message in the 'links_management.html' template if the user attempts to add a new service link without providing a valid link.
+    """
     if 'user' in session:
         session_manger = Session()
         if SESSION(session.get('user'), 'check', session.get('session_id')):
@@ -80,6 +117,19 @@ def links_management():
 
 @auth_view.route('/api/links_management/delete/<int:link_id>', methods=['POST'])
 def delete_link(link_id):
+    """
+    Handles the deletion of a service link for authenticated users.
+    What it does:
+    - Checks if the user is logged in by verifying the session.
+    - If the user is logged in, it attempts to delete the specified service link associated with their account.
+    - If the link is found and the user has permission to delete it, the link is removed from the database, and the user is redirected to the 'links_management' page.
+    - If the link is not found or the user does not have permission to delete it, an error message is displayed on the 'links_management.html' template.
+    - If the user is not logged in or the session is invalid, it redirects to the login page.
+    Returns:
+    - A redirect to the 'links_management' page after successfully deleting the service link.
+    - A redirect to the login page if the user is not authenticated or the session is invalid.
+    - An error message in the 'links_management.html' template if the link is not found or the user does not have permission to delete it.
+    """
     session_manger = Session()
     if 'user' not in session:
         if SESSION(session.get('user'), 'check', session.get('session_id')):
@@ -106,6 +156,19 @@ def delete_link(link_id):
 
 @auth_view.route('/api/links_management/update/<int:link_id>', methods=['POST'])
 def update_link(link_id):
+    """
+    Handles the updating of a service link for authenticated users.
+    What it does:
+    - Checks if the user is logged in by verifying the session.
+    - If the user is logged in, it attempts to update the specified service link associated with their account.
+    - If the link is found and the user has permission to update it, the link is updated in the database with the new service link provided in the request form, and the user is redirected to the 'links_management' page.
+    - If the link is not found or the user does not have permission to update it, an error message is displayed on the 'links_management.html' template.
+    - If the user is not logged in or the session is invalid, it redirects to the login page.
+    Returns:
+    - A redirect to the 'links_management' page after successfully updating the service link.
+    - A redirect to the login page if the user is not authenticated or the session is invalid.
+    - An error message in the 'links_management.html' template if the link is not found or the user does not have permission to update it, or if the new service link is not provided.
+    """
     session_manger = Session()
     if 'user' not in session:
         if SESSION(session.get('user'), 'check', session.get('session_id')):
