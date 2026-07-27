@@ -27,7 +27,7 @@
                     class="btn-primary inline-flex items-center justify-center space-x-2 px-4 py-3 sm:px-6 sm:py-3 flex-1 sm:flex-none">
                 <i class="fas fa-sync" id="refreshIcon"></i>
                 <span>Check Status</span>
-                <span class="sarcastic-xs hidden sm:inline">(Only 200 = Online)</span>
+                <span class="sarcastic-xs hidden sm:inline">(Backend check)</span>
             </button>
             <!-- Add Link Button -->
             <button onclick="openAddModal()" 
@@ -54,31 +54,6 @@
             <span class="text-xs text-blue-600 font-medium" id="statusCount">0/0</span>
         </div>
     </div>
-
-    <!-- Success/Error Messages -->
-    {% if error %}
-    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl mb-6 alert-auto-hide">
-        <div class="flex items-start">
-            <i class="fas fa-exclamation-circle text-red-500 mr-3 mt-0.5 flex-shrink-0"></i>
-            <div>
-                <p class="text-red-700">{{ error }}</p>
-                <span class="sarcastic-block text-sm">(We told you not to break anything. But did you listen? No.)</span>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    {% if success %}
-    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-xl mb-6 alert-auto-hide">
-        <div class="flex items-start">
-            <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
-            <div>
-                <p class="text-green-700">{{ success }}</p>
-                <span class="sarcastic-block text-sm">(Look at you, being productive and stuff.)</span>
-            </div>
-        </div>
-    </div>
-    {% endif %}
 
     <!-- Search and Filter -->
     <div class="glass-effect rounded-3xl p-4 sm:p-6 mb-6 border-2 border-green-200">
@@ -119,11 +94,9 @@
                 <i class="fas fa-list mr-2 text-green-600"></i>
                 Your Links (<span id="linkCount">{{ links|length if links else 0 }}</span>)
                 <span class="sarcastic-sm ml-2 hidden sm:inline">(Quality over quantity, right?)</span>
-                <img src="{{ url_for('static', filename='img/leaf.png') }}" 
-                     alt="Leaf" 
-                     class="w-5 h-5 sm:w-6 sm:h-6 ml-2 object-contain">
+                <i class="fas fa-leaf text-green-500 ml-2"></i>
             </h3>
-            <span class="text-xs sm:text-sm text-green-600"><i class="fas fa-leaf"></i> Last updated: <span id="lastUpdated">today</span> <span class="sarcastic-xs">(We think)</span></span>
+            <span class="text-xs sm:text-sm text-green-600"><i class="fas fa-clock"></i> Last updated: <span id="lastUpdated">today</span> <span class="sarcastic-xs">(We think)</span></span>
         </div>
 
         {% if links %}
@@ -133,7 +106,7 @@
             <div class="link-row bg-green-50/50 rounded-xl p-4 border border-green-200" data-status="{{ link.status }}" data-link-id="{{ link.ID }}">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-sm font-semibold text-green-700">#{{ loop.index }}</span>
-                    <span class="status-badge {% if link.status == 'online' %}status-online{% else %}status-offline{% endif %} text-xs" id="status-badge-{{ link.ID }}">
+                    <span class="status-badge status-badge-mobile {% if link.status == 'online' %}status-online{% else %}status-offline{% endif %} text-xs" id="status-badge-mobile-{{ link.ID }}">
                         {% if link.status == 'online' %}
                             <i class="fas fa-check-circle"></i> ONLINE
                         {% else %}
@@ -195,14 +168,14 @@
                             </a>
                         </td>
                         <td class="py-3 px-3">
-                            <span class="status-badge {% if link.status == 'online' %}status-online{% else %}status-offline{% endif %} text-xs whitespace-nowrap" id="status-badge-{{ link.ID }}">
+                            <span class="status-badge status-badge-desktop {% if link.status == 'online' %}status-online{% else %}status-offline{% endif %} text-xs whitespace-nowrap" id="status-badge-desktop-{{ link.ID }}">
                                 {% if link.status == 'online' %}
                                     <i class="fas fa-check-circle"></i> ONLINE
                                 {% else %}
                                     <i class="fas fa-times-circle"></i> OFFLINE
                                 {% endif %}
                             </span>
-                            <span class="status-code text-xs text-gray-400 hidden" id="status-code-{{ link.ID }}"></span>
+                            <span class="status-code text-xs" id="status-code-{{ link.ID }}"></span>
                         </td>
                         <td class="py-3 px-3 text-sm text-green-600">
                             {{ link.create_at.strftime('%Y-%m-%d') if link.create_at else 'N/A' }}
@@ -212,14 +185,12 @@
                                 <button onclick="openEditModal('{{ link.ID }}', '{{ link.service_link }}')" 
                                         class="btn-warning inline-flex items-center space-x-1 text-xs px-3 py-1.5">
                                     <i class="fas fa-edit"></i>
-                                    <span class="hidden sm:inline">Edit</span>
-                                    <span class="sm:hidden">✏️</span>
+                                    <span>Edit</span>
                                 </button>
                                 <button onclick="openDeleteModal('{{ link.ID }}')" 
                                         class="btn-danger inline-flex items-center space-x-1 text-xs px-3 py-1.5">
                                     <i class="fas fa-trash"></i>
-                                    <span class="hidden sm:inline">Delete</span>
-                                    <span class="sm:hidden">🗑️</span>
+                                    <span>Delete</span>
                                 </button>
                             </div>
                         </td>
@@ -233,7 +204,7 @@
         <div class="flex flex-wrap justify-between items-center mt-6 pt-4 border-t-2 border-green-200 gap-3">
             <p class="text-sm text-green-600">
                 Showing <span id="visibleCount">{{ links|length }}</span> links 
-                <span class="sarcastic-xs hidden sm:inline">(You're doing great, champ)</span>
+                <span class="sarcastic-xs hidden sm:inline">(You're doing great)</span>
             </p>
             <div class="flex space-x-2">
                 <button class="px-3 py-1 border-2 border-green-200 rounded-lg hover:bg-green-50 transition-colors duration-200 text-sm text-green-700">
@@ -271,7 +242,7 @@
         {% endif %}
     </div>
     
-    <!-- Motivational/Sarcastic Message -->
+    <!-- Motivational Message -->
     <div class="mt-6 glass-effect rounded-3xl p-4 border-2 border-green-200">
         <div class="flex items-center justify-center space-x-3 flex-wrap">
             <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
@@ -317,15 +288,8 @@
                 <p class="sarcastic-xs mt-1"><i class="fas fa-frog"></i> Pro tip: Copy-paste. Don't type. Trust me.</p>
             </div>
             <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
-                <button type="button" 
-                        onclick="closeModal('addModal')" 
-                        class="btn-secondary w-full sm:w-auto">
-                    Cancel
-                </button>
-                <button type="submit" class="btn-primary w-full sm:w-auto">
-                    <i class="fas fa-plus"></i>
-                    Add Link
-                </button>
+                <button type="button" onclick="closeModal('addModal')" class="btn-secondary w-full sm:w-auto">Cancel</button>
+                <button type="submit" class="btn-primary w-full sm:w-auto"><i class="fas fa-plus"></i> Add Link</button>
             </div>
         </form>
     </div>
@@ -361,15 +325,8 @@
                 <p class="sarcastic-xs mt-1"><i class="fas fa-frog"></i> Remember: With great power comes great responsibility... and broken URLs.</p>
             </div>
             <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
-                <button type="button" 
-                        onclick="closeModal('editModal')" 
-                        class="btn-secondary w-full sm:w-auto">
-                    Cancel
-                </button>
-                <button type="submit" class="btn-warning w-full sm:w-auto">
-                    <i class="fas fa-save"></i>
-                    Update Link
-                </button>
+                <button type="button" onclick="closeModal('editModal')" class="btn-secondary w-full sm:w-auto">Cancel</button>
+                <button type="submit" class="btn-warning w-full sm:w-auto"><i class="fas fa-save"></i> Update Link</button>
             </div>
         </form>
     </div>
@@ -389,15 +346,8 @@
             </p>
             <form id="deleteForm" method="POST">
                 <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-3">
-                    <button type="button" 
-                            onclick="closeModal('deleteModal')" 
-                            class="btn-secondary w-full sm:w-auto">
-                        Cancel
-                    </button>
-                    <button type="submit" class="btn-danger w-full sm:w-auto">
-                        <i class="fas fa-trash"></i>
-                        Delete
-                    </button>
+                    <button type="button" onclick="closeModal('deleteModal')" class="btn-secondary w-full sm:w-auto">Cancel</button>
+                    <button type="submit" class="btn-danger w-full sm:w-auto"><i class="fas fa-trash"></i> Delete</button>
                 </div>
             </form>
             <p class="sarcastic-xs mt-4"><i class="fas fa-frog"></i> We'll miss this link. It had so much potential.</p>
@@ -443,7 +393,9 @@
 </style>
 
 <script>
-    // Modal functions
+    // ============================================================
+    // MODAL FUNCTIONS
+    // ============================================================
     function openAddModal() {
         document.getElementById('addModal').classList.remove('hidden');
         document.getElementById('addModal').classList.add('flex');
@@ -453,7 +405,6 @@
     function openEditModal(linkId, currentLink) {
         document.getElementById('editModal').classList.remove('hidden');
         document.getElementById('editModal').classList.add('flex');
-        
         const form = document.getElementById('editForm');
         form.action = `/api/links_management/update/${linkId}`;
         document.getElementById('edit_service_link').value = currentLink;
@@ -463,7 +414,6 @@
     function openDeleteModal(linkId) {
         document.getElementById('deleteModal').classList.remove('hidden');
         document.getElementById('deleteModal').classList.add('flex');
-        
         const form = document.getElementById('deleteForm');
         form.action = `/api/links_management/delete/${linkId}`;
         document.body.style.overflow = 'hidden';
@@ -486,7 +436,9 @@
         });
     });
 
-    // Filter links
+    // ============================================================
+    // SEARCH AND FILTER FUNCTIONS
+    // ============================================================
     function filterLinks() {
         const searchTerm = document.getElementById('searchLinks').value.toLowerCase().trim();
         const statusFilter = document.getElementById('statusFilter').value;
@@ -506,13 +458,11 @@
             }
             
             const status = row.dataset.status;
-            
             let show = true;
             
             if (searchTerm && !linkText.includes(searchTerm)) {
                 show = false;
             }
-            
             if (statusFilter !== 'all' && status !== statusFilter) {
                 show = false;
             }
@@ -530,7 +480,10 @@
         filterLinks();
     }
 
-    // Refresh/Check Status Function - Only 200 = Online
+    // ============================================================
+    // REFRESH LINKS USING BACKEND API
+    // Updates BOTH mobile and desktop badges
+    // ============================================================
     async function refreshAllLinks() {
         const button = document.getElementById('refreshButton');
         const icon = document.getElementById('refreshIcon');
@@ -539,232 +492,257 @@
         const progressText = document.getElementById('statusProgressText');
         const statusCount = document.getElementById('statusCount');
         const rows = document.querySelectorAll('.link-row');
-        
+
         if (rows.length === 0) {
-            console.log('No links to check. You\'re off the hook... for now.');
+            console.log('No links to check.');
             return;
         }
-        
+
         // Disable button and show progress
         button.disabled = true;
         button.style.opacity = '0.7';
         icon.className = 'fas fa-sync fa-spin';
         progressDiv.classList.remove('hidden');
-        
-        let checked = 0;
-        let online = 0;
-        let offline = 0;
-        
-        // Update progress
-        progressText.textContent = `Checking ${rows.length} links...`;
-        progressBar.style.width = '0%';
+
+        progressText.textContent = 'Calling backend to check statuses...';
+        progressBar.style.width = '30%';
         statusCount.textContent = `0/${rows.length}`;
-        
-        // Update last updated time
+
         const now = new Date();
-        const timeStr = now.toLocaleString();
-        document.getElementById('lastUpdated').textContent = timeStr;
-        
-        // Check each link
-        for (const row of rows) {
-            // Find the link URL
-            let linkUrl = '';
-            const linkElement = row.querySelector('td:nth-child(2) a');
-            if (linkElement) {
-                linkUrl = linkElement.textContent.trim();
-            } else {
-                const mobileLink = row.querySelector('a');
-                if (mobileLink) {
-                    linkUrl = mobileLink.textContent.trim();
+        document.getElementById('lastUpdated').textContent = now.toLocaleString();
+
+        try {
+            // Call the backend endpoint
+            const response = await fetch('/is_the_like_alive', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            });
+
+            const result = await response.json();
+
+            console.log('Full response from backend:', result);
+
+            // Handle different response codes
+            if (response.status === 401) {
+                progressText.textContent = 'Please login first: ' + (result.message || '');
+                progressBar.style.width = '100%';
+                button.disabled = false;
+                button.style.opacity = '1';
+                icon.className = 'fas fa-exclamation-triangle';
+                
+                setTimeout(() => {
+                    progressDiv.classList.add('hidden');
+                    icon.className = 'fas fa-sync';
+                }, 4000);
+                return;
+            }
+
+            if (response.status === 404) {
+                progressText.textContent = 'No links found: ' + (result.message || '');
+                progressBar.style.width = '100%';
+                button.disabled = false;
+                button.style.opacity = '1';
+                icon.className = 'fas fa-exclamation-triangle';
+                
+                setTimeout(() => {
+                    progressDiv.classList.add('hidden');
+                    icon.className = 'fas fa-sync';
+                }, 4000);
+                return;
+            }
+
+            if (response.status === 500) {
+                progressText.textContent = 'Server error: ' + (result.message || 'Something went wrong');
+                progressBar.style.width = '100%';
+                button.disabled = false;
+                button.style.opacity = '1';
+                icon.className = 'fas fa-exclamation-triangle';
+                
+                setTimeout(() => {
+                    progressDiv.classList.add('hidden');
+                    icon.className = 'fas fa-sync';
+                }, 4000);
+                return;
+            }
+
+            if (response.status === 200 && result.message) {
+                const report = result.message;
+                const onlineLinks = report.online || [];
+                const offlineLinks = report.offline || [];
+
+                console.log('Online links from backend:', onlineLinks);
+                console.log('Offline links from backend:', offlineLinks);
+
+                // Normalize URL for comparison - remove protocol, trailing slashes, and www
+                function normalizeUrl(url) {
+                    if (!url) return '';
+                    let normalized = url.trim().toLowerCase();
+                    // Remove trailing slash
+                    normalized = normalized.replace(/\/+$/, '');
+                    // Remove protocol
+                    normalized = normalized.replace(/^https?:\/\//, '');
+                    // Remove www.
+                    normalized = normalized.replace(/^www\./, '');
+                    return normalized;
                 }
-            }
-            
-            if (!linkUrl) {
-                checked++;
-                updateProgress(checked, rows.length, progressBar, progressText, statusCount);
-                continue;
-            }
-            
-            // Get link ID
-            const linkId = row.dataset.linkId;
-            const statusBadge = document.getElementById(`status-badge-${linkId}`);
-            const statusCodeSpan = document.getElementById(`status-code-${linkId}`);
-            
-            // Show updating state
-            if (statusBadge) {
-                statusBadge.classList.add('updating');
-            }
-            
-            let isOnline = false;
-            let statusCode = 0;
-            let statusText = 'Unknown';
-            
-            try {
-                // Try CORS mode first
-                try {
-                    const response = await fetch(linkUrl, {
-                        method: 'HEAD',
-                        mode: 'cors',
-                        cache: 'no-cache',
-                        signal: AbortSignal.timeout(5000)
-                    });
-                    
-                    statusCode = response.status;
-                    statusText = response.statusText;
-                    
-                    // ONLY 200 = ONLINE
-                    if (statusCode === 200) {
-                        isOnline = true;
+
+                // Create normalized sets for quick lookup
+                const onlineSet = new Set();
+                const offlineSet = new Set();
+                
+                onlineLinks.forEach(url => {
+                    onlineSet.add(normalizeUrl(url));
+                });
+                
+                offlineLinks.forEach(url => {
+                    offlineSet.add(normalizeUrl(url));
+                });
+
+                console.log('Normalized online set:', [...onlineSet]);
+                console.log('Normalized offline set:', [...offlineSet]);
+
+                // Update each row based on the report
+                let checked = 0;
+                let online = 0;
+                let offline = 0;
+
+                rows.forEach(row => {
+                    // Get the link URL from the row
+                    let linkUrl = '';
+                    const linkElement = row.querySelector('td:nth-child(2) a');
+                    if (linkElement) {
+                        linkUrl = linkElement.getAttribute('href') || linkElement.textContent.trim();
                     } else {
-                        isOnline = false;
-                    }
-                    
-                } catch (corsError) {
-                    // CORS blocked, try no-cors
-                    try {
-                        const noCorsResponse = await fetch(linkUrl, {
-                            method: 'HEAD',
-                            mode: 'no-cors',
-                            cache: 'no-cache',
-                            signal: AbortSignal.timeout(5000)
-                        });
-                        
-                        // With no-cors, we can't read status
-                        // We'll assume online if no error, but mark as "Unknown"
-                        isOnline = false;
-                        statusCode = 0;
-                        statusText = 'CORS Blocked - Unknown';
-                        
-                        // Try a different approach - use an image or script
-                        // For now, mark as offline since we can't verify 200
-                        isOnline = false;
-                        
-                    } catch (noCorsError) {
-                        isOnline = false;
-                        statusCode = 0;
-                        statusText = 'Connection Failed';
-                    }
-                }
-                
-                // Update the row data
-                row.dataset.status = isOnline ? 'online' : 'offline';
-                
-                // Update the badge
-                if (statusBadge) {
-                    statusBadge.classList.remove('updating');
-                    if (isOnline) {
-                        statusBadge.className = 'status-badge status-online text-xs whitespace-nowrap';
-                        statusBadge.innerHTML = `<i class="fas fa-check-circle"></i> ONLINE`;
-                    } else {
-                        statusBadge.className = 'status-badge status-offline text-xs whitespace-nowrap';
-                        statusBadge.innerHTML = `<i class="fas fa-times-circle"></i> OFFLINE`;
-                    }
-                }
-                
-                // Show status code if available
-                if (statusCodeSpan) {
-                    if (statusCode > 0) {
-                        statusCodeSpan.textContent = `Status: ${statusCode} ${statusText}`;
-                        statusCodeSpan.className = 'status-code text-xs';
-                        if (isOnline) {
-                            statusCodeSpan.style.color = '#2E7D32';
-                        } else {
-                            statusCodeSpan.style.color = '#C62828';
+                        const mobileLink = row.querySelector('a');
+                        if (mobileLink) {
+                            linkUrl = mobileLink.getAttribute('href') || mobileLink.textContent.trim();
                         }
-                    } else {
-                        statusCodeSpan.textContent = statusText;
-                        statusCodeSpan.className = 'status-code text-xs text-gray-500';
                     }
-                }
-                
-                if (isOnline) {
-                    online++;
-                    console.log(`Link ${linkId}: ONLINE (Status: ${statusCode})`);
-                } else {
-                    offline++;
-                    console.log(`Link ${linkId}: OFFLINE (Status: ${statusCode || 'N/A'})`);
-                }
-                
-            } catch (error) {
-                // Link is offline or unreachable
-                offline++;
-                row.dataset.status = 'offline';
-                
-                if (statusBadge) {
-                    statusBadge.classList.remove('updating');
-                    statusBadge.className = 'status-badge status-offline text-xs whitespace-nowrap';
-                    statusBadge.innerHTML = `<i class="fas fa-times-circle"></i> OFFLINE`;
-                }
-                
-                if (statusCodeSpan) {
-                    statusCodeSpan.textContent = `Error: ${error.message}`;
-                    statusCodeSpan.className = 'status-code text-xs text-red-500';
-                }
-                
-                console.log(`Link ${linkId}: OFFLINE (Error: ${error.message})`);
+
+                    const normalizedLinkUrl = normalizeUrl(linkUrl);
+                    
+                    const linkId = row.dataset.linkId;
+                    
+                    // Get BOTH badges using different IDs
+                    const mobileBadge = document.getElementById(`status-badge-mobile-${linkId}`);
+                    const desktopBadge = document.getElementById(`status-badge-desktop-${linkId}`);
+                    const statusCodeSpan = document.getElementById(`status-code-${linkId}`);
+
+                    console.log(`Link ${linkId}: mobile badge found:`, !!mobileBadge);
+                    console.log(`Link ${linkId}: desktop badge found:`, !!desktopBadge);
+
+                    // Check if this link is online using the normalized sets
+                    let isOnline = false;
+                    let statusText = '';
+
+                    if (onlineSet.has(normalizedLinkUrl)) {
+                        isOnline = true;
+                        statusText = 'HTTP 200 OK';
+                    } else if (offlineSet.has(normalizedLinkUrl)) {
+                        isOnline = false;
+                        statusText = 'Offline or unreachable';
+                    } else {
+                        // Fallback: check the original arrays directly
+                        const urlMatch = onlineLinks.some(url => normalizeUrl(url) === normalizedLinkUrl);
+                        if (urlMatch) {
+                            isOnline = true;
+                            statusText = 'HTTP 200 OK';
+                        } else {
+                            isOnline = false;
+                            statusText = 'Status unknown';
+                        }
+                    }
+                    
+                    // Update row dataset
+                    row.dataset.status = isOnline ? 'online' : 'offline';
+
+                    // Helper function to update a badge
+                    function updateBadge(badgeElement, isOnline) {
+                        if (badgeElement) {
+                            badgeElement.classList.remove('updating');
+                            if (isOnline) {
+                                badgeElement.className = 'status-badge status-online text-xs whitespace-nowrap';
+                                badgeElement.innerHTML = '<i class="fas fa-check-circle"></i> ONLINE';
+                            } else {
+                                badgeElement.className = 'status-badge status-offline text-xs whitespace-nowrap';
+                                badgeElement.innerHTML = '<i class="fas fa-times-circle"></i> OFFLINE';
+                            }
+                        }
+                    }
+
+                    // Update BOTH mobile and desktop badges
+                    updateBadge(mobileBadge, isOnline);
+                    updateBadge(desktopBadge, isOnline);
+
+                    // Update status code display
+                    if (statusCodeSpan) {
+                        statusCodeSpan.textContent = statusText;
+                        statusCodeSpan.className = 'status-code text-xs';
+                        statusCodeSpan.style.color = isOnline ? '#2E7D32' : '#C62828';
+                    }
+
+                    console.log(`Link ${linkId}: ${linkUrl} -> ${isOnline ? 'ONLINE' : 'OFFLINE'} (${statusText})`);
+
+                    if (isOnline) {
+                        online++;
+                    } else {
+                        offline++;
+                    }
+
+                    checked++;
+                    const percent = Math.round((checked / rows.length) * 100);
+                    progressBar.style.width = `${percent}%`;
+                    progressText.textContent = `Updating statuses... ${checked}/${rows.length}`;
+                    statusCount.textContent = `${checked}/${rows.length}`;
+                });
+
+                // Show summary
+                const summaryText = `Done! ${online} online, ${offline} offline`;
+                progressText.textContent = summaryText;
+                progressBar.style.width = '100%';
+                statusCount.textContent = `${rows.length}/${rows.length}`;
+
+                console.log(`Summary: ${online} online, ${offline} offline`);
+
+                // Force a re-filter to update the display
+                filterLinks();
+
+            } else {
+                progressText.textContent = 'Error: Unexpected response from server';
+                progressBar.style.width = '100%';
+                console.error('Unexpected response:', result);
             }
-            
-            checked++;
-            updateProgress(checked, rows.length, progressBar, progressText, statusCount);
+
+        } catch (error) {
+            console.error('Error checking link statuses:', error);
+            progressText.textContent = 'Error: ' + (error.message || 'Could not reach server');
+            progressBar.style.width = '100%';
         }
-        
-        // Update button and progress
-        icon.className = 'fas fa-check-circle';
+
+        // Reset button
         button.disabled = false;
         button.style.opacity = '1';
-        
-        // Show summary
-        progressText.textContent = `Done! ${online} online, ${offline} offline`;
-        progressBar.style.width = '100%';
-        statusCount.textContent = `${rows.length}/${rows.length}`;
-        
-        // Update the link count display
-        document.getElementById('linkCount').textContent = rows.length;
-        
-        // Re-apply filters
-        filterLinks();
-        
-        // Sarcastic console message
-        if (online === rows.length) {
-            console.log(`All ${online} links are online. Did you fix something?`);
-        } else if (offline === rows.length) {
-            console.log(`All ${offline} links are offline. Did you break something?`);
-        } else {
-            console.log(`Summary: ${online} online, ${offline} offline. Could be worse.`);
-        }
-        
-        // Hide progress after 4 seconds
+        icon.className = 'fas fa-check-circle';
+
         setTimeout(() => {
             progressDiv.classList.add('hidden');
             icon.className = 'fas fa-sync';
         }, 4000);
     }
-    
-    function updateProgress(checked, total, progressBar, progressText, statusCount) {
-        const percent = Math.round((checked / total) * 100);
-        progressBar.style.width = `${percent}%`;
-        progressText.textContent = `Checking links... ${checked}/${total}`;
-        if (statusCount) {
-            statusCount.textContent = `${checked}/${total}`;
-        }
-    }
 
-    // Initialize on page load
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         console.log('FrogLink Link Management loaded.');
-        console.log('Click "Check Status" to test all links - Only status code 200 = ONLINE');
+        console.log('Click "Check Status" to call backend API and check all links.');
+        console.log('Both mobile and desktop badges will be updated.');
         
-        // Fix for modal scrolling
-        const modals = document.querySelectorAll('.fixed.inset-0');
-        modals.forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.add('hidden');
-                    this.classList.remove('flex');
-                    document.body.style.overflow = '';
-                }
-            });
-        });
+        // Auto-refresh on page load
+        setTimeout(refreshAllLinks, 1000);
     });
 </script>
 {% endblock %}

@@ -10,7 +10,8 @@ what it does:
 - Redirects unauthenticated users to the login page when they attempt to access protected routes.
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
+import requests
 
 from database.model import User, service_linkes
 from database.manage_db import Session, SESSION
@@ -170,7 +171,7 @@ def update_link(link_id):
     - An error message in the 'links_management.html' template if the link is not found or the user does not have permission to update it, or if the new service link is not provided.
     """
     session_manger = Session()
-    if 'user' not in session:
+    if 'user' in session:
         if SESSION(session.get('user'), 'check', session.get('session_id')):
             user = session_manger.query(User).filter_by(username=session.get('user')).first()
             if user:
@@ -198,4 +199,55 @@ def update_link(link_id):
         else:
             return redirect(url_for('auth_view.login'))
     return render_template('links_management.html')
+
+
+@auth_view.route('/is_the_like_alive')
+def is_the_like_alive():
+    session_manager = Session()
+    
+    try:
+        # Check if user is logged in
+        if 'user' not in session:
+            return jsonify({'message': 'Please login first'}), 401
+        
+        # Check if session is valid
+        if not SESSION(session.get('user'), 'check', session.get('session_id')):
+            return jsonify({'message': 'Invalid session. Please login again.'}), 401
+        
+        # Get the user
+        user = session_manager.query(User).filter_by(username=session.get('user')).first()
+        
+        if not user:
+            return jsonify({'message': 'User not found'}), 404
+        
+        # Get all links for this user
+        links = session_manager.query(service_linkes).filter_by(user_id=user.id).all()
+        
+        if not links:
+            return jsonify({'message': {'online': [], 'offline': []}}), 200
+        
+        report = {
+            'online': [],
+            'offline': []
+        }
+        
+        for link in links:
+            try:
+                # Send a HEAD request with timeout to check if link is alive
+                r = requests.head(link.service_link, timeout=5, allow_redirects=True)
+                if r.status_code == 200:
+                    report['online'].append(link.service_link)
+                else:
+                    report['offline'].append(link.service_link)
+            except Exception as e:
+                report['offline'].append(link.service_link)
+        
+        return jsonify({'message': report}), 200
+        
+    except Exception as e:
+        print(f"Error in is_the_like_alive: {e}")
+        return jsonify({'message': 'An error occurred while checking links'}), 500
+    finally:
+        session_manager.close()
+
 
