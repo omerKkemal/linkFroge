@@ -1,70 +1,386 @@
 {% extends "base.html" %}
 
-{% block title %}Welcome to FrogLink 🐸{% endblock %}
+{% block title %}FrogLink - Because ngrok URLs Are Ugly and You Know It{% endblock %}
 
 {% block content %}
-<div class="min-h-[80vh] flex items-center justify-center">
+<!-- Hero Section -->
+<section class="min-h-[70vh] flex items-center justify-center">
     <div class="text-center slide-in">
         <div class="mb-8">
             <div class="inline-block p-6 bg-white/90 backdrop-blur-sm rounded-3xl mb-6 shadow-2xl border-2 border-green-200">
-                <div class="text-8xl frog-bounce">🐸</div>
+                <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+                     alt="Frog" 
+                     class="w-40 h-40 rounded-full object-cover object-position-center-30 border-4 border-green-400 frog-bounce shadow-xl">
             </div>
             <h1 class="text-5xl md:text-7xl font-extrabold text-green-800 mb-6 leading-tight">
-                Hop Into Better
+                Stop Explaining
                 <span class="block text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-700">
-                    Link Management
+                    Ugly URLs
                 </span>
             </h1>
-            <p class="text-xl text-green-700 max-w-2xl mx-auto mb-8">
-                🍃 Organize, track, and manage all your important service links in one place.
-                Simple, secure, and froggy-fun!
+            <p class="text-xl text-green-700 max-w-3xl mx-auto mb-8">
+                <i class="fas fa-frog"></i> Because ngrok URLs are ugly and you know it. 
+                Permanent links. Dynamic updates. Less embarrassment. <span class="sarcastic">(We hope)</span>
             </p>
+            <div class="flex flex-wrap gap-3 justify-center text-sm text-green-600 mb-8">
+                <span class="px-3 py-1 bg-green-50 rounded-full border border-green-200"><i class="fas fa-link mr-1"></i> Permanent Links</span>
+                <span class="px-3 py-1 bg-green-50 rounded-full border border-green-200"><i class="fas fa-sync mr-1"></i> Auto-Update</span>
+                <span class="px-3 py-1 bg-green-50 rounded-full border border-green-200"><i class="fas fa-terminal mr-1"></i> CLI Agent</span>
+                <span class="px-3 py-1 bg-green-50 rounded-full border border-green-200"><i class="fas fa-chart-line mr-1"></i> Real-time Status</span>
+                <span class="px-3 py-1 bg-green-50 rounded-full border border-green-200"><i class="fas fa-coffee mr-1"></i> Caffeine Required</span>
+            </div>
         </div>
         
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ url_for('login_view.register') }}" 
                class="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl font-bold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center">
-                <span class="mr-2">🐸</span>
-                Get Started Free
-                <span class="ml-2">✨</span>
+                <i class="fas fa-frog mr-2"></i>
+                Join the Cult
+                <i class="fas fa-rocket ml-2"></i>
             </a>
-            <a href="{{ url_for('login_view.login') }}" 
+            <a href="#about" 
                class="px-8 py-4 bg-white/80 backdrop-blur-sm text-green-700 rounded-2xl font-bold text-lg hover:bg-white transition-all duration-300 border-2 border-green-300 flex items-center justify-center">
-                <span class="mr-2">🍃</span>
-                Login
+                <i class="fas fa-info-circle mr-2"></i>
+                Learn More <span class="sarcastic-sm ml-1">(Or Don't)</span>
             </a>
-        </div>
-
-        <!-- Features -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
-            <div class="glass-effect rounded-3xl p-6 hover-scale slide-in slide-in-delay-1 border-2 border-green-200">
-                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-4xl">
-                    🐸
-                </div>
-                <h3 class="text-xl font-bold text-green-800 mb-2">Organize Links</h3>
-                <p class="text-green-600">Keep all your service links organized in one dashboard</p>
-            </div>
-            <div class="glass-effect rounded-3xl p-6 hover-scale slide-in slide-in-delay-2 border-2 border-green-200">
-                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-4xl">
-                    📊
-                </div>
-                <h3 class="text-xl font-bold text-green-800 mb-2">Track Status</h3>
-                <p class="text-green-600">Monitor online/offline status of all your links</p>
-            </div>
-            <div class="glass-effect rounded-3xl p-6 hover-scale slide-in slide-in-delay-3 border-2 border-green-200">
-                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-4xl">
-                    🛡️
-                </div>
-                <h3 class="text-xl font-bold text-green-800 mb-2">Secure & Safe</h3>
-                <p class="text-green-600">Your data is protected with enterprise-grade security</p>
-            </div>
+            <a href="#contact" 
+               class="px-8 py-4 bg-white/80 backdrop-blur-sm text-green-700 rounded-2xl font-bold text-lg hover:bg-white transition-all duration-300 border-2 border-green-300 flex items-center justify-center">
+                <i class="fas fa-envelope mr-2"></i>
+                Contact Us <span class="sarcastic-sm ml-1">(We Might Reply)</span>
+            </a>
         </div>
         
-        <!-- Fun Frog Fact -->
-        <div class="mt-12 glass-effect rounded-3xl p-4 border-2 border-green-200 inline-block">
+        <!-- Sarcastic disclaimer -->
+        <div class="mt-8 sarcastic-sm">
+            <i class="fas fa-exclamation-triangle"></i> 
+            Not a C2. Not a RAT. Not a Trojan horse. It's for managing links. That's it. 
+            <span class="sarcastic-xs">Don't use it for illegal stuff. We don't have time for that.</span>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="mt-20">
+    <div class="text-center mb-12">
+        <h2 class="text-4xl font-bold text-green-800 mb-4">
+            <i class="fas fa-frog mr-3 text-green-600"></i>
+            What Is This Abomination?
+        </h2>
+        <div class="w-24 h-1 bg-gradient-to-r from-green-400 to-green-600 mx-auto rounded-full"></div>
+        <p class="text-green-600 mt-4 max-w-2xl mx-auto">
+            LinkFroge is a link management system that gives permanent, stable URLs for dynamic services like ngrok tunnels.
+            <span class="sarcastic-block">Basically: You get a pretty link. It points to your ugly ngrok URL. No one notices. Magic.</span>
+        </p>
+    </div>
+
+    <!-- Main Features Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <div class="glass-effect rounded-3xl p-8 hover-scale border-2 border-green-200">
+            <div class="flex items-start space-x-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-link text-2xl text-green-600"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-green-800 mb-2">Permanent Links <span class="sarcastic-sm">(The Whole Point)</span></h3>
+                    <p class="text-green-600 leading-relaxed">
+                        Generate stable URLs that don't change. Update destination URL without changing the link. 
+                        Perfect for ngrok, localhost, dev servers, anything dynamic.
+                    </p>
+                    <ul class="mt-3 space-y-1 text-sm text-green-600">
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Stable forever <span class="sarcastic-xs">(We promise... mostly)</span></li>
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Update without changing <span class="sarcastic-xs">(Like magic, but with code)</span></li>
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Perfect for dynamic services <span class="sarcastic-xs">(You're welcome)</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-3xl p-8 hover-scale border-2 border-green-200">
+            <div class="flex items-start space-x-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-terminal text-2xl text-green-600"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-green-800 mb-2">Desktop CLI Agent <span class="sarcastic-sm">(The Magic)</span></h3>
+                    <p class="text-green-600 leading-relaxed">
+                        Starts ngrok automatically, detects URL changes, sends heartbeats, and auto-recovers 
+                        when things break. Because things always break.
+                    </p>
+                    <ul class="mt-3 space-y-1 text-sm text-green-600">
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Auto-start ngrok <span class="sarcastic-xs">(You're welcome)</span></li>
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> URL change detection <span class="sarcastic-xs">(It's watching...)</span></li>
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Heartbeat system <span class="sarcastic-xs">(Keeps things alive, like coffee)</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-3xl p-8 hover-scale border-2 border-green-200">
+            <div class="flex items-start space-x-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-chart-simple text-2xl text-green-600"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-green-800 mb-2">Web Dashboard <span class="sarcastic-sm">(The Pretty Face)</span></h3>
+                    <p class="text-green-600 leading-relaxed">
+                        User-friendly link management with usage statistics and API token management. 
+                        Because even developers like pretty things.
+                    </p>
+                    <ul class="mt-3 space-y-1 text-sm text-green-600">
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Manage all links <span class="sarcastic-xs">(Like a boss)</span></li>
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> View statistics <span class="sarcastic-xs">(Numbers! Yay!)</span></li>
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> API token management <span class="sarcastic-xs">(For the nerds)</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-3xl p-8 hover-scale border-2 border-green-200">
+            <div class="flex items-start space-x-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-code text-2xl text-green-600"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-green-800 mb-2">REST API <span class="sarcastic-sm">(For The Nerds)</span></h3>
+                    <p class="text-green-600 leading-relaxed">
+                        Full CRUD operations with token authentication. For the nerds who want programmatic control. 
+                        You know who you are.
+                    </p>
+                    <ul class="mt-3 space-y-1 text-sm text-green-600">
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Full CRUD operations <span class="sarcastic-xs">(The whole shebang)</span></li>
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Token authentication <span class="sarcastic-xs">(Security! Yay!)</span></li>
+                        <li><i class="fas fa-check-circle text-green-500 mr-2"></i> JSON responses <span class="sarcastic-xs">(Because XML is dead)</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="glass-effect rounded-3xl p-8 border-2 border-green-200 mb-12">
+        <h3 class="text-2xl font-bold text-green-800 mb-6 text-center">
+            <i class="fas fa-magic mr-2 text-green-500"></i>
+            How The CLI Agent Works <span class="sarcastic-sm">(Magic, basically)</span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-play text-2xl text-green-600"></i>
+                </div>
+                <h4 class="font-bold text-green-800 mb-1">Auto-Start</h4>
+                <p class="text-sm text-green-600">Downloads and starts ngrok automatically <span class="sarcastic-xs block">(Zero effort required)</span></p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-eye text-2xl text-green-600"></i>
+                </div>
+                <h4 class="font-bold text-green-800 mb-1">URL Detection</h4>
+                <p class="text-sm text-green-600">Monitors and detects URL changes instantly <span class="sarcastic-xs block">(It's watching. Always.)</span></p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-heartbeat text-2xl text-green-600"></i>
+                </div>
+                <h4 class="font-bold text-green-800 mb-1">Heartbeat System</h4>
+                <p class="text-sm text-green-600">Keeps links alive with periodic updates <span class="sarcastic-xs block">(Like a pacemaker for URLs)</span></p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-sync text-2xl text-green-600"></i>
+                </div>
+                <h4 class="font-bold text-green-800 mb-1">Auto-Recovery</h4>
+                <p class="text-sm text-green-600">Restarts and recovers when things break <span class="sarcastic-xs block">(Because they will)</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLI Commands -->
+    <div class="glass-effect rounded-3xl p-8 border-2 border-green-200">
+        <h3 class="text-2xl font-bold text-green-800 mb-4 text-center">
+            <i class="fas fa-terminal mr-2 text-green-500"></i>
+            CLI Agent Commands <span class="sarcastic-sm">(The Fun Part)</span>
+        </h3>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b-2 border-green-200">
+                        <th class="text-left py-3 px-4 text-sm font-semibold text-green-700">Option</th>
+                        <th class="text-left py-3 px-4 text-sm font-semibold text-green-700">What It Does</th>
+                        <th class="text-left py-3 px-4 text-sm font-semibold text-green-700">Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-green-100">
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--port</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Local port to expose <span class="sarcastic-xs block">(Where the magic happens)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">5000</td>
+                    </tr>
+                    <tr class="border-b border-green-100">
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--backend</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Backend API URL <span class="sarcastic-xs block">(Where the data goes)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">https://yourdomain.com/api/service/update</td>
+                    </tr>
+                    <tr class="border-b border-green-100">
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--service-id</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Unique service identifier <span class="sarcastic-xs block">(Like a name tag for your app)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">abc123</td>
+                    </tr>
+                    <tr class="border-b border-green-100">
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--token</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Authentication token <span class="sarcastic-xs block">(Shh... it's a secret)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">your_secure_token</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--verbose</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Enable verbose logging <span class="sarcastic-xs block">(Because who doesn't love logs?)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">False</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4 bg-gray-900 rounded-xl p-4">
+            <code class="text-sm text-green-300">
+                python linkFroge.py --port 5000 --backend https://yourdomain.com/api/service/update --service-id abc123 --token your_secure_token
+            </code>
+            <p class="sarcastic-xs mt-2"><i class="fas fa-lightbulb"></i> Pro tip: Copy-paste this. Don't type it manually. You'll thank me later.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="mt-20">
+    <div class="text-center mb-12">
+        <h2 class="text-4xl font-bold text-green-800 mb-4">
+            <i class="fas fa-envelope mr-3 text-green-600"></i>
+            Contact Us <span class="sarcastic-sm">(We Might Reply)</span>
+        </h2>
+        <div class="w-24 h-1 bg-gradient-to-r from-green-400 to-green-600 mx-auto rounded-full"></div>
+        <p class="text-green-600 mt-4 max-w-2xl mx-auto">
+            Got questions? Want to report a bug? Or just want to say hi? We'd love to hear from you!
+            <span class="sarcastic-block">Seriously. We get lonely.</span>
+        </p>
+    </div>
+
+    <div class="max-w-2xl mx-auto">
+        <div class="glass-effect rounded-3xl p-8 border-2 border-green-200">
+            {% if contact_success %}
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-xl mb-6">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                    <p class="text-green-700">{{ contact_success }} <span class="sarcastic-sm">(We'll get back to you. Probably.)</span></p>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if contact_error %}
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl mb-6">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                    <p class="text-red-700">{{ contact_error }} <span class="sarcastic-sm">(It's not you. It's us. Or is it?)</span></p>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('login_view.contact') }}" class="space-y-6">
+                <div>
+                    <label class="form-label" for="contact_email">
+                        <i class="fas fa-envelope mr-2"></i>Your Email <span class="sarcastic-sm">(We won't spam you. Probably.)</span>
+                    </label>
+                    <input type="email" 
+                           id="contact_email" 
+                           name="email" 
+                           required
+                           placeholder="you@example.com"
+                           class="form-input"
+                           value="{{ request.form.get('email', '') }}">
+                </div>
+
+                <div>
+                    <label class="form-label" for="contact_subject">
+                        <i class="fas fa-tag mr-2"></i>Subject <span class="sarcastic-sm">(Make it interesting)</span>
+                    </label>
+                    <input type="text" 
+                           id="contact_subject" 
+                           name="subject" 
+                           required
+                           placeholder="What's this about?"
+                           class="form-input"
+                           value="{{ request.form.get('subject', '') }}">
+                </div>
+
+                <div>
+                    <label class="form-label" for="contact_message">
+                        <i class="fas fa-comment mr-2"></i>Message <span class="sarcastic-sm">(Be nice. We're sensitive.)</span>
+                    </label>
+                    <textarea 
+                           id="contact_message" 
+                           name="message" 
+                           required
+                           rows="5"
+                           placeholder="Tell us what's on your mind..."
+                           class="form-input resize-none">{{ request.form.get('message', '') }}</textarea>
+                </div>
+
+                <div class="flex items-start space-x-3">
+                    <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+                         alt="Frog" 
+                         class="w-12 h-12 rounded-full object-cover object-position-center-30 border-2 border-green-300 flex-shrink-0">
+                    <div>
+                        <p class="text-sm text-green-600">
+                            <i class="fas fa-frog"></i> We'll get back to you within 24 hours. 
+                            <span class="sarcastic-xs block">Unless we're busy. Or forget. Or both.</span>
+                        </p>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary w-full flex items-center justify-center space-x-2">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Send Message</span>
+                    <i class="fas fa-frog"></i>
+                </button>
+            </form>
+
+            <!-- Alternative Contact Methods -->
+            <div class="mt-6 pt-6 border-t border-green-200">
+                <p class="text-sm text-green-600 text-center mb-4">Or reach out through other channels <span class="sarcastic-xs">(If you're brave enough)</span>:</p>
+                <div class="flex justify-center space-x-6">
+                    <a href="#" class="text-green-600 hover:text-green-700 transition-colors text-center">
+                        <i class="fab fa-github text-2xl"></i>
+                        <span class="block text-xs">GitHub</span>
+                        <span class="sarcastic-xs">(We lurk here)</span>
+                    </a>
+                    <a href="#" class="text-green-600 hover:text-green-700 transition-colors text-center">
+                        <i class="fab fa-twitter text-2xl"></i>
+                        <span class="block text-xs">Twitter</span>
+                        <span class="sarcastic-xs">(We tweet occasionally)</span>
+                    </a>
+                    <a href="#" class="text-green-600 hover:text-green-700 transition-colors text-center">
+                        <i class="fab fa-discord text-2xl"></i>
+                        <span class="block text-xs">Discord</span>
+                        <span class="sarcastic-xs">(Come say hi!)</span>
+                    </a>
+                    <a href="#" class="text-green-600 hover:text-green-700 transition-colors text-center">
+                        <i class="fas fa-envelope text-2xl"></i>
+                        <span class="block text-xs">Email</span>
+                        <span class="sarcastic-xs">(Traditional, we know)</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Fun Footer Note -->
+<div class="mt-12 glass-effect rounded-3xl p-4 border-2 border-green-200 text-center">
+    <div class="flex items-center justify-center space-x-3">
+        <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+             alt="Frog" 
+             class="w-10 h-10 rounded-full object-cover object-position-center-30 border-2 border-green-400">
+        <div>
             <p class="text-green-700 text-sm">
-                🐸 Did you know? Frogs can leap up to 20 times their own length!
+                <i class="fas fa-frog"></i> Built with spite. Powered by sarcasm. Sustained by coffee.
             </p>
+            <p class="sarcastic-xs">No refunds. No regrets. No sleep. Go touch grass. Or don't. I'm not your mom.</p>
         </div>
     </div>
 </div>

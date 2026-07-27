@@ -1,24 +1,26 @@
 {% extends "base.html" %}
 
-{% block title %}Login - FrogLink 🐸{% endblock %}
+{% block title %}Login - FrogLink{% endblock %}
 
 {% block content %}
 <div class="min-h-[80vh] flex items-center justify-center">
     <div class="w-full max-w-md slide-in">
         <div class="glass-effect-dark rounded-3xl p-8 shadow-2xl border-2 border-green-200">
             <div class="text-center mb-8">
-                <div class="inline-block p-4 bg-gradient-to-br from-green-400 to-green-600 rounded-3xl mb-4 shadow-lg">
-                    <span class="text-5xl frog-bounce">🐸</span>
+                <div class="inline-block p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-3xl mb-4 shadow-lg">
+                    <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+                         alt="Frog" 
+                         class="w-20 h-20 rounded-full object-cover object-position-center-30 border-4 border-white frog-bounce">
                 </div>
                 <h2 class="text-3xl font-bold text-green-800">Welcome Back!</h2>
-                <p class="text-green-600 mt-2">Hop back into your account 🍃</p>
+                <p class="text-green-600 mt-2"><i class="fas fa-leaf"></i> Hop back into your account <span class="sarcastic-xs">(We missed you)</span></p>
             </div>
 
             {% if error %}
             <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl mb-6 alert-auto-hide">
                 <div class="flex items-center">
-                    <span class="text-red-500 mr-3">❌</span>
-                    <p class="text-red-700 text-sm">{{ error }}</p>
+                    <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                    <p class="text-red-700 text-sm">{{ error }} <span class="sarcastic-sm block">(It's probably your fault. But we forgive you.)</span></p>
                 </div>
             </div>
             {% endif %}
@@ -26,7 +28,7 @@
             <form method="POST" action="{{ url_for('login_view.login') }}" class="space-y-6">
                 <div>
                     <label class="form-label" for="username">
-                        <span class="mr-2">👤</span>Username
+                        <i class="fas fa-user mr-2"></i>Username <span class="sarcastic-xs">(The one you chose)</span>
                     </label>
                     <input type="text" 
                            id="username" 
@@ -38,7 +40,7 @@
 
                 <div>
                     <label class="form-label" for="password">
-                        <span class="mr-2">🔒</span>Password
+                        <i class="fas fa-lock mr-2"></i>Password <span class="sarcastic-xs">(Don't forget it)</span>
                     </label>
                     <input type="password" 
                            id="password" 
@@ -51,15 +53,15 @@
                 <div class="flex items-center justify-between">
                     <label class="flex items-center text-sm text-green-700">
                         <input type="checkbox" name="remember" class="w-4 h-4 rounded border-green-300 text-green-600 focus:ring-green-500">
-                        <span class="ml-2">Remember me</span>
+                        <span class="ml-2">Remember me <span class="sarcastic-xs">(We'll try)</span></span>
                     </label>
                     <a href="#" class="text-sm text-green-600 hover:text-green-700 font-medium">
-                        Forgot password? 🐸
+                        Forgot password? <i class="fas fa-frog"></i> <span class="sarcastic-xs">(Happens to the best of us)</span>
                     </a>
                 </div>
 
                 <button type="submit" class="btn-primary w-full flex items-center justify-center space-x-2">
-                    <span>🐸</span>
+                    <i class="fas fa-frog"></i>
                     <span>Hop In!</span>
                 </button>
             </form>
@@ -68,27 +70,29 @@
                 <p class="text-sm text-green-700">
                     Don't have an account? 
                     <a href="{{ url_for('login_view.register') }}" class="text-green-600 hover:text-green-700 font-semibold">
-                        Create one now 🐸
+                        Join the cult <i class="fas fa-frog"></i>
                     </a>
+                    <span class="sarcastic-xs block mt-1">We have cookies. And links.</span>
                 </p>
             </div>
 
             <div class="mt-8 flex items-center">
                 <div class="flex-1 border-t border-green-200"></div>
-                <span class="px-4 text-sm text-green-500">Or continue with</span>
+                <span class="px-4 text-sm text-green-500">Or continue with <span class="sarcastic-xs">(If you must)</span></span>
                 <div class="flex-1 border-t border-green-200"></div>
             </div>
 
             <div class="mt-6 grid grid-cols-2 gap-3">
                 <button class="px-4 py-2 border-2 border-green-200 rounded-xl hover:bg-green-50 transition-colors duration-300 flex items-center justify-center space-x-2">
-                    <span>🌐</span>
+                    <i class="fab fa-google text-red-500"></i>
                     <span class="text-sm font-medium text-green-700">Google</span>
                 </button>
                 <button class="px-4 py-2 border-2 border-green-200 rounded-xl hover:bg-green-50 transition-colors duration-300 flex items-center justify-center space-x-2">
-                    <span>🐙</span>
+                    <i class="fab fa-github text-gray-700"></i>
                     <span class="text-sm font-medium text-green-700">GitHub</span>
                 </button>
             </div>
+            <p class="sarcastic-xs text-center mt-4">(We promise not to sell your data. Much.)</p>
         </div>
     </div>
 </div>

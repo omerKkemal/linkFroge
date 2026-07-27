@@ -93,3 +93,17 @@ def logout():
     session.pop('session_id', None)
     SESSION(session.get('user'), 'delete', session.get('session_id'))
     return redirect(url_for('login_view.login'))
+
+
+@login_view.route('/contact', methods=['POST'])
+def contact():
+    email = request.form.get('email')
+    subject = request.form.get('subject')
+    message = request.form.get('message')
+    
+    if not all([email, subject, message]):
+        return render_template('index.html', contact_error='Please fill in all fields.')
+    
+    # Here you can send an email, save to database, or whatever you want
+    # For now, just show success message
+    return render_template('index.html', contact_success='Thank you for your message! We\'ll get back to you soon. 🐸')

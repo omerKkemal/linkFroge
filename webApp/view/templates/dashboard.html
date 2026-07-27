@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - FrogLink 🐸{% endblock %}
+{% block title %}Dashboard - FrogLink{% endblock %}
 
 {% block content %}
 <div class="slide-in">
@@ -8,21 +8,23 @@
     <div class="glass-effect rounded-3xl p-8 mb-8 border-2 border-green-200">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
-                <div class="flex items-center space-x-3">
-                    <span class="text-5xl frog-bounce">🐸</span>
+                <div class="flex items-center space-x-4">
+                    <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+                         alt="Frog" 
+                         class="w-20 h-20 rounded-full object-cover object-position-center-30 border-4 border-green-400 frog-bounce shadow-xl">
                     <div>
                         <h1 class="text-4xl font-bold text-green-800 mb-2">
                             Welcome back, <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-800">{{ session.user }}</span>
                         </h1>
-                        <p class="text-green-600">Here's an overview of your link management pond 🍃</p>
+                        <p class="text-green-600"><i class="fas fa-leaf"></i> Here's an overview of your link management pond <span class="sarcastic-xs">(Don't fall in)</span></p>
                     </div>
                 </div>
             </div>
             <a href="{{ url_for('auth_view.links_management') }}" 
                class="btn-primary inline-flex items-center space-x-2 mt-4 md:mt-0">
-                <span>➕</span>
+                <i class="fas fa-plus"></i>
                 <span>Add New Link</span>
-                <span>🐸</span>
+                <i class="fas fa-frog"></i>
             </a>
         </div>
     </div>
@@ -32,48 +34,52 @@
         <div class="glass-effect rounded-3xl p-6 hover-scale slide-in slide-in-delay-1 border-2 border-green-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-green-600">Total Links</p>
+                    <p class="text-sm font-medium text-green-600">Total Links <span class="sarcastic-xs">(Impressive, right?)</span></p>
                     <p class="text-3xl font-bold text-green-800 mt-2">{{ number_of_links }}</p>
                 </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center text-4xl">
-                    🔗
+                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center">
+                    <i class="fas fa-link text-3xl text-green-600"></i>
                 </div>
             </div>
             <div class="mt-4 flex items-center space-x-2">
-                <span class="text-sm text-green-600">All your service links</span>
-                <span>🐸</span>
+                <img src="{{ url_for('static', filename='img/leaf.png') }}" 
+                     alt="Leaf" 
+                     class="w-6 h-6 object-contain">
+                <span class="text-sm text-green-600">All your service links <span class="sarcastic-xs">(Quantity over quality?)</span></span>
             </div>
         </div>
 
         <div class="glass-effect rounded-3xl p-6 hover-scale slide-in slide-in-delay-2 border-2 border-green-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-green-600">Online</p>
+                    <p class="text-sm font-medium text-green-600">Online <span class="sarcastic-xs">(Working ones)</span></p>
                     <p class="text-3xl font-bold text-green-600 mt-2">{{ online_links }}</p>
                 </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center text-4xl">
-                    ✅
+                <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center">
+                    <i class="fas fa-check-circle text-3xl text-green-600"></i>
                 </div>
             </div>
             <div class="mt-4 flex items-center space-x-2">
-                <span class="text-sm text-green-600">Active and running</span>
-                <span>🌿</span>
+                <i class="fas fa-leaf text-green-500"></i>
+                <span class="text-sm text-green-600">Active and running <span class="sarcastic-xs">(For now)</span></span>
             </div>
         </div>
 
         <div class="glass-effect rounded-3xl p-6 hover-scale slide-in slide-in-delay-3 border-2 border-green-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-green-600">Offline</p>
+                    <p class="text-sm font-medium text-green-600">Offline <span class="sarcastic-xs">(Oops)</span></p>
                     <p class="text-3xl font-bold text-red-600 mt-2">{{ offline_links }}</p>
                 </div>
-                <div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-4xl">
-                    ⚠️
+                <div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center">
+                    <i class="fas fa-times-circle text-3xl text-red-500"></i>
                 </div>
             </div>
             <div class="mt-4 flex items-center space-x-2">
-                <span class="text-sm text-red-600">Need attention</span>
-                <span>🐸</span>
+                <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+                     alt="Frog" 
+                     class="w-6 h-6 rounded-full object-cover object-position-center-30 border border-red-300">
+                <span class="text-sm text-red-600">Need attention <span class="sarcastic-xs">(Like a needy ex)</span></span>
             </div>
         </div>
     </div>
@@ -81,20 +87,22 @@
     <!-- Quick Actions -->
     <div class="glass-effect rounded-3xl p-8 border-2 border-green-200">
         <h3 class="text-xl font-bold text-green-800 mb-6 flex items-center">
-            <span class="mr-2">⚡</span>
-            Quick Actions
-            <span class="ml-2 text-2xl">🐸</span>
+            <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+            Quick Actions <span class="sarcastic-sm ml-2">(Get stuff done, or don't)</span>
+            <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+                 alt="Frog" 
+                 class="w-8 h-8 rounded-full object-cover object-position-center-30 ml-2 border-2 border-green-400">
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <a href="{{ url_for('auth_view.links_management') }}" 
                class="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl hover:shadow-lg transition-all duration-300 group border-2 border-green-200 hover:border-green-400">
                 <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform text-2xl">
-                        ➕
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fas fa-plus text-white text-xl"></i>
                     </div>
                     <div>
                         <p class="font-semibold text-green-800">Add Link</p>
-                        <p class="text-xs text-green-600">Create new service link</p>
+                        <p class="text-xs text-green-600">Create new service link <span class="sarcastic-xs">(Easy)</span></p>
                     </div>
                 </div>
             </a>
@@ -102,36 +110,36 @@
             <a href="{{ url_for('auth_view.links_management') }}" 
                class="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl hover:shadow-lg transition-all duration-300 group border-2 border-green-200 hover:border-green-400">
                 <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform text-2xl">
-                        📋
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fas fa-list text-white text-xl"></i>
                     </div>
                     <div>
                         <p class="font-semibold text-green-800">View All</p>
-                        <p class="text-xs text-green-600">Manage your links</p>
+                        <p class="text-xs text-green-600">Manage your links <span class="sarcastic-xs">(Boring but necessary)</span></p>
                     </div>
                 </div>
             </a>
             
             <a href="#" class="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl hover:shadow-lg transition-all duration-300 group border-2 border-green-200 hover:border-green-400">
                 <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform text-2xl">
-                        📊
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fas fa-chart-bar text-white text-xl"></i>
                     </div>
                     <div>
                         <p class="font-semibold text-green-800">Analytics</p>
-                        <p class="text-xs text-green-600">View statistics</p>
+                        <p class="text-xs text-green-600">View statistics <span class="sarcastic-xs">(Numbers! Yay!)</span></p>
                     </div>
                 </div>
             </a>
             
             <a href="#" class="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl hover:shadow-lg transition-all duration-300 group border-2 border-green-200 hover:border-green-400">
                 <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform text-2xl">
-                        ⚙️
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fas fa-cog text-white text-xl"></i>
                     </div>
                     <div>
                         <p class="font-semibold text-green-800">Settings</p>
-                        <p class="text-xs text-green-600">Configure preferences</p>
+                        <p class="text-xs text-green-600">Configure preferences <span class="sarcastic-xs">(Break things)</span></p>
                     </div>
                 </div>
             </a>
@@ -140,9 +148,15 @@
     
     <!-- Fun Frog Tip -->
     <div class="mt-6 glass-effect rounded-3xl p-4 border-2 border-green-200">
-        <p class="text-green-700 text-sm text-center">
-            🐸 Tip: Frogs are amphibians, just like your links - they can be both online and offline!
-        </p>
+        <div class="flex items-center justify-center space-x-3">
+            <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+                 alt="Frog" 
+                 class="w-8 h-8 rounded-full object-cover object-position-center-30 border-2 border-green-400">
+            <p class="text-green-700 text-sm text-center">
+                <i class="fas fa-frog"></i> Tip: Frogs are amphibians, just like your links - they can be both online and offline!
+                <span class="sarcastic-xs block">(Deep, right?)</span>
+            </p>
+        </div>
     </div>
 </div>
 {% endblock %}
