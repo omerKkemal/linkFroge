@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, flash, render_template, request, redirect, url_for, session, flash
 import traceback
 
-from database.model import User
+from database.model import User, service_linkes
 from database.manage_db import get_engine as engine
 from database.manage_db import Session
 from database.manage_db import config, SESSION
@@ -107,3 +107,16 @@ def contact():
     # Here you can send an email, save to database, or whatever you want
     # For now, just show success message
     return render_template('index.html', contact_success='Thank you for your message! We\'ll get back to you soon. 🐸')
+
+
+@login_view.route("/<ID>")
+def load_dynmic_link(ID):
+    session = Session()
+    try:
+        to_be_loaded_link = session.query(service_linkes).filter_by(ID=ID).first()
+        return render_template("ifram.html", service_link=to_be_loaded_link.service_link)
+    except Exception as e:
+        print(str(e))
+        error = 'No such link ;('
+        return render_template('index.html',error=error)
+

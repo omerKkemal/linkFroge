@@ -5,77 +5,107 @@
 {% block content %}
 <div class="slide-in">
     <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-        <div>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div class="w-full sm:w-auto">
             <div class="flex items-center space-x-3">
                 <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
                      alt="Frog" 
-                     class="w-14 h-14 rounded-full object-cover object-position-center-30 border-4 border-green-400 frog-bounce shadow-xl">
-                <div>
-                    <h1 class="text-4xl font-bold text-green-800">
+                     class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover object-position-center-30 border-4 border-green-400 frog-bounce shadow-xl flex-shrink-0">
+                <div class="min-w-0">
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-green-800 leading-tight">
                         Link Management
-                        <span class="sarcastic-block">(Try not to break anything)</span>
+                        <span class="sarcastic-block text-sm sm:text-base">(Try not to break anything)</span>
                     </h1>
-                    <p class="text-green-600"><i class="fas fa-leaf"></i> Manage all your service links in one place <span class="sarcastic">(Or lose them forever. Your call.)</span></p>
+                    <p class="text-green-600 text-sm sm:text-base truncate"><i class="fas fa-leaf"></i> Manage all your service links in one place <span class="sarcastic text-xs sm:text-sm">(Or lose them forever. Your call.)</span></p>
                 </div>
             </div>
         </div>
-        <!-- Add Link Modal Trigger -->
-        <button onclick="openAddModal()" 
-                class="btn-primary inline-flex items-center space-x-2 mt-4 md:mt-0">
-            <i class="fas fa-plus"></i>
-            <span>Add New Link</span>
-            <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
-                 alt="Frog" 
-                 class="w-6 h-6 rounded-full object-cover object-position-center-30 border border-white">
-        </button>
+        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+            <!-- Refresh Button -->
+            <button onclick="refreshAllLinks()" 
+                    id="refreshButton"
+                    class="btn-primary inline-flex items-center justify-center space-x-2 px-4 py-3 sm:px-6 sm:py-3 flex-1 sm:flex-none">
+                <i class="fas fa-sync" id="refreshIcon"></i>
+                <span>Check Status</span>
+                <span class="sarcastic-xs hidden sm:inline">(Only 200 = Online)</span>
+            </button>
+            <!-- Add Link Button -->
+            <button onclick="openAddModal()" 
+                    class="btn-primary inline-flex items-center justify-center space-x-2 px-4 py-3 sm:px-6 sm:py-3 flex-1 sm:flex-none">
+                <i class="fas fa-plus"></i>
+                <span>Add New Link</span>
+                <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+                     alt="Frog" 
+                     class="w-6 h-6 rounded-full object-cover object-position-center-30 border border-white flex-shrink-0">
+            </button>
+        </div>
     </div>
 
-    <!-- Success/Error Messages with Sarcasm -->
+    <!-- Status Check Progress -->
+    <div id="statusCheckProgress" class="hidden glass-effect rounded-3xl p-4 mb-6 border-2 border-blue-200 bg-blue-50/50">
+        <div class="flex items-center space-x-3">
+            <div class="loading-spinner-small"></div>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-blue-800" id="statusProgressText">Checking link statuses...</p>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div id="statusProgressBar" class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                </div>
+            </div>
+            <span class="text-xs text-blue-600 font-medium" id="statusCount">0/0</span>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
     {% if error %}
     <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl mb-6 alert-auto-hide">
-        <div class="flex items-center">
-            <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
-            <p class="text-red-700">{{ error }} <span class="sarcastic-block">(We told you not to break anything. But did you listen? No.)</span></p>
+        <div class="flex items-start">
+            <i class="fas fa-exclamation-circle text-red-500 mr-3 mt-0.5 flex-shrink-0"></i>
+            <div>
+                <p class="text-red-700">{{ error }}</p>
+                <span class="sarcastic-block text-sm">(We told you not to break anything. But did you listen? No.)</span>
+            </div>
         </div>
     </div>
     {% endif %}
 
     {% if success %}
     <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-xl mb-6 alert-auto-hide">
-        <div class="flex items-center">
-            <i class="fas fa-check-circle text-green-500 mr-3"></i>
-            <p class="text-green-700">{{ success }} <span class="sarcastic-block">(Look at you, being productive and stuff.)</span></p>
+        <div class="flex items-start">
+            <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
+            <div>
+                <p class="text-green-700">{{ success }}</p>
+                <span class="sarcastic-block text-sm">(Look at you, being productive and stuff.)</span>
+            </div>
         </div>
     </div>
     {% endif %}
 
-    <!-- Search and Filter with Sass -->
-    <div class="glass-effect rounded-3xl p-6 mb-8 border-2 border-green-200">
-        <div class="flex flex-col md:flex-row gap-4">
+    <!-- Search and Filter -->
+    <div class="glass-effect rounded-3xl p-4 sm:p-6 mb-6 border-2 border-green-200">
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div class="flex-1">
                 <div class="relative">
                     <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-green-400"></i>
                     <input type="text" 
                            id="searchLinks" 
                            placeholder="Search links..." 
-                           class="form-input pl-12"
+                           class="form-input pl-12 w-full"
                            onkeyup="filterLinks()">
                     <span class="sarcastic-xs block mt-1">(Good luck finding what you're looking for)</span>
                 </div>
             </div>
-            <div class="flex gap-3">
+            <div class="flex flex-wrap gap-2 sm:gap-3 items-center">
                 <select id="statusFilter" 
-                        class="form-input w-auto min-w-[150px]"
+                        class="form-input w-full sm:w-auto min-w-[120px] sm:min-w-[150px]"
                         onchange="filterLinks()">
-                    <option value="all">All Status <i class="fas fa-frog"></i></option>
+                    <option value="all">All Status</option>
                     <option value="online"><i class="fas fa-check-circle text-green-600"></i> Online</option>
                     <option value="offline"><i class="fas fa-times-circle text-red-600"></i> Offline</option>
                 </select>
                 <button onclick="clearFilters()" 
-                        class="px-4 py-2 border-2 border-green-200 rounded-xl hover:bg-green-50 transition-colors duration-300 group">
+                        class="px-4 py-2 border-2 border-green-200 rounded-xl hover:bg-green-50 transition-colors duration-300 group flex items-center justify-center">
                     <i class="fas fa-undo text-green-600 group-hover:rotate-180 transition-transform duration-300"></i>
-                    <span class="sarcastic-xs hidden md:inline ml-1">(Reset)</span>
+                    <span class="sarcastic-xs hidden sm:inline ml-1">(Reset)</span>
                 </button>
             </div>
         </div>
@@ -83,71 +113,113 @@
     </div>
 
     <!-- Links List -->
-    <div class="glass-effect rounded-3xl p-6 border-2 border-green-200">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold text-green-800 flex items-center">
+    <div class="glass-effect rounded-3xl p-4 sm:p-6 border-2 border-green-200">
+        <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+            <h3 class="text-base sm:text-lg font-bold text-green-800 flex items-center flex-wrap">
                 <i class="fas fa-list mr-2 text-green-600"></i>
-                Your Links ({{ links|length if links else 0 }}) <span class="sarcastic-sm ml-2">(Quality over quantity, right?)</span>
+                Your Links (<span id="linkCount">{{ links|length if links else 0 }}</span>)
+                <span class="sarcastic-sm ml-2 hidden sm:inline">(Quality over quantity, right?)</span>
                 <img src="{{ url_for('static', filename='img/leaf.png') }}" 
                      alt="Leaf" 
-                     class="w-6 h-6 ml-2 object-contain">
+                     class="w-5 h-5 sm:w-6 sm:h-6 ml-2 object-contain">
             </h3>
-            <span class="text-sm text-green-600"><i class="fas fa-leaf"></i> Last updated: today <span class="sarcastic-xs">(We think)</span></span>
+            <span class="text-xs sm:text-sm text-green-600"><i class="fas fa-leaf"></i> Last updated: <span id="lastUpdated">today</span> <span class="sarcastic-xs">(We think)</span></span>
         </div>
 
         {% if links %}
-        <div class="overflow-x-auto">
-            <table class="w-full">
+        <!-- Mobile Card View -->
+        <div class="block sm:hidden space-y-4" id="mobileLinksContainer">
+            {% for link in links %}
+            <div class="link-row bg-green-50/50 rounded-xl p-4 border border-green-200" data-status="{{ link.status }}" data-link-id="{{ link.ID }}">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-sm font-semibold text-green-700">#{{ loop.index }}</span>
+                    <span class="status-badge {% if link.status == 'online' %}status-online{% else %}status-offline{% endif %} text-xs" id="status-badge-{{ link.ID }}">
+                        {% if link.status == 'online' %}
+                            <i class="fas fa-check-circle"></i> ONLINE
+                        {% else %}
+                            <i class="fas fa-times-circle"></i> OFFLINE
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="mb-2">
+                    <a href="{{ link.service_link }}" 
+                       target="_blank" 
+                       class="text-green-600 hover:text-green-700 font-medium hover:underline break-all text-sm">
+                        {{ link.service_link }}
+                    </a>
+                    <span class="sarcastic-xs block">(Click to test your luck)</span>
+                </div>
+                <div class="flex justify-between items-center text-xs text-green-600 mb-3">
+                    <span>Created: {{ link.create_at.strftime('%Y-%m-%d') if link.create_at else 'N/A' }}</span>
+                    <span class="sarcastic-xs">(Remember that day?)</span>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button onclick="openEditModal('{{ link.ID }}', '{{ link.service_link }}')" 
+                            class="btn-warning inline-flex items-center space-x-1 text-xs px-3 py-1.5">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit</span>
+                    </button>
+                    <button onclick="openDeleteModal('{{ link.ID }}')" 
+                            class="btn-danger inline-flex items-center space-x-1 text-xs px-3 py-1.5">
+                        <i class="fas fa-trash"></i>
+                        <span>Delete</span>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden sm:block overflow-x-auto">
+            <table class="w-full min-w-[600px]">
                 <thead>
                     <tr class="border-b-2 border-green-200">
-                        <th class="text-left py-3 px-4 text-sm font-semibold text-green-700"># <span class="sarcastic-xs">(Count 'em)</span></th>
-                        <th class="text-left py-3 px-4 text-sm font-semibold text-green-700">Service Link <span class="sarcastic-xs">(The actual URL)</span></th>
-                        <th class="text-left py-3 px-4 text-sm font-semibold text-green-700">Status <span class="sarcastic-xs">(Is it alive?)</span></th>
-                        <th class="text-left py-3 px-4 text-sm font-semibold text-green-700">Created <span class="sarcastic-xs">(When you were productive)</span></th>
-                        <th class="text-right py-3 px-4 text-sm font-semibold text-green-700">Actions <span class="sarcastic-xs">(Danger zone)</span></th>
+                        <th class="text-left py-3 px-3 text-xs md:text-sm font-semibold text-green-700">#</th>
+                        <th class="text-left py-3 px-3 text-xs md:text-sm font-semibold text-green-700">Service Link</th>
+                        <th class="text-left py-3 px-3 text-xs md:text-sm font-semibold text-green-700">Status</th>
+                        <th class="text-left py-3 px-3 text-xs md:text-sm font-semibold text-green-700">Created</th>
+                        <th class="text-right py-3 px-3 text-xs md:text-sm font-semibold text-green-700">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="linksTableBody">
                     {% for link in links %}
                     <tr class="link-row border-b border-green-100 hover:bg-green-50/30 transition-colors duration-200 group" 
-                        data-status="{{ link.status }}">
-                        <td class="py-3 px-4 text-sm text-green-700">{{ loop.index }}</td>
-                        <td class="py-3 px-4">
+                        data-status="{{ link.status }}" data-link-id="{{ link.ID }}">
+                        <td class="py-3 px-3 text-sm text-green-700">{{ loop.index }}</td>
+                        <td class="py-3 px-3">
                             <a href="{{ link.service_link }}" 
                                target="_blank" 
-                               class="text-green-600 hover:text-green-700 font-medium hover:underline truncate block max-w-[300px] group-hover:text-blue-600 transition-colors">
+                               class="text-green-600 hover:text-green-700 font-medium hover:underline truncate block max-w-[200px] md:max-w-[300px] group-hover:text-blue-600 transition-colors">
                                 {{ link.service_link }}
                                 <span class="sarcastic-xs block">(Click to test your luck)</span>
                             </a>
                         </td>
-                        <td class="py-3 px-4">
-                            <span class="status-badge {% if link.status == 'online' %}status-online{% else %}status-offline{% endif %}">
+                        <td class="py-3 px-3">
+                            <span class="status-badge {% if link.status == 'online' %}status-online{% else %}status-offline{% endif %} text-xs whitespace-nowrap" id="status-badge-{{ link.ID }}">
                                 {% if link.status == 'online' %}
-                                    <i class="fas fa-check-circle"></i> ONLINE <span class="sarcastic-xs"></span>
-                                    (Miracles do happen)
+                                    <i class="fas fa-check-circle"></i> ONLINE
                                 {% else %}
-                                    (It's not you, it's the link)
-                                    <i class="fas fa-times-circle"></i> OFFLINE <span class="sarcastic-xs"></span>
+                                    <i class="fas fa-times-circle"></i> OFFLINE
                                 {% endif %}
                             </span>
+                            <span class="status-code text-xs text-gray-400 hidden" id="status-code-{{ link.ID }}"></span>
                         </td>
-                        <td class="py-3 px-4 text-sm text-green-600">
+                        <td class="py-3 px-3 text-sm text-green-600">
                             {{ link.create_at.strftime('%Y-%m-%d') if link.create_at else 'N/A' }}
-                            <span class="sarcastic-xs block">(Remember that day?)</span>
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-3 px-3">
                             <div class="flex items-center justify-end space-x-2">
                                 <button onclick="openEditModal('{{ link.ID }}', '{{ link.service_link }}')" 
-                                        class="btn-warning inline-flex items-center space-x-1 text-xs">
+                                        class="btn-warning inline-flex items-center space-x-1 text-xs px-3 py-1.5">
                                     <i class="fas fa-edit"></i>
-                                    <span>Edit</span>
-                                    <span class="sarcastic-xs hidden group-hover:inline"></span>
+                                    <span class="hidden sm:inline">Edit</span>
+                                    <span class="sm:hidden">✏️</span>
                                 </button>
                                 <button onclick="openDeleteModal('{{ link.ID }}')" 
-                                        class="btn-danger inline-flex items-center space-x-1 text-xs">
+                                        class="btn-danger inline-flex items-center space-x-1 text-xs px-3 py-1.5">
                                     <i class="fas fa-trash"></i>
-                                    <span>Delete</span>
-                                    <span class="sarcastic-xs hidden group-hover:inline">(Poof! It's gone)</span>
+                                    <span class="hidden sm:inline">Delete</span>
+                                    <span class="sm:hidden">🗑️</span>
                                 </button>
                             </div>
                         </td>
@@ -157,37 +229,37 @@
             </table>
         </div>
 
-        <!-- Pagination with Sass -->
-        <div class="flex justify-between items-center mt-6 pt-4 border-t-2 border-green-200">
+        <!-- Pagination -->
+        <div class="flex flex-wrap justify-between items-center mt-6 pt-4 border-t-2 border-green-200 gap-3">
             <p class="text-sm text-green-600">
-                Showing {{ links|length }} links <i class="fas fa-frog"></i> 
-                <span class="sarcastic-xs">(You're doing great, champ)</span>
+                Showing <span id="visibleCount">{{ links|length }}</span> links 
+                <span class="sarcastic-xs hidden sm:inline">(You're doing great, champ)</span>
             </p>
             <div class="flex space-x-2">
                 <button class="px-3 py-1 border-2 border-green-200 rounded-lg hover:bg-green-50 transition-colors duration-200 text-sm text-green-700">
-                    Previous <span class="sarcastic-xs">(If you must)</span>
+                    Previous
                 </button>
                 <button class="px-3 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-colors duration-200 text-sm">
-                    1 <span class="sarcastic-xs text-green-300">(The chosen one)</span>
+                    1
                 </button>
                 <button class="px-3 py-1 border-2 border-green-200 rounded-lg hover:bg-green-50 transition-colors duration-200 text-sm text-green-700">
-                    Next <span class="sarcastic-xs">(If you dare)</span>
+                    Next
                 </button>
             </div>
         </div>
         {% else %}
-        <!-- Empty State with Extra Sass -->
-        <div class="text-center py-12">
+        <!-- Empty State -->
+        <div class="text-center py-8 sm:py-12">
             <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
                  alt="Frog" 
-                 class="w-32 h-32 rounded-full object-cover object-position-center-30 border-4 border-green-300 frog-bounce mx-auto">
-            <h4 class="text-xl font-semibold text-green-800 mb-2 mt-4">No links found</h4>
-            <p class="text-green-600 mb-4">
+                 class="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover object-position-center-30 border-4 border-green-300 frog-bounce mx-auto">
+            <h4 class="text-lg sm:text-xl font-semibold text-green-800 mb-2 mt-4">No links found</h4>
+            <p class="text-green-600 mb-4 px-4">
                 Start by adding your first service link 
                 <span class="sarcastic-sm block">(It's not that hard. We believe in you.)</span>
             </p>
             <button onclick="openAddModal()" 
-                    class="btn-primary inline-flex items-center space-x-2">
+                    class="btn-primary inline-flex items-center space-x-2 px-6 py-3">
                 <i class="fas fa-plus"></i>
                 <span>Add Your First Link</span>
                 <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
@@ -201,10 +273,10 @@
     
     <!-- Motivational/Sarcastic Message -->
     <div class="mt-6 glass-effect rounded-3xl p-4 border-2 border-green-200">
-        <div class="flex items-center justify-center space-x-3">
+        <div class="flex items-center justify-center space-x-3 flex-wrap">
             <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
                  alt="Frog" 
-                 class="w-8 h-8 rounded-full object-cover object-position-center-30 border-2 border-green-400">
+                 class="w-8 h-8 rounded-full object-cover object-position-center-30 border-2 border-green-400 flex-shrink-0">
             <div class="text-center">
                 <p class="text-green-700 text-sm">
                     <i class="fas fa-frog"></i> Remember: Every link you manage is one less ugly ngrok URL in the world. 
@@ -215,16 +287,16 @@
     </div>
 </div>
 
-<!-- Add Link Modal with Sass -->
-<div id="addModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 slide-in border-2 border-green-200">
+<!-- Add Link Modal -->
+<div id="addModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full slide-in border-2 border-green-200 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="text-2xl font-bold text-green-800 flex items-center">
+            <h3 class="text-xl sm:text-2xl font-bold text-green-800 flex items-center">
                 <i class="fas fa-plus-circle text-green-600 mr-2"></i>
                 Add New Link
                 <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
                      alt="Frog" 
-                     class="w-8 h-8 rounded-full object-cover object-position-center-30 ml-2 border-2 border-green-400">
+                     class="w-8 h-8 rounded-full object-cover object-position-center-30 ml-2 border-2 border-green-400 hidden sm:inline-block">
             </h3>
             <button onclick="closeModal('addModal')" class="text-green-400 hover:text-green-600 transition-colors">
                 <i class="fas fa-times text-2xl"></i>
@@ -241,35 +313,34 @@
                        name="service_link" 
                        required
                        placeholder="https://example.com/service"
-                       class="form-input">
+                       class="form-input w-full">
                 <p class="sarcastic-xs mt-1"><i class="fas fa-frog"></i> Pro tip: Copy-paste. Don't type. Trust me.</p>
             </div>
-            <div class="flex justify-end space-x-3">
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
                 <button type="button" 
                         onclick="closeModal('addModal')" 
-                        class="btn-secondary">
-                    Cancel <span class="sarcastic-xs">(Chicken!)</span>
+                        class="btn-secondary w-full sm:w-auto">
+                    Cancel
                 </button>
-                <button type="submit" class="btn-primary">
+                <button type="submit" class="btn-primary w-full sm:w-auto">
                     <i class="fas fa-plus"></i>
                     Add Link
-                    <i class="fas fa-frog"></i>
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Edit Link Modal with Sass -->
-<div id="editModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 slide-in border-2 border-yellow-200">
+<!-- Edit Link Modal -->
+<div id="editModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full slide-in border-2 border-yellow-200 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="text-2xl font-bold text-yellow-800 flex items-center">
+            <h3 class="text-xl sm:text-2xl font-bold text-yellow-800 flex items-center">
                 <i class="fas fa-edit text-yellow-600 mr-2"></i>
                 Edit Link
                 <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
                      alt="Frog" 
-                     class="w-8 h-8 rounded-full object-cover object-position-center-30 ml-2 border-2 border-yellow-400">
+                     class="w-8 h-8 rounded-full object-cover object-position-center-30 ml-2 border-2 border-yellow-400 hidden sm:inline-block">
             </h3>
             <button onclick="closeModal('editModal')" class="text-yellow-400 hover:text-yellow-600 transition-colors">
                 <i class="fas fa-times text-2xl"></i>
@@ -286,49 +357,46 @@
                        name="service_link" 
                        required
                        placeholder="https://example.com/service"
-                       class="form-input border-yellow-300 focus:border-yellow-500">
+                       class="form-input w-full border-yellow-300 focus:border-yellow-500">
                 <p class="sarcastic-xs mt-1"><i class="fas fa-frog"></i> Remember: With great power comes great responsibility... and broken URLs.</p>
             </div>
-            <div class="flex justify-end space-x-3">
+            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
                 <button type="button" 
                         onclick="closeModal('editModal')" 
-                        class="btn-secondary">
-                    Cancel <span class="sarcastic-xs">(Coward!)</span>
+                        class="btn-secondary w-full sm:w-auto">
+                    Cancel
                 </button>
-                <button type="submit" class="btn-warning">
+                <button type="submit" class="btn-warning w-full sm:w-auto">
                     <i class="fas fa-save"></i>
                     Update Link
-                    <i class="fas fa-frog"></i>
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Delete Confirmation Modal with Extra Sass -->
-<div id="deleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 slide-in border-2 border-red-200">
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full slide-in border-2 border-red-200 max-h-[90vh] overflow-y-auto">
         <div class="text-center">
             <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
                  alt="Frog" 
-                 class="w-24 h-24 rounded-full object-cover object-position-center-30 border-4 border-red-300 mx-auto">
-            <h3 class="text-2xl font-bold text-red-800 mb-2 mt-4">Delete Link</h3>
-            <p class="text-red-600 mb-6">
+                 class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover object-position-center-30 border-4 border-red-300 mx-auto">
+            <h3 class="text-xl sm:text-2xl font-bold text-red-800 mb-2 mt-4">Delete Link</h3>
+            <p class="text-red-600 mb-6 text-sm sm:text-base">
                 Are you sure you want to delete this link? 
-                <span class="sarcastic-sm block">This action cannot be undone. Seriously. We're not kidding. </span>
-                <span class="sarcastic-xs block">(We can't save you from yourself.)</span>
+                <span class="sarcastic-sm block">This action cannot be undone. Seriously. We're not kidding.</span>
             </p>
             <form id="deleteForm" method="POST">
-                <div class="flex justify-center space-x-3">
+                <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-3">
                     <button type="button" 
                             onclick="closeModal('deleteModal')" 
-                            class="btn-secondary">
-                        Cancel <span class="sarcastic-xs">(Good choice!)</span>
+                            class="btn-secondary w-full sm:w-auto">
+                        Cancel
                     </button>
-                    <button type="submit" class="btn-danger">
+                    <button type="submit" class="btn-danger w-full sm:w-auto">
                         <i class="fas fa-trash"></i>
-                        Delete <span class="sarcastic-xs">(Poof!)</span>
-                        <i class="fas fa-frog"></i>
+                        Delete
                     </button>
                 </div>
             </form>
@@ -337,11 +405,49 @@
     </div>
 </div>
 
+<style>
+    .loading-spinner-small {
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(76, 175, 80, 0.1);
+        border-top: 3px solid #4CAF50;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        flex-shrink: 0;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .status-badge {
+        transition: all 0.3s ease;
+    }
+    
+    .status-badge.updating {
+        opacity: 0.5;
+        animation: pulse 0.5s ease-in-out infinite alternate;
+    }
+    
+    @keyframes pulse {
+        from { opacity: 0.5; }
+        to { opacity: 1; }
+    }
+    
+    .status-code {
+        display: block;
+        font-size: 0.6rem;
+        margin-top: 2px;
+    }
+</style>
+
 <script>
     // Modal functions
     function openAddModal() {
         document.getElementById('addModal').classList.remove('hidden');
         document.getElementById('addModal').classList.add('flex');
+        document.body.style.overflow = 'hidden';
     }
 
     function openEditModal(linkId, currentLink) {
@@ -351,9 +457,7 @@
         const form = document.getElementById('editForm');
         form.action = `/api/links_management/update/${linkId}`;
         document.getElementById('edit_service_link').value = currentLink;
-        
-        // Sarcastic console message
-        console.log('Editing link:', linkId, ' - Good luck!');
+        document.body.style.overflow = 'hidden';
     }
 
     function openDeleteModal(linkId) {
@@ -362,14 +466,13 @@
         
         const form = document.getElementById('deleteForm');
         form.action = `/api/links_management/delete/${linkId}`;
-        
-        // Sarcastic console message
-        console.warn('Deleting link:', linkId, ' - Say goodbye!');
+        document.body.style.overflow = 'hidden';
     }
 
     function closeModal(modalId) {
         document.getElementById(modalId).classList.add('hidden');
         document.getElementById(modalId).classList.remove('flex');
+        document.body.style.overflow = '';
     }
 
     // Close modals when clicking outside
@@ -378,19 +481,30 @@
             if (e.target === this) {
                 this.classList.add('hidden');
                 this.classList.remove('flex');
+                document.body.style.overflow = '';
             }
         });
     });
 
-    // Filter links with sarcastic feedback
+    // Filter links
     function filterLinks() {
-        const searchTerm = document.getElementById('searchLinks').value.toLowerCase();
+        const searchTerm = document.getElementById('searchLinks').value.toLowerCase().trim();
         const statusFilter = document.getElementById('statusFilter').value;
         const rows = document.querySelectorAll('.link-row');
         let visibleCount = 0;
         
         rows.forEach(row => {
-            const linkText = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            let linkText = '';
+            const linkElement = row.querySelector('td:nth-child(2) a');
+            if (linkElement) {
+                linkText = linkElement.textContent.toLowerCase();
+            } else {
+                const mobileLink = row.querySelector('a');
+                if (mobileLink) {
+                    linkText = mobileLink.textContent.toLowerCase();
+                }
+            }
+            
             const status = row.dataset.status;
             
             let show = true;
@@ -407,25 +521,250 @@
             if (show) visibleCount++;
         });
         
-        // Sarcastic console feedback
-        if (searchTerm && visibleCount === 0) {
-            console.log('No results found. Your search skills are... impressive.');
-        } else if (searchTerm) {
-            console.log(`Found ${visibleCount} links. Look at you go!`);
-        }
+        document.getElementById('visibleCount').textContent = visibleCount;
     }
 
     function clearFilters() {
         document.getElementById('searchLinks').value = '';
         document.getElementById('statusFilter').value = 'all';
         filterLinks();
-        console.log('Filters cleared. Back to chaos!');
+    }
+
+    // Refresh/Check Status Function - Only 200 = Online
+    async function refreshAllLinks() {
+        const button = document.getElementById('refreshButton');
+        const icon = document.getElementById('refreshIcon');
+        const progressDiv = document.getElementById('statusCheckProgress');
+        const progressBar = document.getElementById('statusProgressBar');
+        const progressText = document.getElementById('statusProgressText');
+        const statusCount = document.getElementById('statusCount');
+        const rows = document.querySelectorAll('.link-row');
+        
+        if (rows.length === 0) {
+            console.log('No links to check. You\'re off the hook... for now.');
+            return;
+        }
+        
+        // Disable button and show progress
+        button.disabled = true;
+        button.style.opacity = '0.7';
+        icon.className = 'fas fa-sync fa-spin';
+        progressDiv.classList.remove('hidden');
+        
+        let checked = 0;
+        let online = 0;
+        let offline = 0;
+        
+        // Update progress
+        progressText.textContent = `Checking ${rows.length} links...`;
+        progressBar.style.width = '0%';
+        statusCount.textContent = `0/${rows.length}`;
+        
+        // Update last updated time
+        const now = new Date();
+        const timeStr = now.toLocaleString();
+        document.getElementById('lastUpdated').textContent = timeStr;
+        
+        // Check each link
+        for (const row of rows) {
+            // Find the link URL
+            let linkUrl = '';
+            const linkElement = row.querySelector('td:nth-child(2) a');
+            if (linkElement) {
+                linkUrl = linkElement.textContent.trim();
+            } else {
+                const mobileLink = row.querySelector('a');
+                if (mobileLink) {
+                    linkUrl = mobileLink.textContent.trim();
+                }
+            }
+            
+            if (!linkUrl) {
+                checked++;
+                updateProgress(checked, rows.length, progressBar, progressText, statusCount);
+                continue;
+            }
+            
+            // Get link ID
+            const linkId = row.dataset.linkId;
+            const statusBadge = document.getElementById(`status-badge-${linkId}`);
+            const statusCodeSpan = document.getElementById(`status-code-${linkId}`);
+            
+            // Show updating state
+            if (statusBadge) {
+                statusBadge.classList.add('updating');
+            }
+            
+            let isOnline = false;
+            let statusCode = 0;
+            let statusText = 'Unknown';
+            
+            try {
+                // Try CORS mode first
+                try {
+                    const response = await fetch(linkUrl, {
+                        method: 'HEAD',
+                        mode: 'cors',
+                        cache: 'no-cache',
+                        signal: AbortSignal.timeout(5000)
+                    });
+                    
+                    statusCode = response.status;
+                    statusText = response.statusText;
+                    
+                    // ONLY 200 = ONLINE
+                    if (statusCode === 200) {
+                        isOnline = true;
+                    } else {
+                        isOnline = false;
+                    }
+                    
+                } catch (corsError) {
+                    // CORS blocked, try no-cors
+                    try {
+                        const noCorsResponse = await fetch(linkUrl, {
+                            method: 'HEAD',
+                            mode: 'no-cors',
+                            cache: 'no-cache',
+                            signal: AbortSignal.timeout(5000)
+                        });
+                        
+                        // With no-cors, we can't read status
+                        // We'll assume online if no error, but mark as "Unknown"
+                        isOnline = false;
+                        statusCode = 0;
+                        statusText = 'CORS Blocked - Unknown';
+                        
+                        // Try a different approach - use an image or script
+                        // For now, mark as offline since we can't verify 200
+                        isOnline = false;
+                        
+                    } catch (noCorsError) {
+                        isOnline = false;
+                        statusCode = 0;
+                        statusText = 'Connection Failed';
+                    }
+                }
+                
+                // Update the row data
+                row.dataset.status = isOnline ? 'online' : 'offline';
+                
+                // Update the badge
+                if (statusBadge) {
+                    statusBadge.classList.remove('updating');
+                    if (isOnline) {
+                        statusBadge.className = 'status-badge status-online text-xs whitespace-nowrap';
+                        statusBadge.innerHTML = `<i class="fas fa-check-circle"></i> ONLINE`;
+                    } else {
+                        statusBadge.className = 'status-badge status-offline text-xs whitespace-nowrap';
+                        statusBadge.innerHTML = `<i class="fas fa-times-circle"></i> OFFLINE`;
+                    }
+                }
+                
+                // Show status code if available
+                if (statusCodeSpan) {
+                    if (statusCode > 0) {
+                        statusCodeSpan.textContent = `Status: ${statusCode} ${statusText}`;
+                        statusCodeSpan.className = 'status-code text-xs';
+                        if (isOnline) {
+                            statusCodeSpan.style.color = '#2E7D32';
+                        } else {
+                            statusCodeSpan.style.color = '#C62828';
+                        }
+                    } else {
+                        statusCodeSpan.textContent = statusText;
+                        statusCodeSpan.className = 'status-code text-xs text-gray-500';
+                    }
+                }
+                
+                if (isOnline) {
+                    online++;
+                    console.log(`Link ${linkId}: ONLINE (Status: ${statusCode})`);
+                } else {
+                    offline++;
+                    console.log(`Link ${linkId}: OFFLINE (Status: ${statusCode || 'N/A'})`);
+                }
+                
+            } catch (error) {
+                // Link is offline or unreachable
+                offline++;
+                row.dataset.status = 'offline';
+                
+                if (statusBadge) {
+                    statusBadge.classList.remove('updating');
+                    statusBadge.className = 'status-badge status-offline text-xs whitespace-nowrap';
+                    statusBadge.innerHTML = `<i class="fas fa-times-circle"></i> OFFLINE`;
+                }
+                
+                if (statusCodeSpan) {
+                    statusCodeSpan.textContent = `Error: ${error.message}`;
+                    statusCodeSpan.className = 'status-code text-xs text-red-500';
+                }
+                
+                console.log(`Link ${linkId}: OFFLINE (Error: ${error.message})`);
+            }
+            
+            checked++;
+            updateProgress(checked, rows.length, progressBar, progressText, statusCount);
+        }
+        
+        // Update button and progress
+        icon.className = 'fas fa-check-circle';
+        button.disabled = false;
+        button.style.opacity = '1';
+        
+        // Show summary
+        progressText.textContent = `Done! ${online} online, ${offline} offline`;
+        progressBar.style.width = '100%';
+        statusCount.textContent = `${rows.length}/${rows.length}`;
+        
+        // Update the link count display
+        document.getElementById('linkCount').textContent = rows.length;
+        
+        // Re-apply filters
+        filterLinks();
+        
+        // Sarcastic console message
+        if (online === rows.length) {
+            console.log(`All ${online} links are online. Did you fix something?`);
+        } else if (offline === rows.length) {
+            console.log(`All ${offline} links are offline. Did you break something?`);
+        } else {
+            console.log(`Summary: ${online} online, ${offline} offline. Could be worse.`);
+        }
+        
+        // Hide progress after 4 seconds
+        setTimeout(() => {
+            progressDiv.classList.add('hidden');
+            icon.className = 'fas fa-sync';
+        }, 4000);
     }
     
-    // Additional sarcasm on page load
+    function updateProgress(checked, total, progressBar, progressText, statusCount) {
+        const percent = Math.round((checked / total) * 100);
+        progressBar.style.width = `${percent}%`;
+        progressText.textContent = `Checking links... ${checked}/${total}`;
+        if (statusCount) {
+            statusCount.textContent = `${checked}/${total}`;
+        }
+    }
+
+    // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('FrogLink Link Management loaded. Try not to break anything.');
-        console.log('Pro tip: If something breaks, it\'s probably your fault.');
+        console.log('FrogLink Link Management loaded.');
+        console.log('Click "Check Status" to test all links - Only status code 200 = ONLINE');
+        
+        // Fix for modal scrolling
+        const modals = document.querySelectorAll('.fixed.inset-0');
+        modals.forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                    this.classList.remove('flex');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
     });
 </script>
 {% endblock %}

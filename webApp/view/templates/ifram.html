@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrogLink - Iframe Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 50%, #A5D6A7 100%);
+            min-height: 100vh;
+            font-family: 'Quicksand', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Loading Screen - Same as base.html */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 50%, #A5D6A7 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        
+        #loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loading-frog-icon {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center 30%;
+            animation: loadingBounce 1.2s infinite ease-in-out;
+            border: 4px solid #4CAF50;
+            box-shadow: 0 0 40px rgba(76, 175, 80, 0.3);
+        }
+        
+        @keyframes loadingBounce {
+            0%, 100% { 
+                transform: translateY(0) scale(1);
+            }
+            50% { 
+                transform: translateY(-30px) scale(1.05);
+            }
+        }
+        
+        .loading-text {
+            margin-top: 2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2E7D32;
+            animation: textPulse 1.5s infinite ease-in-out;
+        }
+        
+        @keyframes textPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading-dots {
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+        
+        .loading-dots span {
+            display: inline-block;
+            animation: dotBounce 1.4s infinite ease-in-out;
+        }
+        
+        .loading-dots span:nth-child(1) { animation-delay: 0s; }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes dotBounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        .loading-spinner {
+            margin-top: 2rem;
+            width: 60px;
+            height: 60px;
+            border: 5px solid #E8F5E9;
+            border-top: 5px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-leaves {
+            position: absolute;
+            opacity: 0.15;
+            animation: floatLeaf 8s infinite ease-in-out;
+        }
+        
+        .loading-leaves img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+        
+        .loading-leaves:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .loading-leaves:nth-child(2) {
+            bottom: 15%;
+            right: 10%;
+            animation-delay: -2s;
+        }
+        
+        .loading-leaves:nth-child(3) {
+            top: 50%;
+            right: 5%;
+            animation-delay: -4s;
+        }
+        
+        .loading-leaves:nth-child(4) {
+            bottom: 30%;
+            left: 5%;
+            animation-delay: -6s;
+        }
+        
+        @keyframes floatLeaf {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(30px, -20px) rotate(10deg);
+            }
+            50% {
+                transform: translate(-20px, 30px) rotate(-5deg);
+            }
+            75% {
+                transform: translate(20px, -10px) rotate(8deg);
+            }
+        }
+        
+        .loading-progress {
+            margin-top: 2rem;
+            width: 200px;
+            height: 4px;
+            background: #E8F5E9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #81C784);
+            border-radius: 4px;
+            animation: progressLoad 2s ease-in-out infinite;
+            width: 0%;
+        }
+        
+        @keyframes progressLoad {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+        
+        .loading-frog-friends {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .loading-frog-friends img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center 35%;
+            border: 2px solid #4CAF50;
+            animation: friendBounce 1.8s infinite ease-in-out;
+        }
+        
+        .loading-frog-friends img:nth-child(1) { animation-delay: 0s; }
+        .loading-frog-friends img:nth-child(2) { animation-delay: 0.3s; }
+        .loading-frog-friends img:nth-child(3) { animation-delay: 0.6s; }
+        .loading-frog-friends img:nth-child(4) { animation-delay: 0.9s; }
+        .loading-frog-friends img:nth-child(5) { animation-delay: 1.2s; }
+        
+        @keyframes friendBounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+        
+        /* Frog body for images */
+        .frog-body {
+            object-fit: cover;
+            object-position: center 20%;
+        }
+        
+        /* Sarcastic text */
+        .sarcastic {
+            color: #000000 !important;
+            font-weight: 700 !important;
+        }
+        
+        .sarcastic-xs {
+            color: #000000 !important;
+            font-weight: 700 !important;
+            font-size: 0.7rem !important;
+        }
+        
+        /* Iframe Container - FULL SCREEN */
+        .iframe-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+        
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+            display: block;
+        }
+        
+        /* Floating Frog Decorations - Same as base.html */
+        .frog-float {
+            position: fixed;
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatFrog 20s infinite ease-in-out;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid rgba(76, 175, 80, 0.2);
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.1);
+        }
+        
+        .frog-float img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 25%;
+        }
+        
+        .frog-float:nth-child(1) {
+            top: 8%;
+            left: 3%;
+            animation-delay: 0s;
+            width: 150px;
+            height: 150px;
+        }
+        
+        .frog-float:nth-child(2) {
+            top: 55%;
+            right: 2%;
+            animation-delay: -5s;
+            width: 130px;
+            height: 130px;
+        }
+        
+        .frog-float:nth-child(3) {
+            bottom: 8%;
+            left: 10%;
+            animation-delay: -10s;
+            width: 180px;
+            height: 180px;
+        }
+        
+        .frog-float:nth-child(4) {
+            top: 15%;
+            right: 8%;
+            animation-delay: -15s;
+            width: 110px;
+            height: 110px;
+        }
+        
+        .frog-float:nth-child(5) {
+            bottom: 25%;
+            right: 15%;
+            animation-delay: -7s;
+            width: 140px;
+            height: 140px;
+        }
+        
+        @keyframes floatFrog {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+            }
+            25% {
+                transform: translate(40px, -30px) rotate(5deg) scale(1.05);
+            }
+            50% {
+                transform: translate(-20px, 40px) rotate(-3deg) scale(0.95);
+            }
+            75% {
+                transform: translate(30px, -15px) rotate(4deg) scale(1.02);
+            }
+        }
+        
+        /* Leaf decoration */
+        .leaf-decoration {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.06;
+        }
+        
+        .leaf-decoration img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+        }
+        
+        .leaf-decoration:nth-child(1) {
+            bottom: 0;
+            right: 0;
+            transform: rotate(-20deg);
+        }
+        
+        .leaf-decoration:nth-child(2) {
+            top: 0;
+            left: 0;
+            transform: rotate(160deg);
+        }
+        
+        /* Status overlay - subtle */
+        .iframe-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+        
+        .iframe-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+        
+        .iframe-status-dot.loading {
+            background: #ffbd2e;
+        }
+        
+        .iframe-status-dot.error {
+            background: #ff5f56;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .iframe-status-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .iframe-status-sarcasm {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.6rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen - SAME AS base.html -->
+    <div id="loading-screen">
+        <!-- Floating Leaves -->
+        <div class="loading-leaves">
+            <img src="{{ url_for('static', filename='img/leaf.jpg') }}" alt="Leaf">
+        </div>
+        <div class="loading-leaves">
+            <img src="{{ url_for('static', filename='img/leaf.jpg') }}" alt="Leaf">
+        </div>
+        <div class="loading-leaves">
+            <img src="{{ url_for('static', filename='img/leaf.jpg') }}" alt="Leaf">
+        </div>
+        <div class="loading-leaves">
+            <img src="{{ url_for('static', filename='img/leaf.jpg') }}" alt="Leaf">
+        </div>
+        
+        <!-- Frog Friends -->
+        <div class="loading-frog-friends">
+            <img src="{{ url_for('static', filename='img/cute.jpg') }}" alt="Frog Friend" class="frog-body">
+            <img src="{{ url_for('static', filename='img/cute.jpg') }}" alt="Frog Friend" class="frog-body">
+            <img src="{{ url_for('static', filename='img/cute.jpg') }}" alt="Frog Friend" class="frog-body">
+            <img src="{{ url_for('static', filename='img/cute.jpg') }}" alt="Frog Friend" class="frog-body">
+            <img src="{{ url_for('static', filename='img/cute.jpg') }}" alt="Frog Friend" class="frog-body">
+        </div>
+        
+        <!-- Main Frog -->
+        <img src="{{ url_for('static', filename='img/cute.jpg') }}" alt="Frog" class="loading-frog-icon frog-body">
+        
+        <!-- Loading Text -->
+        <div class="loading-text">
+            Loading FrogLink
+            <span class="loading-dots">
+                <span>.</span>
+                <span>.</span>
+                <span>.</span>
+            </span>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div class="loading-spinner"></div>
+        
+        <!-- Progress Bar -->
+        <div class="loading-progress">
+            <div class="loading-progress-bar"></div>
+        </div>
+        
+        <!-- Fun Loading Message -->
+        <p class="sarcastic mt-4" id="loading-message">
+            <i class="fas fa-frog"></i> Loading your ngrok URL... This might take a while.
+        </p>
+    </div>
+
+    <!-- Floating Frog Decorations -->
+    <div class="frog-float">
+        <img src="{{ url_for('static', filename='img/cute.jpg') }}" alt="Frog" class="frog-body">
+    </div>
+    <div class="frog-float">
+        <img src="{{ url_for('static', filename='img/cute.jpg') }}" alt="Frog" class="frog-body">
+    </div>
+    <div class="frog-float">
+        <img src="{{ url_for('static', filename='img/cute.jpg') }}" alt="Frog" class="frog-body">
+    </div>
+    <div class="frog-float">
+        <img src="{{ url_for('static', filename='img/cute.jpg') }}" alt="Frog" class="frog-body">
+    </div>
+    <div class="frog-float">
+        <img src="{{ url_for('static', filename='img/cute.jpg') }}" alt="Frog" class="frog-body">
+    </div>
+    
+    <!-- Leaf Decorations -->
+    <div class="leaf-decoration">
+        <img src="{{ url_for('static', filename='img/leaf.png') }}" alt="Leaf">
+    </div>
+    <div class="leaf-decoration">
+        <img src="{{ url_for('static', filename='img/leaf.png') }}" alt="Leaf">
+    </div>
+
+    <!-- Iframe - FULL SCREEN -->
+    <div class="iframe-container" id="iframeContainer">
+        <iframe 
+            id="mainIframe"
+            src=""
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+            loading="lazy"
+            onload="iframeLoaded()"
+            onerror="iframeError()"
+        ></iframe>
+    </div>
+
+    <!-- Status Overlay -->
+    <div class="iframe-status" id="statusOverlay">
+        <div class="iframe-status-dot" id="statusDot"></div>
+        <span class="iframe-status-text" id="statusText">Loading...</span>
+        <span class="iframe-status-sarcasm" id="statusSarcasm">(We hope it works)</span>
+    </div>
+
+    <script>
+        // Sarcastic loading messages - SAME as base.html
+        const loadingMessages = [
+            '<i class="fas fa-frog"></i> Loading... or not. Who knows?',
+            '<i class="fas fa-leaf"></i> Gathering leaves. Very important work.',
+            '<i class="fas fa-frog"></i> Hoping this loads before you give up...',
+            '<i class="fas fa-leaf"></i> Almost there. Or not. I\'m not your mom.',
+            '<i class="fas fa-frog"></i> This is taking longer than expected. That\'s what she said.',
+            '<i class="fas fa-leaf"></i> Your patience is admirable. Or is it?',
+            '<i class="fas fa-frog"></i> Loading... Please don\'t break anything.',
+            '<i class="fas fa-leaf"></i> If it takes too long, blame the internet. Always.',
+            '<i class="fas fa-frog"></i> Almost done. Don\'t hold your breath though.',
+            '<i class="fas fa-leaf"></i> Ready when you are. Or when the server responds.',
+            '<i class="fas fa-frog"></i> Loading ngrok URL... This might take a while.',
+            '<i class="fas fa-leaf"></i> The frogs are working on it. Be patient.'
+        ];
+        
+        // Get URL from query parameter
+        // function getNgrokUrl() {
+        //     const urlParams = new URLSearchParams(window.location.search);
+        //     let url = urlParams.get('url');
+            
+        //     // If not in URL params, check localStorage
+        //     if (!url) {
+        //         url = localStorage.getItem('lastNgrokUrl');
+        //     }
+            
+        //     // Default if nothing found
+        //     if (!url) {
+        //         url = 'https://your-ngrok-url.ngrok.io';
+        //     }
+            
+        //     return url;
+        // }
+        
+        let currentUrl = "{{ service_link }}";
+        let loadingMessageInterval;
+        
+        function startLoadingMessages() {
+            let messageIndex = 0;
+            const messageElement = document.getElementById('loading-message');
+            
+            // Clear any existing interval
+            if (loadingMessageInterval) {
+                clearInterval(loadingMessageInterval);
+            }
+            
+            // Change loading message every 1.5 seconds
+            loadingMessageInterval = setInterval(() => {
+                messageIndex = (messageIndex + 1) % loadingMessages.length;
+                messageElement.innerHTML = loadingMessages[messageIndex];
+            }, 1500);
+        }
+        
+        function loadNgrokUrl() {
+            const iframe = document.getElementById('mainIframe');
+            const loadingScreen = document.getElementById('loading-screen');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const statusSarcasm = document.getElementById('statusSarcasm');
+            
+            // Show loading screen
+            loadingScreen.classList.remove('hidden');
+            statusDot.className = 'iframe-status-dot loading';
+            statusText.textContent = 'Loading ngrok URL...';
+            statusSarcasm.textContent = '(This might take a while)';
+            
+            // Start loading messages
+            startLoadingMessages();
+            
+            // Set iframe src
+            iframe.src = currentUrl;
+            
+            // Save to localStorage
+            localStorage.setItem('lastNgrokUrl', currentUrl);
+        }
+        
+        function iframeLoaded() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const statusSarcasm = document.getElementById('statusSarcasm');
+            
+            // Clear message interval
+            if (loadingMessageInterval) {
+                clearInterval(loadingMessageInterval);
+            }
+            
+            // Hide loading screen
+            loadingScreen.classList.add('hidden');
+            statusDot.className = 'iframe-status-dot';
+            statusText.textContent = 'Connected to FrogLink';
+            statusSarcasm.textContent = '(It actually worked!)';
+            
+            console.log('✅ Iframe loaded successfully');
+        }
+        
+        function iframeError() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const statusSarcasm = document.getElementById('statusSarcasm');
+            
+            // Clear message interval
+            if (loadingMessageInterval) {
+                clearInterval(loadingMessageInterval);
+            }
+            
+            // Hide loading screen but show error
+            loadingScreen.classList.add('hidden');
+            statusDot.className = 'iframe-status-dot error';
+            statusText.textContent = 'Failed to load URL';
+            statusSarcasm.textContent = '(Blame ngrok, not us)';
+            
+            console.error('❌ Failed to load iframe');
+        }
+        
+        // Auto-load on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const statusText = document.getElementById('statusText');
+            const statusSarcasm = document.getElementById('statusSarcasm');
+            
+            if (currentUrl) {
+                statusText.textContent = 'Ready to load';
+                statusSarcasm.textContent = '(Enter your ngrok URL)';
+                loadNgrokUrl();
+            } else {
+                loadingScreen.classList.add('hidden');
+                statusText.textContent = 'No URL provided';
+                statusSarcasm.textContent = '(Add ?url=your-ngrok-url)';
+            }
+            
+            // Sarcastic console messages
+            console.log('🐸 FrogLink Iframe Viewer loaded.');
+            console.log('💀 This is not a C2. We swear.');
+            console.log('☕ Built with spite, powered by coffee.');
+            console.log('📝 Current URL: ' + currentUrl);
+            console.log('⚠️ If it breaks, blame ngrok.');
+        });
+        
+        // Handle iframe load errors with fallback
+        window.addEventListener('load', function() {
+            // If iframe hasn't loaded after 10 seconds, show error
+            setTimeout(function() {
+                const loadingScreen = document.getElementById('loading-screen');
+                if (!loadingScreen.classList.contains('hidden')) {
+                    iframeError();
+                }
+            }, 10000);
+        });
+    </script>
+</body>
+</html>
