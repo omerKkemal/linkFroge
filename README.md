@@ -1,187 +1,117 @@
-# LinkFroge – because ngrok URLs are ugly and you know it
+# FrogLink
+
+<p align="center">
+  <img src="screen_shot/logo.jpg" alt="FrogLink Logo" width="200">
+</p>
 
 ---
 
-## Behold. The Link Manager.
+## Because ngrok URLs are ugly and you know it.
 
-You know what's annoying? Ngrok URLs. They're long, ugly, and change every time you restart.  
-You know what's worse? Telling your clients "oh sorry, the URL changed again."  
+FrogLink is a link management system that gives permanent, stable URLs for dynamic services like ngrok tunnels, local development servers, and other temporary endpoints.
 
-LinkFroge fixes that. Permanent links. Dynamic updates. Less embarrassment.  
-Built for developers who are tired of explaining why their API endpoint keeps changing.
+**Basically:** You get a pretty link. It points to your ugly ngrok URL. When ngrok changes, you update it. No one notices. Magic. You're welcome.
+
+---
+
+## Showcase
+
+<div align="center">
+
+### Home Page
+<img src="screen_shot/home.png" alt="Home Page" width="700">
+
+*"Wow, this looks professional!"* – Someone who hasn't seen the code yet
+
+<br><br>
+
+### Dashboard
+<img src="screen_shot/dashboard.jpg" alt="Dashboard" width="700">
+
+*Numbers! Graphs! Stuff! You're basically a data analyst now.*
+
+<br><br>
+
+### Link Management
+<img src="screen_shot/link_management.jpg" alt="Link Management" width="700">
+
+*Create. Edit. Delete. Cry. The cycle of life.*
+
+<br><br>
+
+### Loading Animation
+<img src="screen_shot/loading.png" alt="Loading Animation" width="700">
+
+*Because waiting is fun. Especially with frogs.*
+
+</div>
 
 ---
 
 ## The Fine Print (Read It Or Don't, I'm Not Your Mom)
 
-This is a **legitimate tool**. Not a C2. Not a RAT. Not a Trojan horse.  
-It's for managing links. That's it.  
-Don't use it for illegal stuff. I don't have time for that.
+This is a **legitimate tool**. Not a C2. Not a RAT. Not a Trojan horse. I swear. Mostly.
+
+It's for managing links. That's it. Don't use it for illegal stuff. I don't have time for that. I have coffee to drink and code to break.
 
 ---
 
-## What Is This Abomination?
+## What It Does (When It's Not Crashing)
 
-LinkFroge is a link management system that gives permanent, stable URLs for dynamic services like ngrok tunnels, local development servers, and other temporary endpoints.  
-The system creates persistent links that remain active even when the underlying service URL changes, with automatic CLI updates when links expire.
-
-**Basically:** You get a pretty link. It points to your ugly ngrok URL. When ngrok changes, you update it. No one notices. Magic.
-
----
-
-## The Repository (It's A Mess)
-
-```
-LinkFroge/
-├── desktop_app/                # CLI agent (the brains)
-│   ├── linkFroge.py            # The main event
-|   └── phishing                # 
-|       ├── templates/          #
-|       └── phishing.py         #
-
-
-│
-├── webApp/                     # Flask web app (the face)
-│   ├── app.py                  # Start here
-│   ├── api/                    # The talking part
-│   ├── database/               # Where data sleeps
-│   ├── utility/                # The helpful bits
-│   ├── view/                   # The actual bits
-│   └── templates/              # HTML files (the pretty bits)
-├── requirements.txt            # Things you need
-├── .env.example                # Copy this, don't skip it
-└── README.md                   # You're reading this
-```
+- **Permanent Links** – Generate stable URLs that don't change. Revolutionary, I know.
+- **CLI Agent** – Auto-starts ngrok, detects URL changes, sends heartbeats. Like a digital heartbeat. Creepy.
+- **Web Dashboard** – User-friendly link management with statistics. Because numbers make you feel important.
+- **REST API** – Full CRUD operations with token authentication. For the nerds.
 
 ---
 
-## Features That Actually Work
+## How It Works (Try To Keep Up)
 
-### Permanent Links (The Whole Point)
-- Generate stable URLs that don't change
-- Update destination URL without changing the link
-- Perfect for ngrok, localhost, dev servers, anything dynamic
+1. CLI agent starts ngrok and monitors URL
+2. URL changes detected -> backend updated automatically
+3. Your permanent link always points to the right place
+4. Users never see the ugly URL
 
-### Desktop CLI Agent (The Magic)
-- Starts ngrok automatically (you're welcome)
-- Detects URL changes and updates backend
-- Sends heartbeats to keep links alive
-- Auto-recovery when things break
-
-### Web Dashboard (The Pretty Face)
-- User-friendly link management
-- Track all your permanent links
-- View usage statistics
-- Manage API tokens
-
-### REST API (For The Nerds)
-- Full CRUD operations
-- Token authentication
-- JSON responses
-- Programmatic link management
-
-### Email Notifications (Because You'll Forget)
-- Professional HTML emails
-- White and gold theme (fancy)
-- Link expiry warnings
-- Status change notifications
+**It's like magic. But with more code. And less rabbits.**
 
 ---
 
-## The CLI Agent – How It Works
-
-1. **Auto-Start ngrok**
-   - Downloads ngrok automatically (no effort required)
-   - Starts it on your specified port
-   - Handles process lifecycle
-
-2. **URL Detection**
-   - Monitors ngrok API for URL changes
-   - Detects when URL changes (ngrok restart)
-   - Immediately sends updated URL to backend
-
-3. **Heartbeat System**
-   - Sends periodic updates to keep link active
-   - Maintains link status in backend
-   - Prevents link expiration due to inactivity
-
-4. **Auto-Recovery**
-   - Restarts ngrok if it crashes
-   - Retries with exponential backoff
-   - Updates backend with new URL on recovery
-
----
-
-## Getting It Running (Without Crying)
-
-### 1. Clone The Thing
+## Quick Start (Without Breaking Things)
 
 ```bash
 git clone https://github.com/yourusername/linkfroge.git
 cd linkfroge
-```
-
-### 2. Hide Your Dependencies
-
-```bash
-# Linux/Mac
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Windows
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-### 3. Install The Noise
-
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure Stuff
-
-Create a `.env` file:
+Configure `.env` file:
 
 ```env
-SECRET_KEY=your-secret-key-here
+SECRET_KEY=your-secret-key
 DEBUG=True
 BASE_URL=http://localhost:5000
 DATABASE_URL=sqlite:///linkfroge.db
-
-# Email (if you want notifications)
-SMTP_LINK=smtp.gmail.com
-SMTP_PORT=587
-EMAIL=your-email@gmail.com
-EMAIL_PASSWORD=your-app-password
-
-DEFAULT_LINK_EXPIRY=30
-AUTO_UPDATE_ON_EXPIRY=True
 ```
 
-### 5. Create The Database
+Run the web app:
 
 ```bash
 cd webApp
-python -c "from app import app, db; app.app_context().push(); db.create_all()"
-```
-
-### 6. Run The Web App
-
-```bash
 python app.py
 ```
 
-### 7. Run The CLI Agent (The Real Magic)
+Run the CLI agent:
 
 ```bash
 cd desktop_app
-python linkFroge.py --port 5000 --backend https://yourdomain.com/api/service/update --service-id abc123 --token your_secure_token
+python linkFroge.py --port 5000 --backend https://yourdomain.com/api/service/update --service-id YOUR_ID --token YOUR_TOKEN
 ```
 
 ---
 
-## CLI Agent Commands (The Fun Part)
+## CLI Options (For The Brave)
 
 | Option | What It Does | Default |
 |--------|--------------|---------|
@@ -189,116 +119,47 @@ python linkFroge.py --port 5000 --backend https://yourdomain.com/api/service/upd
 | `--backend` | Backend API URL | https://yourdomain.com/api/service/update |
 | `--service-id` | Unique service identifier | abc123 |
 | `--token` | Authentication token | your_secure_token |
-| `--install-dir` | Ngrok install directory | ~/.linkforge |
-| `--no-download` | Disable auto-download | False |
 | `--verbose` | Enable verbose logging | False |
 
----
-
-## Web Dashboard (The Pretty Parts)
-
-Once logged in, you can:
-
-- **Create permanent links** – Give your ugly URLs a pretty face
-- **Manage your links** – View, edit, delete, cry
-- **Update destination URL** – When ngrok changes, update it here
-- **View statistics** – See how many times your links were clicked
-- **API Token Management** – Generate, revoke, copy
+**Pro tip:** Don't lose your token. I'm not making you another one.
 
 ---
 
-## REST API (For The Nerds)
+## Tech Stack (The Things That Make It Work)
 
-All endpoints require token authentication.
-
-| Method | Endpoint | What It Does |
-|--------|----------|--------------|
-| GET | `/api/links` | Get all your links |
-| POST | `/api/links` | Create a new link |
-| PUT | `/api/links/{slug}` | Update destination URL |
-| DELETE | `/api/links/{slug}` | Delete a link |
-| GET | `/api/links/{slug}/status` | Check if it's alive |
-| GET | `/api/links/{slug}/stats` | Get statistics |
-| POST | `/api/service/update` | Update from CLI agent |
+- **Backend:** Flask, SQLAlchemy – because reinventing the wheel is for amateurs
+- **Frontend:** TailwindCSS, Font Awesome – because looking good matters
+- **Database:** SQLite (configurable) – where data goes to sleep
+- **CLI:** Python, ngrok – the magic behind the curtain
 
 ---
 
-## Email Templates (Fancy)
+## Project Structure (The Mess)
 
-The system sends emails for:
-
-1. Welcome Email
-2. Link Created
-3. URL Updated
-4. Service Status Change
-5. Password Reset
-6. Link Accessed
-7. Link Expiring (7, 3, 1 day warnings)
-8. Link Expired
-9. Link Deleted
-10. API Token Generated
-
-White and gold theme. Because why not.
-
----
-
-## Deployment (For The Brave)
-
-### Linux/Mac (Gunicorn)
-
-```bash
-pip install gunicorn
-gunicorn -w 4 -b 0.0.0.0:8000 "webApp.app:app"
 ```
-
-### Windows (Waitress)
-
-```bash
-pip install waitress
-waitress-serve --port=8000 "webApp.app:app"
-```
-
-### Docker (If You Hate Yourself)
-
-```dockerfile
-FROM python:3.9-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-ENV FLASK_APP=webApp/app.py
-EXPOSE 5000
-CMD ["flask", "run", "--host=0.0.0.0"]
+LinkFroge/
+├── desktop_app/                # CLI agent
+│   ├── linkFroge.py            # The main event
+│   └── phishing/               # (Don't ask. Seriously.)
+│
+├── webApp/                     # Flask web app
+│   ├── app.py                  # Start here
+│   ├── api/                    # REST API (the talking part)
+│   ├── database/               # Models & DB (where data sleeps)
+│   ├── utility/                # Helpers (the helpful bits)
+│   ├── view/                   # Routes (the actual bits)
+│   └── templates/              # HTML files (the pretty bits)
+├── screenshots/                # Screenshots (you're looking at them)
+├── requirements.txt            # Things you need
+├── .env.example                # Copy this. Don't skip it.
+└── README.md                   # You're reading this
 ```
 
 ---
 
-## Troubleshooting (When It Breaks)
+## The Legal Bit
 
-**Database connection error:**
-```bash
-# Recreate database
-python -c "from webApp.app import app, db; app.app_context().push(); db.create_all()"
-```
-
-**Email sending fails:**
-- Check your SMTP credentials
-- Make sure port 587 is open
-
-**Link not redirecting:**
-- Check if it's active
-- Verify the destination URL is accessible
-- Check if it expired
-
-**Ngrok issues:**
-- Check internet connection
-- Try `--no-download` and install manually
-
----
-
-## Author
-
-**Omer Kemal** – developer, caffeine addict, link enthusiast.
+It's mine. Don't steal it. Don't misuse it. Be a decent human.
 
 ---
 
@@ -309,3 +170,4 @@ python -c "from webApp.app import app, db; app.app_context().push(); db.create_a
   <br>
   <sub>Go outside. Touch grass. Or don't. I'm not your mom.</sub>
 </p>
+
