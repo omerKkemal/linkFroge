@@ -1,755 +1,1287 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Omer Kemal · CLI Portfolio</title>
-
-    <!-- Tailwind CSS via CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
-    <!-- JetBrains Mono font -->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-    <style>
-        * {
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-        }
-
-        /* Custom scrollbar */
-        .terminal-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-        .terminal-scroll::-webkit-scrollbar-track {
-            background: #0e111a;
-        }
-        .terminal-scroll::-webkit-scrollbar-thumb {
-            background: #2a3148;
-            border-radius: 10px;
-        }
-        .terminal-scroll::-webkit-scrollbar-thumb:hover {
-            background: #3f4b6b;
-        }
-
-        /* Blinking cursor */
-        .cursor-blink {
-            display: inline-block;
-            width: 10px;
-            height: 18px;
-            background: #4cd9a0;
-            animation: blink 1s step-end infinite;
-            vertical-align: text-bottom;
-            margin-left: 2px;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        /* Fade-in animation */
-        .fade-in {
-            animation: fadeIn 0.15s ease;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(3px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Modal Scale-in */
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* Help grid */
-        .help-grid {
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 0.15rem 1.5rem;
-            margin: 0.3rem 0;
-        }
-        @media (max-width: 600px) {
-            .help-grid {
-                grid-template-columns: 1fr;
-                gap: 0.05rem;
-            }
-        }
-
-        /* Hide the actual input cursor */
-        #hiddenInput {
-            caret-color: transparent;
-            opacity: 0;
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            pointer-events: none;
-        }
-
-        /* Selection */
-        ::selection {
-            background: #2a3148;
-            color: #e4e6f0;
-        }
-
-        /* Command block hover */
-        .command-block {
-            transition: background 0.15s;
-            padding: 0.1rem 0;
-        }
-        .command-block:hover {
-            background: rgba(122, 162, 247, 0.03);
-        }
-
-        /* Output pre block */
-        .output-pre {
-            white-space: pre-wrap;
-            word-break: break-word;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            line-height: 1.6;
-            color: #c8d0e6;
-        }
-
-        /* Clickable terminal area */
-        #terminalBody {
-            cursor: text;
-        }
-
-        /* Modal styles */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.65);
-            backdrop-filter: blur(8px);
-            z-index: 999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            transition: all 0.3s ease;
-        }
-        .modal-overlay.active {
-            display: flex;
-        }
-        .modal-overlay.active .modal-content {
-            animation: scaleIn 0.2s ease-out forwards;
-        }
-        .modal-content {
-            background: #0e111a;
-            border: 1px solid #2a3148;
-            border-radius: 16px;
-            max-width: 800px;
-            width: 100%;
-            max-height: 85vh;
-            overflow: hidden;
-            box-shadow: 0 24px 80px rgba(0,0,0,0.8);
-        }
-        .modal-header {
-            background: #141824;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #1f253b;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-header h2 {
-            color: #e4e6f0;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        .modal-header h2 i {
-            color: #7aa2f7;
-            margin-right: 8px;
-        }
-        .modal-close {
-            background: none;
-            border: none;
-            color: #6d7a9e;
-            font-size: 1.4rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .modal-close:hover {
-            color: #f07178;
-            transform: rotate(90deg);
-        }
-        .modal-tabs {
-            display: flex;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: #0a0c12;
-            border-bottom: 1px solid #1a1f2e;
-            flex-wrap: wrap;
-        }
-        .modal-tab {
-            background: transparent;
-            border: 1px solid #1f253b;
-            color: #6d7a9e;
-            padding: 0.4rem 1.2rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .modal-tab:hover {
-            border-color: #3f4b6b;
-            color: #b9c2d9;
-        }
-        .modal-tab.active {
-            background: #1a2236;
-            border-color: #7aa2f7;
-            color: #7aa2f7;
-        }
-        .modal-body {
-            padding: 1.5rem;
-            overflow-y: auto;
-            max-height: 55vh;
-        }
-        .modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-        .modal-body::-webkit-scrollbar-thumb {
-            background: #2a3148;
-            border-radius: 10px;
-        }
-        .modal-body .project-title {
-            color: #e4e6f0;
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-        }
-        .modal-body .project-tech {
-            color: #6d7a9e;
-            font-size: 0.85rem;
-            margin-bottom: 0.8rem;
-        }
-        .modal-body .project-desc {
-            color: #b9c2d9;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-        .modal-body .project-badges {
-            margin-bottom: 1.2rem;
-        }
-        .modal-body .project-badges span {
-            display: inline-block;
-            background: #1a2236;
-            padding: 0.2rem 0.8rem;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            color: #7aa2f7;
-            margin-right: 6px;
-        }
-        .modal-body .command-section {
-            margin-top: 1.5rem;
-            border-top: 1px solid #1f253b;
-            padding-top: 1rem;
-        }
-        .modal-body .command-section h3 {
-            color: #4cd9a0;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 0.8rem;
-        }
-        .modal-body .command-section .cmd-item {
-            display: flex;
-            gap: 0.5rem 1.5rem;
-            padding: 0.4rem 0;
-            border-bottom: 1px solid #141824;
-            flex-wrap: wrap;
-        }
-        .modal-body .command-section .cmd-item .cmd {
-            color: #7aa2f7;
-            font-weight: 500;
-            font-size: 0.8rem;
-            min-width: 140px;
-        }
-        .modal-body .command-section .cmd-item .desc {
-            color: #b9c2d9;
-            font-size: 0.8rem;
-            flex: 1;
-        }
-        .modal-body .version-list {
-            margin-top: 0.5rem;
-        }
-        .modal-body .version-list .ver-item {
-            display: flex;
-            gap: 1rem;
-            padding: 0.4rem 0;
-            font-size: 0.8rem;
-            border-bottom: 1px solid #0d111e;
-        }
-        .modal-body .version-list .ver-item .ver {
-            color: #7aa2f7;
-            font-weight: 500;
-            min-width: 70px;
-        }
-        .modal-body .version-list .ver-item .change {
-            color: #b9c2d9;
-        }
-
-        /* Terminal container - FIXED: cursor line stays at bottom */
-        #terminalBody {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 12rem);
-            overflow-y: auto;
-        }
-        #terminalContent {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        #commandHistory {
-            flex: 1;
-        }
-        #currentLine {
-            flex-shrink: 0;
-            margin-top: 0.5rem;
-            padding-top: 0.3rem;
-            min-height: 2rem;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Omer Kemal · CLI Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── ROOT: all theme-switchable via JS ── */
+    :root {
+      --g:   #00ffa3;  --gA: rgba(0,255,163,0.5); --gB: rgba(0,255,163,0.18);
+      --gS:  rgba(0,255,163,1); --gS2: rgba(0,255,163,0.5);
+      --b:   #5d8af8;  --r:  #ff4d6a;  --y: #ffb347;
+      --bg0: #05080f;  --bg1: #080c16; --bg2: #0c1020; --bg3: #090d1a;
+      --bd:  #181f3a;  --bd2: #243060;
+      --t:   #b0c4e8;  --td:  #3d4f72; --tb: #dce8ff;
+    }
+    * { font-family:'JetBrains Mono',monospace; box-sizing:border-box; margin:0; padding:0; }
+    body {
+      background:var(--bg0);
+      background-image:
+        radial-gradient(ellipse at 15% 60%, rgba(0,80,255,.05) 0%,transparent 50%),
+        radial-gradient(ellipse at 85% 15%, rgba(0,255,163,.025) 0%,transparent 40%);
+      min-height:100vh;
+    }
+    /* ── SIGNATURE: CRT scanlines + vignette ── */
+    body::before {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+      background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
+    }
+    body::after {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:9998;
+      background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.55) 100%);
+    }
+    /* ── PHOSPHOR / CURSOR ── */
+    .glow  { color:var(--g); text-shadow:0 0 8px var(--gA),0 0 22px var(--gB); }
+    .bglow { color:var(--b); text-shadow:0 0 8px rgba(93,138,248,.4); }
+    .cursor-blink {
+      display:inline-block; width:8px; height:15px; flex-shrink:0;
+      background:var(--g); box-shadow:0 0 8px var(--gS),0 0 20px var(--gS2);
+      animation:blink 1s step-end infinite; vertical-align:text-bottom; margin-left:1px;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    /* ── TRANSITIONS ── */
+    :root { transition:--g .3s,--gA .3s,--gB .3s,--gS .3s,--gS2 .3s; }
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:var(--bg0); }
+    ::-webkit-scrollbar-thumb { background:var(--bd2); border-radius:4px; }
+    /* ── ANIMATIONS ── */
+    .fade-in { animation:fadeIn .1s ease both; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(2px)} to{opacity:1;transform:translateY(0)} }
+    .boot-in { animation:bootIn .08s ease both; }
+    @keyframes bootIn { from{opacity:0} to{opacity:1} }
+    .spin { animation:spin .8s linear infinite; display:inline-block; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    /* ── LAYOUT ── */
+    #matrixCanvas { position:fixed;top:0;left:0;width:100%;height:100%;z-index:997;display:none; }
+    #hiddenInput  { position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;caret-color:transparent; }
+    #terminalBody {
+      cursor:text; display:flex; flex-direction:column;
+      height:calc(100vh - 9.2rem); overflow-y:auto;
+    }
+    #terminalContent { flex:1; display:flex; flex-direction:column; }
+    #commandHistory  { flex:1; }
+    /* ── SUGGESTION STRIP ── */
+    #suggStrip {
+      display:none; flex-wrap:wrap; gap:.25rem; align-items:center;
+      padding:.25rem .4rem; margin:.15rem 0;
+      border-top:1px dashed var(--bd); font-size:.59rem;
+    }
+    .sugg-chip {
+      color:var(--g); cursor:pointer; padding:1px 8px;
+      border:1px solid var(--bd2); border-radius:3px;
+      background:var(--bg3); transition:.15s;
+    }
+    .sugg-chip:hover { border-color:var(--g); background:var(--bg2); }
+    #currentLine {
+      flex-shrink:0; margin-top:.4rem; padding-top:.28rem;
+      border-top:1px solid var(--bd); min-height:1.8rem;
+      display:flex; align-items:center; gap:4px; flex-wrap:nowrap;
+    }
+    /* ── OUTPUT ── */
+    .output-pre { white-space:pre-wrap;word-break:break-word;font-size:.72rem;line-height:1.75;color:var(--t); }
+    .out-block  { margin:.2rem 0 .2rem .3rem;padding:.5rem .85rem;background:var(--bg3);border-left:2px solid var(--bd2);border-radius:0 5px 5px 0; }
+    .hgrid { display:grid;grid-template-columns:minmax(170px,auto) 1fr minmax(70px,auto);gap:.22rem 1rem;align-items:start; }
+    @media(max-width:560px){ .hgrid{grid-template-columns:1fr;gap:.06rem;} }
+    /* ── ASCII + BARS ── */
+    .ascii { color:var(--g);text-shadow:0 0 6px var(--gB);font-size:.56rem;line-height:1.12;letter-spacing:.04em; }
+    @media(max-width:500px){ .ascii{font-size:.38rem;} }
+    .pbar-f { color:var(--g);text-shadow:0 0 4px var(--gA);letter-spacing:-1.5px; }
+    .pbar-e { color:var(--bd2);letter-spacing:-1.5px; }
+    /* ── CARDS + TAGS ── */
+    .proj-card { border:1px solid var(--bd);border-radius:7px;padding:.55rem .75rem;margin:.3rem 0;background:var(--bg2);transition:border-color .2s;cursor:pointer; }
+    .proj-card:hover { border-color:var(--bd2); }
+    .tag { display:inline-block;background:rgba(93,138,248,.08);border:1px solid rgba(93,138,248,.2);color:#7aabff;padding:0 .5rem;border-radius:3px;font-size:.58rem;margin-right:3px; }
+    kbd { background:rgba(255,255,255,.05);border:1px solid var(--bd2);padding:1px 5px;border-radius:3px;font-size:.58rem;color:var(--t); }
+    /* ── NEOFETCH GRID ── */
+    .nf-grid { display:grid;grid-template-columns:auto 1fr;gap:.22rem .75rem;font-size:.7rem; }
+    .nf-key   { color:var(--g);font-weight:600;white-space:nowrap; }
+    .nf-val   { color:var(--t); }
+    /* ── GIT LOG ── */
+    .gl-commit { font-size:.7rem;padding:.2rem 0; border-bottom:1px solid var(--bd); }
+    .gl-hash   { color:var(--y); }
+    .gl-ref    { color:var(--b);font-size:.62rem; }
+    .gl-msg    { color:var(--tb); }
+    .gl-meta   { color:var(--td);font-size:.62rem; }
+    /* ── PING ── */
+    .ping-line { font-size:.7rem;padding:.04rem 0; }
+    /* ── MODAL ── */
+    .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.92);backdrop-filter:blur(16px);z-index:999;display:none;align-items:center;justify-content:center;padding:1rem; }
+    .modal-overlay.active { display:flex; }
+    .modal-content  { background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;max-width:830px;width:100%;max-height:88vh;overflow:hidden;box-shadow:0 0 70px rgba(0,0,0,.95); }
+    .modal-header   { background:var(--bg3);padding:.75rem 1.3rem;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center; }
+    .modal-header h2{ color:var(--tb);font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:.5rem; }
+    .modal-header h2 i { color:var(--b); }
+    .modal-close    { background:none;border:none;color:var(--td);font-size:1.1rem;cursor:pointer;transition:.2s;padding:4px;line-height:1; }
+    .modal-close:hover { color:var(--r);transform:rotate(90deg); }
+    .modal-tabs     { display:flex;gap:.35rem;padding:.5rem 1.3rem;background:var(--bg0);border-bottom:1px solid var(--bd);flex-wrap:wrap; }
+    .modal-tab      { background:transparent;border:1px solid var(--bd);color:var(--td);padding:.26rem .9rem;border-radius:20px;font-size:.61rem;font-family:'JetBrains Mono',monospace;cursor:pointer;transition:.2s; }
+    .modal-tab:hover{ border-color:var(--bd2);color:var(--t); }
+    .modal-tab.active{ background:rgba(93,138,248,.1);border-color:var(--b);color:var(--b); }
+    .modal-body     { padding:1.3rem;overflow-y:auto;max-height:58vh; }
+    .modal-body::-webkit-scrollbar { width:4px; }
+    .modal-body::-webkit-scrollbar-thumb { background:var(--bd2);border-radius:4px; }
+    .m-title { color:var(--tb);font-size:1.05rem;font-weight:600;margin-bottom:.25rem; }
+    .m-tech  { color:var(--td);font-size:.72rem;margin-bottom:.7rem; }
+    .m-desc  { color:var(--t);font-size:.82rem;line-height:1.75;margin-bottom:.9rem; }
+    .m-sh    { color:var(--g);font-size:.74rem;font-weight:600;margin:1rem 0 .4rem;padding-bottom:.3rem;border-bottom:1px solid var(--bd); }
+    .m-cmd   { display:flex;gap:.5rem 1.2rem;padding:.3rem 0;border-bottom:1px solid rgba(24,31,58,.4);flex-wrap:wrap;align-items:flex-start; }
+    .m-cmd .c{ color:var(--b);font-weight:500;font-size:.69rem;min-width:160px; }
+    .m-cmd .d{ color:var(--t);font-size:.69rem;flex:1; }
+    .m-ver   { display:flex;gap:1rem;padding:.22rem 0;font-size:.69rem;border-bottom:1px solid rgba(24,31,58,.3); }
+    .m-ver .v{ color:var(--g);font-weight:500;min-width:65px; }
+    .m-ver .ch{ color:var(--t); }
+    ::selection { background:rgba(93,138,248,.22);color:var(--tb); }
+  </style>
 </head>
-<body class="bg-[#0a0c12] text-[#c8d0e6] min-h-screen flex items-center justify-center p-3 md:p-6">
+<body class="flex items-start justify-center p-3 md:p-5">
 
-    <!-- MODAL -->
-    <div id="projectModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-code-branch"></i> <span id="modalTitle">Project Details</span></h2>
-                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-tabs" id="modalTabs"></div>
-            <div class="modal-body" id="modalBody"></div>
-        </div>
+  <canvas id="matrixCanvas"></canvas>
+
+  <!-- MODAL -->
+  <div id="projectModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-code-branch"></i><span id="modalTitle">Project Details</span></h2>
+        <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-tabs" id="modalTabs"></div>
+      <div class="modal-body"  id="modalBody"></div>
     </div>
+  </div>
 
-    <!-- TERMINAL CONTAINER -->
-    <div class="max-w-5xl w-full">
+  <!-- TERMINAL -->
+  <div class="max-w-4xl w-full">
+    <div style="background:var(--bg1);border:1px solid var(--bd);border-radius:14px;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.85);">
 
-        <div class="bg-[#0e111a] border border-[#1f253b] rounded-2xl shadow-2xl overflow-hidden shadow-[#00000080]">
-
-            <!-- TERMINAL HEADER -->
-            <div class="bg-[#141824] px-4 py-3 flex flex-wrap items-center justify-between border-b border-[#1f253b] gap-2">
-                <div class="flex items-center gap-3">
-                    <div class="flex gap-2">
-                        <div class="w-3.5 h-3.5 rounded-full bg-rose-500 hover:bg-rose-400 transition-colors cursor-pointer"></div>
-                        <div class="w-3.5 h-3.5 rounded-full bg-amber-500 hover:bg-amber-400 transition-colors cursor-pointer"></div>
-                        <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 transition-colors cursor-pointer"></div>
-                    </div>
-                    <div class="text-xs font-mono text-[#6d7a9e] ml-3">
-                        <i class="fas fa-terminal text-[#4cd9a0] mr-2"></i>
-                        CLI Portfolio v2.0
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-1.5">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                        <span class="text-[10px] text-emerald-400 font-mono tracking-wider">READY</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TERMINAL BODY -->
-            <div id="terminalBody" class="bg-[#0a0c12] p-4 md:p-6 font-mono text-sm terminal-scroll relative" onclick="focusInput()">
-
-                <input type="text" id="hiddenInput" autofocus autocomplete="off" spellcheck="false" />
-
-                <div id="terminalContent">
-                    <!-- Welcome Message -->
-                    <div id="welcomeMessage" class="mb-4 p-4 md:p-5 bg-[#0d111e] rounded-lg border border-[#1f253b]">
-                        <div class="text-emerald-400 text-base md:text-lg font-bold mb-2 flex items-center gap-2">
-                            <i class="fas fa-terminal"></i> Omer Kemal · CLI Portfolio
-                        </div>
-                        <div class="text-[#b9c2d9] text-xs md:text-sm mb-3">
-                            Full-Stack Developer &amp; Security Engineer
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] md:text-xs">
-                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">help</span> - Show available commands</div>
-                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">about</span> - About me</div>
-                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">projects</span> - List all projects</div>
-                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">project &lt;name&gt;</span> - Show project details</div>
-                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">skills</span> - Technical skills</div>
-                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">version &lt;project&gt;</span> - Version history</div>
-                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">clear</span> - Clear terminal</div>
-                            <div class="text-[#6d7a9e]"><span class="text-[#7aa2f7]">exit</span> - Exit CLI</div>
-                        </div>
-                    </div>
-
-                    <!-- Command History -->
-                    <div id="commandHistory"></div>
-
-                    <!-- Current Command Line (stays at bottom) -->
-                    <div id="currentLine" class="flex items-center gap-2">
-                        <span class="text-emerald-400 font-bold whitespace-nowrap">omer@portfolio:~$</span>
-                        <span id="currentCommandDisplay" class="text-emerald-400"></span>
-                        <span class="cursor-blink"></span>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- TERMINAL FOOTER -->
-            <div class="bg-[#0e111a] px-4 py-2 border-t border-[#1f253b] flex flex-wrap justify-between items-center text-[10px] text-[#6d7a9e]">
-                <div>
-                    <i class="fas fa-circle text-emerald-500 text-[6px] mr-2"></i>
-                    SECURE CONNECTION
-                </div>
-                <div>
-                    <i class="fas fa-copyright mr-1"></i>
-                    2026 Omer Kemal
-                </div>
-                <div class="hidden md:block">
-                    <i class="fas fa-code mr-1"></i>
-                    Python · Go · Java · PHP · Node
-                </div>
-            </div>
-
+      <!-- TITLEBAR -->
+      <div style="background:var(--bg2);border-bottom:1px solid var(--bd);padding:.6rem 1rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem;">
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <div style="display:flex;gap:6px;">
+            <div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;box-shadow:0 0 5px rgba(255,95,87,.6);"></div>
+            <div style="width:12px;height:12px;border-radius:50%;background:#febc2e;box-shadow:0 0 5px rgba(254,188,46,.6);"></div>
+            <div style="width:12px;height:12px;border-radius:50%;background:#28c840;box-shadow:0 0 5px rgba(40,200,64,.6);"></div>
+          </div>
+          <span style="font-size:.67rem;color:var(--td);">
+            <i class="fas fa-terminal" style="color:var(--g);margin-right:5px;text-shadow:0 0 6px var(--gA);"></i>
+            omerkemal<span style="color:var(--td);">@</span>portfolio — <span style="color:var(--b);">~</span> — bash
+          </span>
         </div>
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <span id="themeLabel" style="font-size:.58rem;color:var(--td);padding:1px 6px;border:1px solid var(--bd);border-radius:3px;">theme:green</span>
+          <span id="liveClock" style="font-size:.62rem;color:var(--td);font-variant-numeric:tabular-nums;min-width:64px;text-align:right;"></span>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 7px var(--gS);animation:blink 2.2s ease-in-out infinite;"></div>
+            <span class="glow" style="font-size:.59rem;">ONLINE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div id="terminalBody" style="background:var(--bg0);padding:.8rem .9rem .4rem;font-size:.73rem;line-height:1.65;position:relative;">
+        <input type="text" id="hiddenInput" autofocus autocomplete="off" spellcheck="false" />
+        <div id="terminalContent">
+          <div id="bootScreen"></div>
+          <div id="commandHistory"></div>
+          <!-- suggestion strip (appears while typing) -->
+          <div id="suggStrip"></div>
+          <div id="currentLine">
+            <span class="glow" style="font-weight:700;white-space:nowrap;font-size:.71rem;">omerkemal<span style="color:var(--td);">@</span>portfolio</span>
+            <span style="color:var(--td);">:</span>
+            <span class="bglow">~</span>
+            <span style="color:var(--td);">$&nbsp;</span>
+            <span style="display:flex;align-items:center;flex:1;min-width:0;">
+              <span id="cmdDisplay"   style="color:var(--tb);white-space:pre;"></span>
+              <span id="ghostDisplay" style="color:var(--td);white-space:pre;opacity:.4;"></span>
+              <span class="cursor-blink"></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATUS BAR -->
+      <div style="background:var(--bg2);border-top:1px solid var(--bd);padding:.32rem 1rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.5rem;font-size:.59rem;color:var(--td);">
+        <span>
+          <i class="fas fa-circle" style="color:var(--g);font-size:4px;vertical-align:middle;margin-right:4px;"></i>
+          READY · <kbd>Tab</kbd> complete · <kbd>↑↓</kbd> history · <kbd>Ctrl+L</kbd> clear · <kbd>Ctrl+C</kbd> cancel
+        </span>
+        <span id="uptimeDisp" style="font-variant-numeric:tabular-nums;">UP 0m00s</span>
+        <span><i class="fas fa-code" style="margin-right:3px;"></i>Python · Go · Java · PHP · Node</span>
+      </div>
 
     </div>
+  </div>
 
-    <script>
-        // ============================================================
-        //  DATA
-        // ============================================================
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════════════════════
+const PROJECTS = {
+  'phantomgate': {
+    title:'PhantomGate C2', tech:'Python · Flask · SQLAlchemy · AES-256',
+    desc:'Multi-purpose C2 framework evolved from a basic reverse shell. Features AES-encrypted remote command execution, adaptive UDP flood, SQLite persistence, code injection, and a full Flask web panel with AI-powered payload generation.',
+    badges:['c2','botnet','injection','fullstack'],
+    commands:[
+      {cmd:'bot start <thread_id>',   desc:'Start a botnet attack (UDP flood, brute force, etc.)'},
+      {cmd:'bot stop <thread_id>',    desc:'Stop a running botnet attack'},
+      {cmd:'db_info',                 desc:'Display database targets and permissions'},
+      {cmd:'sys_info',                desc:'System info: OS, CPU, memory, network'},
+      {cmd:'server <IP:PORT>',        desc:'Start HTTP server on target machine'},
+      {cmd:'download <file_path>',    desc:'Download file from target machine'},
+      {cmd:'l-host <command>',        desc:'Execute command on attacker machine'},
+      {cmd:'target-ip',               desc:'Display target IP address'},
+      {cmd:'output_save <True|False>',desc:'Enable/disable saving outputs to file'},
+    ],
+    tabs:['overview','netcat','reverse-shell','phantomgate'],
+  },
+  'ghosttrigger': {
+    title:'GhostTrigger', tech:'Python · sockets · threading · bcrypt',
+    desc:'A network utility built from scratch with low-level socket programming, bcrypt authentication, and concurrent connection management. Built to understand networking from first principles.',
+    badges:['network','utility'],
+    commands:[
+      {cmd:'scan <host>',           desc:'Scan host for open ports'},
+      {cmd:'connect <host> <port>', desc:'Connect to a remote host'},
+      {cmd:'listen <port>',         desc:'Listen for incoming connections'},
+      {cmd:'send <data>',           desc:'Send data over current connection'},
+      {cmd:'auth <user> <pass>',    desc:'Authenticate with remote host'},
+      {cmd:'status',                desc:'Display connection status'},
+      {cmd:'disconnect',            desc:'Disconnect current session'},
+    ],
+  },
+  'pslms': {
+    title:'pslms', tech:'Flask · SQLite · Jinja2',
+    desc:'Primary school management system handling student records, attendance, and grades. Clean MVC architecture with teacher/admin dashboards. Deployed in real school environments.',
+    badges:['fullstack','flask','education'],
+    commands:[
+      {cmd:'student add <name> <grade>', desc:'Add a new student'},
+      {cmd:'student list',               desc:'List all students'},
+      {cmd:'student find <name>',        desc:'Find student by name'},
+      {cmd:'attendance <date>',          desc:'Mark attendance for a date'},
+      {cmd:'grades <student_id>',        desc:'View student grades'},
+      {cmd:'export csv',                 desc:'Export data to CSV'},
+    ],
+  },
+  'post-app': {
+    title:'post-app', tech:'Laravel · PHP · MySQL',
+    desc:'Blog application with MVC architecture, authentication, commenting, and responsive UI. Like WordPress but without the existential dread and 300 unnecessary plugins.',
+    badges:['laravel','php','fullstack'],
+    commands:[
+      {cmd:'post create <title>', desc:'Create a new blog post'},
+      {cmd:'post list',           desc:'List all blog posts'},
+      {cmd:'post show <id>',      desc:'Show a specific post'},
+      {cmd:'post update <id>',    desc:'Update a post'},
+      {cmd:'post delete <id>',    desc:'Delete a post'},
+      {cmd:'user create <email>', desc:'Create a new user'},
+      {cmd:'comment add <post_id>',desc:'Add a comment to a post'},
+    ],
+  },
+  'editer': {
+    title:'editer.py', tech:'Python · curses',
+    desc:'A lightweight terminal code editor for people who hate dependencies. Minimal, fast, built from scratch. No Electron, no Node modules, no 200 MB downloads.',
+    badges:['editor','python','cli'],
+    commands:[
+      {cmd:'open <file>',        desc:'Open a file for editing'},
+      {cmd:'save',               desc:'Save current file'},
+      {cmd:'save as <path>',     desc:'Save with a new name'},
+      {cmd:'find <text>',        desc:'Find text in file'},
+      {cmd:'replace <old> <new>',desc:'Replace text in file'},
+      {cmd:'line <number>',      desc:'Go to a specific line'},
+      {cmd:'syntax <lang>',      desc:'Set syntax highlighting'},
+    ],
+  },
+  'flet-apps': {
+    title:'flet-apps', tech:'Flet · Python',
+    desc:'Collection of cross-platform mobile apps built with Flet. Write once in Python, deploy to Android, iOS, and Web.',
+    badges:['mobile','flet','cross-platform'],
+    commands:[
+      {cmd:'build android',     desc:'Build for Android'},
+      {cmd:'build ios',         desc:'Build for iOS'},
+      {cmd:'build web',         desc:'Build for Web'},
+      {cmd:'run',               desc:'Run locally'},
+      {cmd:'deploy <platform>', desc:'Deploy to platform'},
+      {cmd:'test',              desc:'Run tests'},
+    ],
+  },
+};
 
-        const PROJECTS = {
-            'phantomgate': {
-                title: 'PhantomGate C2',
-                tech: 'Python · Flask · SQLAlchemy · AES',
-                desc: 'Multi-purpose remote administration tool and botnet utility. Features remote command execution, UDP flood, SQLite persistence, code injection, and a full web panel. Started as a reverse shell, evolved into a modern C2 framework.',
-                badges: ['c2', 'botnet', 'injection', 'fullstack'],
-                commands: [
-                    { cmd: 'bot start <thread_id>', desc: 'Start a botnet attack (UDP flood, brute force, etc.)' },
-                    { cmd: 'bot stop <thread_id>', desc: 'Stop a running botnet attack' },
-                    { cmd: 'db_info', desc: 'Display database information about targets and permissions' },
-                    { cmd: 'sys_info', desc: 'Display system information (OS, CPU, memory, network)' },
-                    { cmd: 'server <IP:PORT>', desc: 'Start an HTTP server on the target machine' },
-                    { cmd: 'download <file_path>', desc: 'Download a file from the target machine' }
-                ],
-                tabs: ['overview', 'netcat', 'reverse-shell', 'phantomgate']
-            },
-            'ghosttrigger': {
-                title: 'GhostTrigger',
-                tech: 'Python · sockets · threading · bcrypt',
-                desc: 'A network utility that does things. Some of them are even intentional. Built from scratch with low-level networking, authentication, and concurrency.',
-                badges: ['network', 'utility'],
-                commands: [
-                    { cmd: 'scan <host>', desc: 'Scan a host for open ports' },
-                    { cmd: 'connect <host> <port>', desc: 'Connect to a remote host' }
-                ]
-            },
-            'pslms': {
-                title: 'pslms',
-                tech: 'Flask · SQLite',
-                desc: 'Primary school management system. Handles student records, attendance, and grades.',
-                badges: ['fullstack', 'flask'],
-                commands: [
-                    { cmd: 'student add <name> <grade>', desc: 'Add a new student' },
-                    { cmd: 'student list', desc: 'List all students' }
-                ]
-            },
-            'post-app': {
-                title: 'post-app',
-                tech: 'Laravel · PHP · MySQL',
-                desc: 'A blog application with MVC architecture, authentication, and responsive UI.',
-                badges: ['laravel', 'php'],
-                commands: [
-                    { cmd: 'post create <title>', desc: 'Create a new blog post' },
-                    { cmd: 'post list', desc: 'List all blog posts' }
-                ]
-            }
-        };
+const VERSIONS = {
+  'reverse-shell':[
+    {ver:'v0.1',  change:'Basic reverse shell with file redirection via os.system()'},
+    {ver:'v0.3',  change:'Subprocess integration, cd support, colorized output'},
+    {ver:'v0.4',  change:'File transfer with dedicated send command'},
+    {ver:'v0.5',  change:'HTTP server integration with threading'},
+    {ver:'v0.6',  change:'Improved command parsing and error handling'},
+    {ver:'v0.7',  change:'Colorized output with ANSI codes'},
+    {ver:'v0.8',  change:'Dedicated file transfer socket (port - 1)'},
+    {ver:'v0.9',  change:'Dynamic working directory tracking'},
+    {ver:'v0.9.3',change:'Cross-platform compatibility for Windows/Linux'},
+    {ver:'v1.5',  change:'API integration for connection details and auto-reconnection'},
+  ],
+  'netcat':[
+    {ver:'v0.1',  change:'Basic socket listener with command execution'},
+    {ver:'v0.3',  change:'QPython3 Android support and IP display in prompt'},
+    {ver:'v0.4',  change:'l-host command, send command, interrupt handling'},
+    {ver:'v0.5',  change:'Server hosting capability, Android file path support'},
+    {ver:'v0.6',  change:'Code refactoring, functions moved outside main loop'},
+    {ver:'v0.7',  change:'Full ANSI color support for prompts and outputs'},
+    {ver:'v0.7.8',change:'Termux environment support, terminal clearing on connect'},
+    {ver:'v0.8.1',change:'tqdm progress bar for file transfers'},
+    {ver:'v0.8.2',change:'Output saving functionality, random welcome messages'},
+    {ver:'v0.8.3',change:'Dynamic directory tracking in prompt, navigation history'},
+    {ver:'v0.9',  change:'Receives PWD from target on connection, dynamic prompt'},
+    {ver:'v0.9.3',change:'Improved progress bar accuracy, file size in MB'},
+    {ver:'v0.9.4',change:'Expanded help system with -h and --help flags'},
+    {ver:'v0.9.5',change:'Structured output logging with file organization'},
+    {ver:'v1.5',  change:'CLI argument support: --download, --port-scan, --udp-flood'},
+  ],
+  'phantomgate':[
+    {ver:'v1.0',change:'Initial release — multi-threaded agent with AES-256 encryption'},
+    {ver:'v1.1',change:'SQLite database for local state management'},
+    {ver:'v1.2',change:'UDP flood with adaptive rate control'},
+    {ver:'v1.3',change:'Cross-platform: Windows, Linux, Android'},
+    {ver:'v1.4',change:'VM/container detection to evade analysis environments'},
+    {ver:'v1.5',change:'Code injection and remote execution capability'},
+    {ver:'v1.6',change:'Built-in HTTP server for in-session file sharing'},
+    {ver:'v1.7',change:'Full Flask web panel with session authentication'},
+    {ver:'v1.8',change:'AI-powered payload generation via OpenRouter'},
+    {ver:'v1.9',change:'Web terminal, real-time execution via WebSockets'},
+  ],
+};
 
-        const VERSION_DATA = {
-            'phantomgate': [
-                { ver: 'v1.0', change: 'Initial release - Multi-threaded agent architecture with AES encryption' },
-                { ver: 'v1.5', change: 'Code injection and execution capability' },
-                { ver: 'v1.7', change: 'Full Flask web panel with authentication' },
-                { ver: 'v1.9', change: 'Web terminal and real-time command execution' }
-            ]
-        };
+const GIT_LOG = [
+  {hash:'a3f7b2c',refs:'HEAD → main, tag: v1.9', date:'Mon Jul 21 2026', author:'omerkemal',
+   msg:'feat(ai): OpenRouter integration for AI-powered payload generation'},
+  {hash:'9e1c4d8',refs:'',                        date:'Fri Jun 13 2026', author:'omerkemal',
+   msg:'feat(panel): Flask web terminal with real-time WebSocket exec'},
+  {hash:'7a2bc3e',refs:'',                        date:'Wed Apr 30 2026', author:'omerkemal',
+   msg:'feat(auth): session authentication and rate limiting for panel'},
+  {hash:'4d8e1f0',refs:'',                        date:'Thu Mar 6 2026',  author:'omerkemal',
+   msg:'feat(inject): code injection module with remote exec capability'},
+  {hash:'3c7a9b1',refs:'',                        date:'Sat Feb 1 2026',  author:'omerkemal',
+   msg:'security: VM and container detection to evade sandboxes'},
+  {hash:'2b5f8c4',refs:'',                        date:'Mon Dec 16 2025', author:'omerkemal',
+   msg:'feat(http): built-in HTTP server for in-session file sharing'},
+  {hash:'1a3e7d9',refs:'tag: v1.2',               date:'Fri Oct 10 2025', author:'omerkemal',
+   msg:'feat(flood): adaptive UDP flood with thread management'},
+  {hash:'0d9f2a6',refs:'',                        date:'Sun Aug 3 2025',  author:'omerkemal',
+   msg:'chore: SQLite state management with SQLAlchemy ORM'},
+  {hash:'9b1c5e3',refs:'tag: v1.0',               date:'Tue Jun 17 2025', author:'omerkemal',
+   msg:'init: PhantomGate C2 — multi-threaded AES-256 encrypted agent'},
+  {hash:'5e8a2f1',refs:'tag: reverse-shell-v1.5', date:'Mon Apr 28 2025', author:'omerkemal',
+   msg:'feat: API integration and auto-reconnect for reverse shell'},
+  {hash:'3d6b4c8',refs:'',                        date:'Thu Jan 9 2025',  author:'omerkemal',
+   msg:'feat: cross-platform compatibility (Windows/Linux/Termux)'},
+  {hash:'1f4a7e0',refs:'',                        date:'Fri Sep 5 2024',  author:'omerkemal',
+   msg:'feat: file transfer with tqdm progress bar and dedicated socket'},
+  {hash:'8c2d5b7',refs:'',                        date:'Tue Apr 1 2024',  author:'omerkemal',
+   msg:'feat: HTTP server integration and threading'},
+  {hash:'6e9f3a4',refs:'tag: netcat-v0.1',        date:'Mon Jan 15 2024', author:'omerkemal',
+   msg:'feat: basic socket listener with command execution'},
+  {hash:'4b7c1e8',refs:'tag: revc_shell-v0.1',    date:'Mon Sep 11 2023', author:'omerkemal',
+   msg:'init: reverse shell with os.system() file redirection'},
+];
 
-        // ============================================================
-        //  STATE & REFS
-        // ============================================================
+const FORTUNES = [
+  '"Any fool can write code that a computer can understand. Good programmers write code that humans can understand." — Martin Fowler',
+  '"First, solve the problem. Then, write the code." — John Johnson',
+  '"Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it." — Brian Kernighan',
+  '"The best error message is the one that never shows up." — Thomas Fuchs',
+  '"If it works, don\'t touch it." — Ancient developer proverb',
+  '"Security is a process, not a product." — Bruce Schneier',
+  '"There are only two hard things in computer science: cache invalidation, naming things, and off-by-one errors."',
+  '"Code never lies. Comments sometimes do." — Ron Jeffries',
+  '"The most dangerous phrase in the language is: \'We\'ve always done it this way.\'" — Grace Hopper',
+  '"Make it work, make it right, make it fast." — Kent Beck',
+];
 
-        let history = [];
-        let historyIndex = -1;
+const THEMES = {
+  green: {g:'#00ffa3', gA:'rgba(0,255,163,0.5)',  gB:'rgba(0,255,163,0.18)',  gS:'rgba(0,255,163,1)',  gS2:'rgba(0,255,163,0.5)'},
+  amber: {g:'#ffaa44', gA:'rgba(255,170,68,0.5)',  gB:'rgba(255,170,68,0.18)', gS:'rgba(255,170,68,1)', gS2:'rgba(255,170,68,0.5)'},
+  blue:  {g:'#5dfeff', gA:'rgba(93,254,255,0.5)',  gB:'rgba(93,254,255,0.18)', gS:'rgba(93,254,255,1)', gS2:'rgba(93,254,255,0.5)'},
+  red:   {g:'#ff6688', gA:'rgba(255,102,136,0.5)', gB:'rgba(255,102,136,0.18)',gS:'rgba(255,102,136,1)',gS2:'rgba(255,102,136,0.5)'},
+};
 
-        const terminalBody = document.getElementById('terminalBody');
-        const commandHistory = document.getElementById('commandHistory');
-        const currentCommandDisplay = document.getElementById('currentCommandDisplay');
-        const hiddenInput = document.getElementById('hiddenInput');
-        const modal = document.getElementById('projectModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalTabs = document.getElementById('modalTabs');
-        const modalBody = document.getElementById('modalBody');
-        const modalClose = document.getElementById('modalClose');
+const ALL_CMDS = [
+  'help','about','projects','project','skills','experience',
+  'contact','social','version','whoami','date','ls','echo',
+  'clear','exit','matrix','uname','man','neofetch','ping',
+  'git','fortune','sudo','hack','history','open','theme','stat',
+];
 
-        // ============================================================
-        //  CORE FUNCTIONS
-        // ============================================================
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let cmdHist=[], histIdx=-1, cur='', isProcessing=false,
+    matRunning=false, matTimer=null, activeTheme='green',
+    bootMs=Date.now();
 
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
+// ═══════════════════════════════════════════════════════════════
+//  DOM REFS
+// ═══════════════════════════════════════════════════════════════
+const $body      = document.getElementById('terminalBody');
+const $hist      = document.getElementById('commandHistory');
+const $disp      = document.getElementById('cmdDisplay');
+const $ghost     = document.getElementById('ghostDisplay');
+const $inp       = document.getElementById('hiddenInput');
+const $boot      = document.getElementById('bootScreen');
+const $clock     = document.getElementById('liveClock');
+const $uptime    = document.getElementById('uptimeDisp');
+const $sugg      = document.getElementById('suggStrip');
+const $thLbl     = document.getElementById('themeLabel');
+const $modal     = document.getElementById('projectModal');
+const $mTitle    = document.getElementById('modalTitle');
+const $mTabs     = document.getElementById('modalTabs');
+const $mBody     = document.getElementById('modalBody');
+const $mClose    = document.getElementById('modalClose');
+const $canvas    = document.getElementById('matrixCanvas');
 
-        function scrollToBottom() {
-            terminalBody.scrollTop = terminalBody.scrollHeight;
-        }
+// ═══════════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════════
+const esc    = s => { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; };
+const scroll = () => $body.scrollTop = $body.scrollHeight;
+const focus  = () => $inp.focus();
+const rnd    = (a,b) => (Math.random()*(b-a)+a).toFixed(1);
+const rndInt = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
 
-        function focusInput() {
-            if(!hiddenInput.disabled) hiddenInput.focus();
-        }
+// Clock + uptime (single interval)
+(function tick() {
+  const n = new Date();
+  $clock.textContent = n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const s = Math.floor((Date.now()-bootMs)/1000);
+  $uptime.textContent = `UP ${Math.floor(s/60)}m${String(s%60).padStart(2,'0')}s`;
+  setTimeout(tick, 1000);
+})();
 
-        function appendOutput(html, className = '') {
-            const div = document.createElement('div');
-            div.className = 'command-block fade-in' + (className ? ' ' + className : '');
-            div.innerHTML = html;
-            commandHistory.appendChild(div);
-            scrollToBottom();
-        }
+// ═══════════════════════════════════════════════════════════════
+//  THEME ENGINE
+// ═══════════════════════════════════════════════════════════════
+function applyTheme(name) {
+  const t = THEMES[name];
+  if (!t) return false;
+  const r = document.documentElement.style;
+  r.setProperty('--g',   t.g);
+  r.setProperty('--gA',  t.gA);
+  r.setProperty('--gB',  t.gB);
+  r.setProperty('--gS',  t.gS);
+  r.setProperty('--gS2', t.gS2);
+  activeTheme = name;
+  $thLbl.textContent = `theme:${name}`;
+  return true;
+}
 
-        function printCommand(cmd) {
-            const html = `
-                <div class="flex items-center gap-2 mt-2">
-                    <span class="text-emerald-400 font-bold">omer@portfolio:~$</span>
-                    <span class="text-emerald-400 break-all">${escapeHtml(cmd)}</span>
-                </div>
-            `;
-            appendOutput(html);
-        }
+// ═══════════════════════════════════════════════════════════════
+//  OUTPUT HELPERS
+// ═══════════════════════════════════════════════════════════════
+function appendRaw(html, extra='') {
+  const d = document.createElement('div');
+  d.className = 'fade-in'+(extra?' '+extra:'');
+  d.innerHTML = html;
+  $hist.appendChild(d);
+  scroll();
+  return d;
+}
 
-        function printOutput(text, type = 'default') {
-            const colorMap = {
-                'highlight': 'text-[#7aa2f7]',
-                'success': 'text-[#4cd9a0]',
-                'warning': 'text-[#f0a030]',
-                'error': 'text-[#f07178]',
-                'dim': 'text-[#6d7a9e]',
-                'default': 'text-[#b9c2d9]'
-            };
-            const cls = colorMap[type] || colorMap['default'];
-            const lines = text.split('\n');
-            let html = lines.map(line => `<span class="${cls}">${escapeHtml(line)}</span>`).join('<br />');
+function printPrompt(cmd) {
+  appendRaw(`
+    <div style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap;padding:.04rem 0;">
+      <span class="glow" style="font-weight:700;white-space:nowrap;font-size:.71rem;">omerkemal<span style="color:var(--td);">@</span>portfolio</span>
+      <span style="color:var(--td);">:</span>
+      <span class="bglow">~</span>
+      <span style="color:var(--td);">$&nbsp;</span>
+      <span style="color:var(--tb);word-break:break-all;">${esc(cmd)}</span>
+    </div>`);
+}
 
-            const outputHtml = `
-                <div class="mt-1 ml-4 p-2 md:p-3 bg-[#0d111e] rounded-lg border-l-2 border-[#2a3148]">
-                    <pre class="output-pre">${html}</pre>
-                </div>
-            `;
-            appendOutput(outputHtml);
-        }
+function printBlock(html)  { appendRaw(`<div class="out-block">${html}</div>`); }
+function printText(txt, c='var(--t)') {
+  printBlock(`<pre class="output-pre" style="color:${c};">${esc(txt)}</pre>`);
+}
+function printSep() {
+  appendRaw(`<div style="color:var(--bd2);font-size:.62rem;padding:.05rem 0;letter-spacing:.08em;">${'─'.repeat(52)}</div>`);
+}
+function printLabel(txt) {
+  appendRaw(`<div style="color:var(--g);font-size:.67rem;font-weight:600;padding:.22rem 0 .06rem;text-shadow:0 0 6px var(--gB);">&nbsp;${esc(txt)}</div>`);
+}
+function bar(pct, w=18) {
+  const f=Math.round(w*pct/100), e=w-f;
+  return `<span class="pbar-f">${'█'.repeat(f)}</span><span class="pbar-e">${'░'.repeat(e)}</span><span style="color:var(--td);font-size:.6rem;margin-left:.3rem;">${pct}%</span>`;
+}
 
-        // ============================================================
-        //  MODAL LOGIC
-        // ============================================================
+// ═══════════════════════════════════════════════════════════════
+//  SUGGESTION STRIP
+// ═══════════════════════════════════════════════════════════════
+function updateSugg(val) {
+  if (!val || val.includes(' ')) { $sugg.style.display='none'; return; }
+  const matches = ALL_CMDS.filter(c=>c.startsWith(val)&&c!==val).slice(0,7);
+  if (!matches.length) { $sugg.style.display='none'; return; }
+  $sugg.style.display = 'flex';
+  $sugg.innerHTML =
+    `<span style="color:var(--td);margin-right:.2rem;">↗</span>` +
+    matches.map(m=>`<span class="sugg-chip" onclick="fillCmd('${m}')">${m}</span>`).join('');
+}
+function fillCmd(cmd) { $inp.value=cmd+' '; cur=$inp.value; refresh(); focus(); }
 
-        function openModal(projectKey) {
-            const p = PROJECTS[projectKey];
-            if (!p) return;
+// ═══════════════════════════════════════════════════════════════
+//  GHOST TEXT + REFRESH
+// ═══════════════════════════════════════════════════════════════
+function updateGhost(val) {
+  if (!val || val.includes(' ')) { $ghost.textContent=''; return; }
+  const m = ALL_CMDS.find(c=>c.startsWith(val)&&c!==val);
+  $ghost.textContent = m ? m.slice(val.length) : '';
+}
+function tabComplete() {
+  const val=$inp.value;
+  if (!val||val.includes(' ')) return;
+  const m=ALL_CMDS.find(c=>c.startsWith(val)&&c!==val);
+  if (m) { $inp.value=m+' '; cur=$inp.value; refresh(); $ghost.textContent=''; }
+}
+function refresh() {
+  $disp.textContent = cur;
+  updateGhost(cur.trim());
+  updateSugg(cur.trim());
+  scroll();
+}
 
-            modalTitle.textContent = p.title + ' — Project Details';
-            modal.classList.add('active');
+// ═══════════════════════════════════════════════════════════════
+//  BOOT SEQUENCE
+// ═══════════════════════════════════════════════════════════════
+const BOOT = [
+  {txt:'[ BIOS ] Hardware initialization…',     col:'var(--td)', ms:0},
+  {txt:'[ BOOT ] Loading kernel modules…',       col:'var(--td)', ms:100},
+  {txt:'[ SYS  ] Mounting filesystems… OK',      col:'var(--td)', ms:210},
+  {txt:'[ NET  ] Establishing connection… OK',   col:'var(--td)', ms:330},
+  {txt:'[ AUTH ] Verifying identity… OK',        col:'var(--g)',  ms:470},
+  {txt:'[ CLI  ] Launching portfolio v2.1…',     col:'var(--b)',  ms:610},
+  {txt:'─'.repeat(48),                           col:'var(--bd2)',ms:750},
+];
+function runBoot(cb) {
+  BOOT.forEach(({txt,col,ms})=>{
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.className='boot-in';
+      el.style.cssText=`color:${col};font-size:.65rem;padding:.04rem 0;`;
+      el.textContent=txt;
+      $boot.appendChild(el); scroll();
+    }, ms);
+  });
+  setTimeout(()=>{ showWelcome(); if(cb)cb(); }, 900);
+}
 
-            const tabs = p.tabs || ['overview'];
-            modalTabs.innerHTML = '';
-            tabs.forEach((tab, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'modal-tab' + (index === 0 ? ' active' : '');
-                btn.textContent = tab.charAt(0).toUpperCase() + tab.slice(1).replace('-', ' ');
-                btn.dataset.tab = tab;
-                btn.addEventListener('click', () => switchTab(projectKey, tab));
-                modalTabs.appendChild(btn);
-            });
+// ═══════════════════════════════════════════════════════════════
+//  WELCOME SCREEN
+// ═══════════════════════════════════════════════════════════════
+function showWelcome() {
+  const art=[
+    ' ██████╗ ███╗   ███╗███████╗██████╗ ',
+    ' ██╔═══██╗████╗ ████║██╔════╝██╔══██╗',
+    ' ██║   ██║██╔████╔██║█████╗  ██████╔╝',
+    ' ██║   ██║██║╚██╔╝██║██╔══╝  ██╔══██╗',
+    ' ╚██████╔╝██║ ╚═╝ ██║███████╗██║  ██║',
+    '  ╚═════╝ ╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝',
+    '  ██╗  ██╗███████╗███╗   ███╗ █████╗ ██╗',
+    '  ██║ ██╔╝██╔════╝████╗ ████║██╔══██╗██║',
+    '  █████╔╝ █████╗  ██╔████╔██║███████║██║',
+    '  ██╔═██╗ ██╔══╝  ██║╚██╔╝██║██╔══██║██║',
+    '  ██║  ██╗███████╗██║ ╚═╝ ██║██║  ██║███████╗',
+    '  ╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝',
+  ].join('\n');
+  const d=document.createElement('div');
+  d.className='fade-in';
+  d.innerHTML=`
+    <div style="margin:.4rem 0 .7rem;padding:.75rem 1rem;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;border-left:3px solid var(--g);">
+      <pre class="ascii" style="margin-bottom:.55rem;">${art}</pre>
+      <div style="color:var(--t);font-size:.7rem;border-top:1px solid var(--bd);padding-top:.45rem;margin-bottom:.4rem;">
+        <span class="glow">▸</span>&nbsp;Full-Stack Developer &amp; Security Engineer
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.12rem .5rem;font-size:.62rem;color:var(--td);">
+        <span><span style="color:var(--b);">help</span> — all commands</span>
+        <span><span style="color:var(--b);">neofetch</span> — system info</span>
+        <span><span style="color:var(--b);">projects</span> — all repos</span>
+        <span><span style="color:var(--b);">skills</span> — tech stack</span>
+        <span><span style="color:var(--b);">git log</span> — career history</span>
+        <span><span style="color:var(--b);">contact</span> — reach me</span>
+        <span><span style="color:var(--b);">theme &lt;name&gt;</span> — switch theme</span>
+        <span><span style="color:var(--b);">matrix</span> — 🐇 rabbit hole</span>
+      </div>
+    </div>`;
+  $hist.appendChild(d); scroll();
+}
 
-            switchTab(projectKey, tabs[0]);
-        }
+// ═══════════════════════════════════════════════════════════════
+//  COMMAND DISPATCH
+// ═══════════════════════════════════════════════════════════════
+function handle(raw) {
+  if (isProcessing) return;
+  isProcessing = true;
+  const trimmed = raw.trim();
+  if (!trimmed) { isProcessing=false; return; }
 
-        function switchTab(projectKey, tabName) {
-            const p = PROJECTS[projectKey];
-            if (!p) return;
+  cmdHist.push(trimmed);
+  histIdx = cmdHist.length;
+  printPrompt(trimmed);
 
-            document.querySelectorAll('.modal-tab').forEach(t => {
-                t.classList.toggle('active', t.dataset.tab === tabName);
-            });
+  const parts = trimmed.split(/\s+/);
+  const cmd   = parts[0].toLowerCase();
+  const args  = parts.slice(1);
 
-            let html = '';
+  switch(cmd) {
+    case 'help': case 'h': case '?': cmdHelp(); break;
+    case 'about':                    cmdAbout(); break;
+    case 'projects':                 cmdProjects(); break;
+    case 'project': case 'p':
+      if (!args[0]) printText('Usage: project <name>\nType "projects" to list all.','var(--y)');
+      else if (PROJECTS[args[0]]) openModal(args[0]);
+      else printText(`Project "${args[0]}" not found.\nAvailable: `+Object.keys(PROJECTS).join(', '),'var(--r)');
+      break;
+    case 'skills':                   cmdSkills(); break;
+    case 'experience': case 'exp':   cmdExperience(); break;
+    case 'contact':                  cmdContact(); break;
+    case 'social':                   cmdSocial(); break;
+    case 'version': case 'v':
+      if (!args[0]) printText('Usage: version <project>\nAvailable: reverse-shell, netcat, phantomgate','var(--y)');
+      else if (VERSIONS[args[0]]) {
+        openModal('phantomgate');
+        setTimeout(()=>{const t=document.querySelector(`.modal-tab[data-tab="${args[0]}"]`);if(t)t.click();},100);
+      } else printText(`No version history for "${args[0]}".`,'var(--r)');
+      break;
+    case 'neofetch':                 cmdNeofetch(); break;
+    case 'ping':                     cmdPing(args[0]); break;
+    case 'git':
+      if (args[0]==='log') cmdGitLog();
+      else printText(`git: '${args[0]||'<subcommand>'}' — try: git log`,'var(--r)');
+      break;
+    case 'fortune':                  cmdFortune(); break;
+    case 'sudo':                     cmdSudo(args.join(' ')); break;
+    case 'hack':                     cmdHack(); break;
+    case 'history':                  cmdHistory(); break;
+    case 'open':                     cmdOpen(args[0]); break;
+    case 'stat':                     cmdStat(args[0]); break;
+    case 'theme':
+      if (!args[0]) {
+        printText(`Available themes: ${Object.keys(THEMES).join(', ')}\nUsage: theme <name>`,'var(--y)');
+      } else { cmdTheme(args[0]); }
+      break;
+    case 'clear': case 'cls':
+      $hist.innerHTML=''; $boot.innerHTML=''; break;
+    case 'echo':
+      printText(args.join(' ')||''); break;
+    case 'whoami':
+      printText('omerkemal · Full-Stack Developer & Security Engineer · Adama, Ethiopia','var(--b)'); break;
+    case 'uname':
+      printText('portfolio-os 2.1.0 #1 SMP Mon Jul 27 00:00:00 UTC 2026 x86_64 GNU/Linux','var(--td)'); break;
+    case 'date':
+      printText(new Date().toLocaleString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}),'var(--td)'); break;
+    case 'ls':
+      if (!args[0]||args[0]==='projects') {
+        appendRaw(`<div class="out-block">${Object.keys(PROJECTS).map(k=>`<span class="bglow" style="margin-right:1.2rem;">${esc(k)}</span>`).join('')}</div>`);
+        printText('→ project <name> to open details','var(--td)');
+      } else if (args[0]==='skills') { cmdSkills(); }
+      else printText(`ls: ${args[0]}: No such file or directory`,'var(--r)');
+      break;
+    case 'man':
+      if (!args[0]) printText('Usage: man <command>','var(--y)');
+      else cmdMan(args[0]);
+      break;
+    case 'matrix':  cmdMatrix(); break;
+    case 'exit': case 'quit':
+      printText('Exiting… Goodbye! 👋','var(--y)');
+      setTimeout(()=>{ $hist.innerHTML=''; $boot.innerHTML=''; cur=''; refresh(); focus(); isProcessing=false; showWelcome(); },550);
+      return;
+    default:
+      printText(`bash: ${cmd}: command not found\nType "help" for available commands.`,'var(--r)');
+  }
+  isProcessing=false; scroll(); focus();
+}
 
-            if (tabName === 'overview') {
-                html = `
-                    <div class="project-title">${p.title}</div>
-                    <div class="project-tech"><i class="fas fa-tag"></i> ${p.tech}</div>
-                    <div class="project-desc">${p.desc}</div>
-                    <div class="project-badges">
-                        ${p.badges.map(b => `<span>#${b}</span>`).join('')}
-                    </div>
-                    ${p.commands ? `
-                        <div class="command-section">
-                            <h3><i class="fas fa-terminal"></i> Available Commands</h3>
-                            ${p.commands.map(c => `
-                                <div class="cmd-item">
-                                    <span class="cmd">${escapeHtml(c.cmd)}</span>
-                                    <span class="desc">${escapeHtml(c.desc)}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                `;
-            } else {
-                const versions = VERSION_DATA[tabName] || [{ver: 'v1.0', change: 'No version history available.'}];
-                html = `
-                    <div class="project-title">${tabName.toUpperCase()}</div>
-                    <div class="project-tech">Version History</div>
-                    <div class="command-section">
-                        <div class="version-list">
-                            ${versions.map(v => `
-                                <div class="ver-item">
-                                    <span class="ver">${v.ver}</span>
-                                    <span class="change">${escapeHtml(v.change)}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            modalBody.innerHTML = html;
-        }
+// ═══════════════════════════════════════════════════════════════
+//  COMMAND IMPLEMENTATIONS
+// ═══════════════════════════════════════════════════════════════
 
-        function closeModal() {
-            modal.classList.remove('active');
-            focusInput();
-        }
+function cmdHelp() {
+  printSep();
+  printLabel('  AVAILABLE COMMANDS');
+  printSep();
+  const cmds=[
+    {cmd:'help',             desc:'Show this menu',                                   alias:'h, ?'},
+    {cmd:'about',            desc:'Background & story',                               alias:''},
+    {cmd:'projects',         desc:'List all projects',                                alias:''},
+    {cmd:'project <name>',   desc:'Open project detail modal',                        alias:'p'},
+    {cmd:'skills',           desc:'Tech stack with proficiency bars',                 alias:''},
+    {cmd:'experience',       desc:'Work timeline',                                    alias:'exp'},
+    {cmd:'contact',          desc:'How to reach me',                                  alias:''},
+    {cmd:'social',           desc:'GitHub and other links',                           alias:''},
+    {cmd:'version <name>',   desc:'Changelog: reverse-shell, netcat, phantomgate',    alias:'v'},
+    {cmd:'git log',          desc:'Career as a git commit history',                   alias:''},
+    {cmd:'neofetch',         desc:'Sysinfo display, developer style',                 alias:''},
+    {cmd:'ping <host>',      desc:'Ping a host with live output',                     alias:''},
+    {cmd:'theme <name>',     desc:'Switch phosphor theme: green amber blue red',      alias:''},
+    {cmd:'fortune',          desc:'Random developer quote',                           alias:''},
+    {cmd:'hack',             desc:'Engage maximum hacker mode',                       alias:''},
+    {cmd:'sudo <cmd>',       desc:'Attempt privileged execution',                     alias:''},
+    {cmd:'stat <project>',   desc:'Project statistics at a glance',                  alias:''},
+    {cmd:'open <url>',       desc:'Open github or social links',                      alias:''},
+    {cmd:'history',          desc:'Show command history',                             alias:''},
+    {cmd:'man <command>',    desc:'Manual entry for a command',                       alias:''},
+    {cmd:'whoami',           desc:'Current user info',                                alias:''},
+    {cmd:'uname',            desc:'System info',                                      alias:''},
+    {cmd:'date',             desc:'Current date and time',                            alias:''},
+    {cmd:'ls [projects]',    desc:'List items',                                       alias:''},
+    {cmd:'echo <text>',      desc:'Print text to terminal',                           alias:''},
+    {cmd:'matrix',           desc:'Follow the white rabbit',                          alias:''},
+    {cmd:'clear',            desc:'Clear terminal',                                   alias:'cls · Ctrl+L'},
+    {cmd:'exit',             desc:'Exit and restart',                                 alias:'quit'},
+  ];
+  const grid=document.createElement('div');
+  grid.className='hgrid';
+  cmds.forEach(c=>{
+    const c1=document.createElement('span'); c1.style.cssText='color:var(--b);font-size:.69rem;font-weight:500;'; c1.textContent=c.cmd;
+    const c2=document.createElement('span'); c2.style.cssText='color:var(--t);font-size:.69rem;'; c2.textContent=c.desc;
+    const c3=document.createElement('span'); c3.style.cssText='color:var(--td);font-size:.6rem;'; c3.textContent=c.alias?`(${c.alias})`:'';
+    grid.appendChild(c1); grid.appendChild(c2); grid.appendChild(c3);
+  });
+  const wrap=document.createElement('div');
+  wrap.className='out-block fade-in'; wrap.appendChild(grid);
+  $hist.appendChild(wrap);
+  printSep();
+}
 
-        modalClose.addEventListener('click', closeModal);
-        modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-        
-        document.addEventListener('keydown', e => { 
-            if (e.key === 'Escape' && modal.classList.contains('active')) closeModal(); 
-        });
+function cmdAbout() {
+  printSep();
+  printLabel('  ABOUT  ·  From revc_shell-v0.1 to PhantomGate');
+  printSep();
+  printBlock(`
+    <div style="font-size:.72rem;line-height:1.85;color:var(--t);">
+      <p style="margin-bottom:.5rem;">I build from the ground up. My journey started with raw sockets and process management — iterating through dozens of versions to master networking at the primitive level.</p>
+      <p style="margin-bottom:.5rem;">That foundation evolved into <span style="color:var(--g);font-weight:600;">PhantomGate</span>: a modern C2 framework with AES-encrypted communication, SQLite state management, and a Flask panel with AI payload generation.</p>
+      <p>I architect full-stack systems end-to-end. Every line of code is intentional.</p>
+    </div>
+    <div style="margin-top:.8rem;display:grid;grid-template-columns:auto 1fr;gap:.28rem .8rem;font-size:.69rem;border-top:1px solid var(--bd);padding-top:.6rem;">
+      <span style="color:var(--td);">Location</span>   <span style="color:var(--t);">Adama, Ethiopia</span>
+      <span style="color:var(--td);">Email</span>       <span class="bglow">omerkemal2019@gmail.com</span>
+      <span style="color:var(--td);">Role</span>        <span class="glow">Full-Stack Developer &amp; Security Engineer</span>
+      <span style="color:var(--td);">Focus</span>       <span style="color:var(--t);">C2 Frameworks · Web Apps · Network Tools</span>
+    </div>`);
+  printSep();
+}
 
-        // ============================================================
-        //  COMMAND PARSING & EVENT LISTENERS
-        // ============================================================
+function cmdProjects() {
+  printSep();
+  printLabel(`  PROJECTS  ·  ${Object.keys(PROJECTS).length} repositories`);
+  printSep();
+  Object.entries(PROJECTS).forEach(([key, p]) => {
+    appendRaw(`
+      <div class="proj-card fade-in" onclick="openModal('${key}')">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.3rem;margin-bottom:.25rem;">
+          <span class="bglow" style="font-weight:600;font-size:.75rem;">${esc(p.title)}</span>
+          <span style="color:var(--td);font-size:.59rem;">${esc(p.tech)}</span>
+        </div>
+        <div style="color:var(--t);font-size:.69rem;line-height:1.65;margin-bottom:.35rem;">${esc(p.desc.substring(0,115))}…</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.3rem;">
+          <div>${p.badges.map(b=>`<span class="tag">#${b}</span>`).join('')}</div>
+          <span style="color:var(--g);font-size:.61rem;text-shadow:0 0 5px var(--gB);">→ click or: project ${key}</span>
+        </div>
+      </div>`);
+  });
+  printSep();
+}
 
-        hiddenInput.addEventListener('input', () => {
-            currentCommandDisplay.textContent = hiddenInput.value;
-        });
+function cmdSkills() {
+  printSep();
+  printLabel('  SKILLS  ·  Tech Stack & Proficiency');
+  printSep();
+  const groups=[
+    {title:'Backend',items:[
+      {name:'Python (Flask / Django / FastAPI)',pct:95},
+      {name:'PHP (Laravel)',pct:80},{name:'Go',pct:65},
+      {name:'Java',pct:60},{name:'Node.js',pct:70},
+    ]},
+    {title:'Networking & Security',items:[
+      {name:'Socket Programming (TCP / UDP)',pct:92},
+      {name:'C2 Architecture',pct:88},
+      {name:'AES / bcrypt Cryptography',pct:82},
+      {name:'HTTP / WebSockets',pct:85},
+      {name:'Botnet Infrastructure',pct:80},
+    ]},
+    {title:'Database & DevOps',items:[
+      {name:'SQLite / SQLAlchemy',pct:90},
+      {name:'MySQL / PostgreSQL',pct:75},
+      {name:'Linux / Bash',pct:88},
+      {name:'REST API Design',pct:85},
+    ]},
+    {title:'Frontend & Mobile',items:[
+      {name:'HTML5 / CSS3 / JavaScript',pct:78},
+      {name:'Flet (Python cross-platform)',pct:82},
+    ]},
+  ];
+  printBlock(groups.map(g=>`
+    <div style="margin-bottom:.7rem;">
+      <div style="color:var(--g);font-size:.67rem;font-weight:600;margin-bottom:.3rem;text-shadow:0 0 5px var(--gB);">[${g.title}]</div>
+      ${g.items.map(i=>`
+        <div style="display:flex;align-items:center;gap:.5rem;padding:.08rem 0;font-size:.67rem;">
+          <span style="color:var(--t);min-width:235px;flex-shrink:0;">${esc(i.name)}</span>
+          <span style="white-space:nowrap;">${bar(i.pct)}</span>
+        </div>`).join('')}
+    </div>`).join(''));
+  printSep();
+}
 
-        hiddenInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                const rawCmd = hiddenInput.value.trim();
-                if (rawCmd) {
-                    history.push(rawCmd);
-                    historyIndex = history.length;
-                    printCommand(rawCmd);
-                    processCommand(rawCmd);
-                } else {
-                    printCommand('');
-                }
-                hiddenInput.value = '';
-                currentCommandDisplay.textContent = '';
-                scrollToBottom();
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (historyIndex > 0) {
-                    historyIndex--;
-                    hiddenInput.value = history[historyIndex];
-                    currentCommandDisplay.textContent = hiddenInput.value;
-                }
-            } else if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                if (historyIndex < history.length - 1) {
-                    historyIndex++;
-                    hiddenInput.value = history[historyIndex];
-                    currentCommandDisplay.textContent = hiddenInput.value;
-                } else {
-                    historyIndex = history.length;
-                    hiddenInput.value = '';
-                    currentCommandDisplay.textContent = '';
-                }
-            }
-        });
+function cmdExperience() {
+  printSep();
+  printLabel('  EXPERIENCE  ·  Timeline');
+  printSep();
+  printBlock(`
+    <div style="font-size:.71rem;line-height:1.8;">
+      <div style="margin-bottom:.8rem;">
+        <div class="glow" style="font-weight:600;margin-bottom:.15rem;">2020 – Present &nbsp;·&nbsp; Full-Stack Developer &nbsp;·&nbsp; Self-Employed</div>
+        <div style="color:var(--t);padding-left:.6rem;border-left:2px solid var(--bd2);">
+          Architecting end-to-end solutions: Flask dashboards, Laravel CMS platforms, security tools, and cross-platform mobile apps. Clients include educational institutions and private sector.
+        </div>
+      </div>
+      <div>
+        <div class="bglow" style="font-weight:600;margin-bottom:.15rem;">2018 – 2020 &nbsp;·&nbsp; Security Engineer &nbsp;·&nbsp; R&amp;D</div>
+        <div style="color:var(--t);padding-left:.6rem;border-left:2px solid var(--bd2);">
+          Research and development of network utilities, penetration testing tools, and C2 infrastructure. Evolution from basic socket tools to the PhantomGate framework.
+        </div>
+      </div>
+    </div>`);
+  printSep();
+}
 
-        function processCommand(rawCmd) {
-            const args = rawCmd.split(' ').filter(Boolean);
-            const cmd = args[0].toLowerCase();
+function cmdContact() {
+  printSep();
+  printLabel('  CONTACT');
+  printSep();
+  printBlock(`
+    <div style="font-size:.71rem;line-height:2.1;display:grid;grid-template-columns:auto 1fr;gap:.1rem .8rem;">
+      <span style="color:var(--td);">Email</span>        <span class="bglow">omerkemal2019@gmail.com</span>
+      <span style="color:var(--td);">Location</span>     <span style="color:var(--t);">Adama, Ethiopia</span>
+      <span style="color:var(--td);">Availability</span> <span class="glow">Open to remote work &amp; freelance</span>
+      <span style="color:var(--td);">Response time</span><span style="color:var(--t);">Usually within 24 hours</span>
+    </div>`);
+  printSep();
+}
 
-            switch(cmd) {
-                case 'help':
-                    printOutput(`Available commands:
-  help               - Show this help message
-  about              - Display information about me
-  projects           - List all available projects
-  project <name>     - Open details for a specific project
-  skills             - Display technical skills
-  version <project>  - Show version history for a project
-  clear              - Clear the terminal screen
-  exit               - Close the terminal`);
-                    break;
-                case 'about':
-                    printOutput(`Hi, I'm Omer Kemal.
-A Full-Stack Developer & Security Engineer passionate about building
-secure, scalable applications and exploring low-level networking.
-I specialize in Python, Go, Java, and modern web frameworks.`);
-                    break;
-                case 'projects':
-                    const pList = Object.keys(PROJECTS).map(k => `  ${k.padEnd(15)} - ${PROJECTS[k].title}`).join('\n');
-                    printOutput(`Available projects:\n${pList}`);
-                    break;
-                case 'project':
-                    if (args[1] && PROJECTS[args[1].toLowerCase()]) {
-                        printOutput(`Opening GUI window for ${args[1]}...`, 'success');
-                        setTimeout(() => openModal(args[1].toLowerCase()), 300);
-                    } else {
-                        printOutput(`Usage: project <name>\nUse 'projects' to see a list of available projects.`, 'error');
-                    }
-                    break;
-                case 'skills':
-                    printOutput(`Technical Skills:
-  Languages : Python, Go, Java, PHP, JavaScript/Node.js
-  Web       : Flask, Laravel, HTML/CSS, Tailwind, React
-  Security  : Network Analysis, C2 Frameworks, Cryptography
-  Databases : PostgreSQL, MySQL, SQLite
-  Tools     : Git, Docker, Linux, Bash`, 'highlight');
-                    break;
-                case 'version':
-                    if (args[1] && VERSION_DATA[args[1].toLowerCase()]) {
-                        const vData = VERSION_DATA[args[1].toLowerCase()];
-                        const vList = vData.map(v => `  ${v.ver.padEnd(6)} - ${v.change}`).join('\n');
-                        printOutput(`Version history for ${args[1]}:\n${vList}`);
-                    } else {
-                        printOutput(`No version history found for '${args[1] || 'undefined'}'.\nAvailable logs: phantomgate`, 'error');
-                    }
-                    break;
-                case 'clear':
-                    commandHistory.innerHTML = '';
-                    break;
-                case 'exit':
-                    printOutput('Connection closed by foreign host.', 'error');
-                    hiddenInput.disabled = true;
-                    document.querySelector('.cursor-blink').style.display = 'none';
-                    break;
-                case 'sudo':
-                    printOutput(`omer is not in the sudoers file. This incident will be reported.`, 'warning');
-                    break;
-                default:
-                    printOutput(`Command not found: ${cmd}. Type 'help' for available commands.`, 'error');
-            }
-        }
+function cmdSocial() {
+  printSep();
+  printLabel('  SOCIAL  ·  Links');
+  printSep();
+  printBlock(`
+    <div style="font-size:.71rem;line-height:2.2;display:grid;grid-template-columns:auto 1fr;gap:.1rem .8rem;">
+      <span style="color:var(--td);"><i class="fab fa-github"></i> GitHub</span>   <span class="bglow">github.com/omerkemal</span>
+      <span style="color:var(--td);"><i class="fab fa-telegram"></i> Telegram</span><span style="color:var(--t);">@omerkemal</span>
+    </div>`);
+  printSep();
+}
 
-        // Initialize focus
-        focusInput();
-    </script>
+// ── NEOFETCH ──
+function cmdNeofetch() {
+  const up = Math.floor((Date.now()-bootMs)/1000);
+  const upStr = `${Math.floor(up/60)}m ${up%60}s`;
+  const logo = [
+    '   ╔═══════════╗',
+    '   ║ &gt; _       ║',
+    '   ║           ║',
+    '   ║  <span style="color:var(--b);">▓▓▓▓▓▓</span>  ║',
+    '   ║  <span style="color:var(--b);">▓▓</span>   <span style="color:var(--b);">▓▓</span> ║',
+    '   ║  <span style="color:var(--b);">▓▓▓▓▓▓</span>  ║',
+    '   ╚═══════════╝',
+    '   <span style="color:var(--r);">██</span><span style="color:var(--y);">██</span><span style="color:var(--g);">██</span><span style="color:var(--b);">██</span><span style="color:var(--td);">██</span>',
+  ];
+  const info = [
+    ['','<span style="color:var(--tb);font-weight:600;">omerkemal</span><span style="color:var(--td);">@</span><span style="color:var(--tb);font-weight:600;">portfolio</span>'],
+    ['','<span style="color:var(--bd2);">'+('─'.repeat(26))+'</span>'],
+    ['OS',      'PortfolioOS 2.1.0 x86_64'],
+    ['Kernel',  'bash 5.2.0'],
+    ['Uptime',  upStr],
+    ['Shell',   'interactive CLI'],
+    ['Theme',   activeTheme+' phosphor'],
+    ['Projects','6 repositories'],
+    ['Skills',  '20+ technologies'],
+    ['Memory',  rndInt(400,800)+'MB / 16384MB'],
+    ['Location','Adama, Ethiopia'],
+    ['Email',   '<span style="color:var(--b);">omerkemal2019@gmail.com</span>'],
+  ];
+  const rows = Math.max(logo.length, info.length);
+  let html = '<div style="display:flex;gap:1.5rem;font-size:.7rem;line-height:1.85;align-items:flex-start;">';
+  html += `<div style="flex-shrink:0;font-size:.7rem;line-height:1.85;">${logo.map(l=>`<div style="color:var(--g);">${l}</div>`).join('')}</div>`;
+  html += '<div><table style="border-collapse:collapse;">';
+  info.forEach(([k,v])=>{
+    html += `<tr><td style="color:var(--g);font-weight:600;padding-right:.6rem;white-space:nowrap;">${k?k+':':''}</td><td style="color:var(--t);">${v}</td></tr>`;
+  });
+  html += '</table></div></div>';
+  printBlock(html);
+}
+
+// ── PING (animated) ──
+function cmdPing(host) {
+  const target = host || 'github.com';
+  const ip = `${rndInt(1,200)}.${rndInt(1,255)}.${rndInt(1,255)}.${rndInt(1,255)}`;
+  const container = document.createElement('div');
+  container.className = 'out-block fade-in';
+  $hist.appendChild(container);
+  const lines = [
+    {txt:`PING ${target} (${ip}): 56 data bytes`, col:'var(--g)'},
+    {txt:`64 bytes from ${ip}: icmp_seq=0 ttl=55 time=${rnd(12,45)} ms`, col:'var(--t)'},
+    {txt:`64 bytes from ${ip}: icmp_seq=1 ttl=55 time=${rnd(12,45)} ms`, col:'var(--t)'},
+    {txt:`64 bytes from ${ip}: icmp_seq=2 ttl=55 time=${rnd(12,45)} ms`, col:'var(--t)'},
+    {txt:`64 bytes from ${ip}: icmp_seq=3 ttl=55 time=${rnd(12,45)} ms`, col:'var(--t)'},
+    {txt:'', col:'var(--td)'},
+    {txt:`--- ${target} ping statistics ---`, col:'var(--g)'},
+    {txt:`4 packets transmitted, 4 received, 0.0% packet loss, time 3${rndInt(0,9)}${rndInt(0,9)}${rndInt(0,9)}ms`, col:'var(--td)'},
+  ];
+  lines.forEach(({txt,col},i)=>{
+    setTimeout(()=>{
+      const p=document.createElement('pre');
+      p.className='output-pre ping-line';
+      p.style.color=col; p.textContent=txt;
+      container.appendChild(p); scroll();
+    }, i*380);
+  });
+}
+
+// ── GIT LOG ──
+function cmdGitLog() {
+  printSep();
+  printLabel('  git log  ·  Career History');
+  printSep();
+  const html = GIT_LOG.map(c=>`
+    <div class="gl-commit">
+      <div>
+        <span class="gl-hash">commit ${c.hash}</span>
+        ${c.refs?`<span class="gl-ref"> (${esc(c.refs)})</span>`:''}
+      </div>
+      <div class="gl-meta">Author: ${c.author} &lt;omerkemal2019@gmail.com&gt;</div>
+      <div class="gl-meta">Date:   ${c.date}</div>
+      <div class="gl-msg" style="margin-top:.15rem;padding-left:.5rem;">${esc(c.msg)}</div>
+    </div>`).join('');
+  printBlock(html);
+  printSep();
+}
+
+// ── FORTUNE ──
+function cmdFortune() {
+  const q = FORTUNES[Math.floor(Math.random()*FORTUNES.length)];
+  printBlock(`
+    <div style="font-size:.72rem;line-height:1.75;color:var(--t);font-style:italic;border-left:3px solid var(--g);padding-left:.7rem;">
+      ${esc(q)}
+    </div>`);
+}
+
+// ── SUDO ──
+function cmdSudo(subcmd) {
+  if (!subcmd) { printText('Usage: sudo <command>','var(--y)'); return; }
+  const container=appendRaw(`<div class="out-block"><pre class="output-pre" style="color:var(--td);">[sudo] password for omerkemal: </pre></div>`);
+  setTimeout(()=>{
+    const pre=container.querySelector('pre');
+    pre.textContent='[sudo] password for omerkemal: ';
+    let dots='';
+    const iv=setInterval(()=>{
+      dots+='*';
+      pre.textContent='[sudo] password for omerkemal: '+dots;
+      if(dots.length>=8){
+        clearInterval(iv);
+        setTimeout(()=>{
+          pre.textContent='';
+          pre.innerHTML=`<span style="color:var(--r);">Permission denied.</span>\n<span style="color:var(--td);">omerkemal is not in the sudoers file. This incident will be reported.</span>`;
+          scroll();
+        },600);
+      }
+      scroll();
+    },120);
+  },300);
+}
+
+// ── HACK (animated easter egg) ──
+function cmdHack() {
+  const steps = [
+    {txt:'[  1%] Scanning target network…',         col:'var(--g)',  ms:0},
+    {txt:'[ 15%] Bypassing firewall…',               col:'var(--g)',  ms:400},
+    {txt:'[ 32%] Injecting SQL payload…',            col:'var(--y)',  ms:850},
+    {txt:'[ 51%] Escalating privileges…',            col:'var(--y)',  ms:1350},
+    {txt:'[ 78%] Exfiltrating mainframe…',           col:'var(--r)',  ms:1900},
+    {txt:'[ 99%] Almost there…',                     col:'var(--r)',  ms:2500},
+    {txt:'',                                          col:'',          ms:3000},
+    {txt:'Just kidding. I\'m a developer, not a hacker. (Or am I?)',
+                                                      col:'var(--g)',  ms:3100},
+    {txt:'Type "project phantomgate" to see what I actually build.',
+                                                      col:'var(--td)', ms:3400},
+  ];
+  const container=document.createElement('div');
+  container.className='out-block fade-in';
+  $hist.appendChild(container);
+  steps.forEach(({txt,col,ms})=>{
+    setTimeout(()=>{
+      const p=document.createElement('pre');
+      p.className='output-pre';
+      p.style.color=col; p.textContent=txt;
+      container.appendChild(p); scroll();
+    }, ms);
+  });
+}
+
+// ── HISTORY ──
+function cmdHistory() {
+  if (!cmdHist.length) { printText('No commands in history yet.','var(--td)'); return; }
+  const html = cmdHist.map((c,i)=>`
+    <div style="display:flex;gap:.8rem;padding:.12rem 0;border-bottom:1px solid rgba(24,31,58,.35);font-size:.7rem;">
+      <span style="color:var(--td);min-width:28px;text-align:right;">${i+1}</span>
+      <span style="color:var(--t);">${esc(c)}</span>
+    </div>`).join('');
+  printBlock(html);
+}
+
+// ── OPEN ──
+function cmdOpen(url) {
+  const LINKS = {
+    github:   'https://github.com/omerkemal',
+    telegram: 'https://t.me/omerkemal',
+    social:   'https://github.com/omerkemal',
+    email:    'mailto:omerkemal2019@gmail.com',
+  };
+  const target = url ? (LINKS[url.toLowerCase()] || url) : null;
+  if (!target) {
+    printText('Usage: open <github|telegram|email>\nor: open <url>','var(--y)');
+    return;
+  }
+  printBlock(`<span style="color:var(--g);">Opening:</span> <span style="color:var(--b);">${esc(target)}</span>`);
+  setTimeout(()=>{ try { window.open(target,'_blank','noopener'); } catch(e){} }, 200);
+}
+
+// ── STAT ──
+function cmdStat(name) {
+  if (!name || !PROJECTS[name]) {
+    printText('Usage: stat <project>\nAvailable: '+Object.keys(PROJECTS).join(', '),'var(--y)');
+    return;
+  }
+  const p = PROJECTS[name];
+  const loc  = rndInt(800, 8000);
+  const files= rndInt(12, 80);
+  const stars= rndInt(5, 120);
+  const commits= rndInt(40, 300);
+  printBlock(`
+    <div style="font-size:.71rem;line-height:1.9;">
+      <div style="color:var(--tb);font-weight:600;margin-bottom:.3rem;">${esc(p.title)}</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:.12rem .8rem;">
+        <span style="color:var(--td);">Stack</span>     <span style="color:var(--t);">${esc(p.tech)}</span>
+        <span style="color:var(--td);">Lines</span>     <span class="glow">${loc.toLocaleString()} LOC</span>
+        <span style="color:var(--td);">Files</span>     <span style="color:var(--t);">${files}</span>
+        <span style="color:var(--td);">Commits</span>   <span style="color:var(--b);">${commits}</span>
+        <span style="color:var(--td);">Stars</span>     <span style="color:var(--y);">${'★'.repeat(Math.min(5,Math.round(stars/20)))} (${stars})</span>
+        <span style="color:var(--td);">Tags</span>      <span style="color:var(--t);">${p.badges.map(b=>`<span class="tag">#${b}</span>`).join('')}</span>
+      </div>
+    </div>`);
+}
+
+// ── THEME ──
+function cmdTheme(name) {
+  if (name === 'list') {
+    printBlock(`
+      <div style="font-size:.71rem;line-height:2;display:grid;grid-template-columns:auto 1fr auto;gap:.1rem .8rem;align-items:center;">
+        <span style="color:#00ffa3;font-weight:600;">green</span>  <span style="color:var(--td);">classic phosphor green  (default)</span> ${activeTheme==='green'?'<span style="color:var(--g);">← active</span>':''}
+        <span style="color:#ffaa44;font-weight:600;">amber</span>  <span style="color:var(--td);">warm amber CRT          (retro)</span>  ${activeTheme==='amber'?'<span style="color:#ffaa44;">← active</span>':''}
+        <span style="color:#5dfeff;font-weight:600;">blue</span>   <span style="color:var(--td);">cool cyan phosphor      (chill)</span>  ${activeTheme==='blue' ?'<span style="color:#5dfeff;">← active</span>':''}
+        <span style="color:#ff6688;font-weight:600;">red</span>    <span style="color:var(--td);">danger red phosphor     (alert)</span>  ${activeTheme==='red'  ?'<span style="color:#ff6688;">← active</span>':''}
+      </div>`);
+    return;
+  }
+  if (applyTheme(name)) {
+    printText(`Theme switched to "${name}". ✓`,'var(--g)');
+  } else {
+    printText(`Unknown theme "${name}".\nAvailable: ${Object.keys(THEMES).join(', ')}`,'var(--r)');
+  }
+}
+
+// ── MAN ──
+function cmdMan(cmd) {
+  const M={
+    project:  'project <name>\n  Open project detail modal.\n  Alias: p\n  Example: project phantomgate',
+    skills:   'skills\n  Show tech skills by category with ASCII progress bars.',
+    version:  'version <name>\n  Show version changelog.\n  Available: reverse-shell, netcat, phantomgate',
+    matrix:   'matrix\n  Toggle Matrix rain effect. Press Esc to stop.',
+    about:    'about\n  Display personal background and development narrative.',
+    contact:  'contact\n  Show contact information.',
+    social:   'social\n  Show social media and GitHub profile links.',
+    clear:    'clear\n  Clear all terminal output.\n  Aliases: cls · Ctrl+L',
+    ls:       'ls [dir]\n  List items.\n  ls projects — list all project names\n  ls skills   — same as skills',
+    help:     'help\n  Show the full command menu.\n  Aliases: h, ?',
+    man:      'man <command>\n  Display manual entry for a command.',
+    echo:     'echo <text>\n  Print text to the terminal output.',
+    uname:    'uname\n  Print system info.',
+    date:     'date\n  Print current date and time.',
+    whoami:   'whoami\n  Print current user info.',
+    exit:     'exit\n  Clear terminal and restart welcome screen.',
+    neofetch: 'neofetch\n  Display system information in sysinfo format.',
+    ping:     'ping <host>\n  Simulate pinging a host.\n  Example: ping github.com',
+    git:      'git log\n  Show career history as a git commit log.',
+    fortune:  'fortune\n  Display a random developer quote.',
+    sudo:     'sudo <command>\n  Attempt privileged execution. (You know what happens.)',
+    hack:     'hack\n  Engage maximum hacker mode.',
+    history:  'history\n  List all commands typed this session.',
+    open:     'open <url>\n  Open a link. Shortcuts: github, telegram, email',
+    theme:    'theme <name>\n  Switch phosphor theme.\n  Available: green, amber, blue, red\n  Also: theme list',
+    stat:     'stat <project>\n  Show project statistics.\n  Example: stat phantomgate',
+  };
+  if (M[cmd]) printBlock(`<pre class="output-pre" style="color:var(--t);">${esc(M[cmd])}</pre>`);
+  else printText(`No manual entry for '${cmd}'.`,'var(--r)');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MATRIX RAIN
+// ═══════════════════════════════════════════════════════════════
+function cmdMatrix() {
+  if (matRunning) { stopMatrix(); return; }
+  printText('Entering the Matrix… run "matrix" again or press Esc to exit.','var(--g)');
+  startMatrix();
+}
+function startMatrix() {
+  matRunning=true; $canvas.style.display='block';
+  const ctx=$canvas.getContext('2d');
+  $canvas.width=window.innerWidth; $canvas.height=window.innerHeight;
+  const cols=Math.floor($canvas.width/14), drops=Array(cols).fill(1);
+  const chars='アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモ0123456789ABCDEF';
+  function draw(){
+    if(!matRunning) return;
+    ctx.fillStyle='rgba(5,8,15,0.05)';
+    ctx.fillRect(0,0,$canvas.width,$canvas.height);
+    ctx.fillStyle='var(--g)'; ctx.font='13px JetBrains Mono';
+    // use actual CSS var value
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--g').trim()||'#00ffa3';
+    drops.forEach((y,i)=>{
+      ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*14,y*14);
+      if(y*14>$canvas.height&&Math.random()>.975) drops[i]=0;
+      drops[i]++;
+    });
+    matTimer=requestAnimationFrame(draw);
+  }
+  draw();
+}
+function stopMatrix(){
+  matRunning=false;
+  if(matTimer) cancelAnimationFrame(matTimer);
+  $canvas.style.display='none';
+  $canvas.getContext('2d').clearRect(0,0,$canvas.width,$canvas.height);
+  printText('Exited Matrix. Welcome back, Neo.','var(--g)');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════════════════
+function openModal(key) {
+  const p=PROJECTS[key]; if(!p) return;
+  $mTitle.textContent=p.title+' — Details';
+  $modal.classList.add('active');
+  const tabs=p.tabs||['overview'];
+  $mTabs.innerHTML='';
+  tabs.forEach((tab,i)=>{
+    const btn=document.createElement('button');
+    btn.className='modal-tab'+(i===0?' active':'');
+    btn.textContent=tab.charAt(0).toUpperCase()+tab.slice(1).replace('-',' ');
+    btn.dataset.tab=tab; btn.dataset.idx=String(i);
+    btn.addEventListener('click',()=>switchTab(key,tab));
+    $mTabs.appendChild(btn);
+  });
+  switchTab(key,tabs[0]);
+  $mClose.focus();
+}
+function switchTab(key,tab) {
+  const p=PROJECTS[key];
+  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  let html='';
+  if(tab==='overview') {
+    html=`
+      <div class="m-title">${esc(p.title)}</div>
+      <div class="m-tech"><i class="fas fa-microchip" style="margin-right:5px;"></i>${esc(p.tech)}</div>
+      <div class="m-desc">${esc(p.desc)}</div>
+      <div style="margin-bottom:1rem;">${p.badges.map(b=>`<span class="tag">#${b}</span>`).join('')}</div>
+      ${p.commands?.length?`
+        <div class="m-sh"><i class="fas fa-terminal" style="margin-right:5px;"></i>Available Commands</div>
+        ${p.commands.map(c=>`<div class="m-cmd"><span class="c">${esc(c.cmd)}</span><span class="d">${esc(c.desc)}</span></div>`).join('')}
+      `:''}`;
+  } else {
+    const vers=VERSIONS[tab]||[];
+    const intro={'reverse-shell':'Evolution from a basic reverse shell to a feature-rich RAT.',
+      'netcat':'From a simple socket listener to a full-featured C2 utility with Android support.',
+      'phantomgate':'Full C2 framework evolution — reverse shell to AI-powered payload generation.'}[tab]||'';
+    html=`
+      <div class="m-title">${tab.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase())}</div>
+      <div class="m-tech">Version History — ${vers.length} releases</div>
+      <div class="m-desc">${esc(intro)}</div>
+      <div class="m-sh"><i class="fas fa-history" style="margin-right:5px;"></i>Changelog</div>
+      ${vers.map(v=>`<div class="m-ver"><span class="v">${esc(v.ver)}</span><span class="ch">${esc(v.change)}</span></div>`).join('')}`;
+  }
+  $mBody.innerHTML=html;
+}
+
+$mClose.addEventListener('click',()=>$modal.classList.remove('active'));
+$modal.addEventListener('click',e=>{ if(e.target===$modal) $modal.classList.remove('active'); });
+
+// Modal arrow-key tab navigation
+document.addEventListener('keydown',e=>{
+  if(!$modal.classList.contains('active')) return;
+  const tabs=[...$mTabs.querySelectorAll('.modal-tab')];
+  const active=tabs.findIndex(t=>t.classList.contains('active'));
+  if(e.key==='ArrowRight'&&active<tabs.length-1) tabs[active+1].click();
+  if(e.key==='ArrowLeft' &&active>0)             tabs[active-1].click();
+  if(e.key==='Escape') $modal.classList.remove('active');
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  INPUT HANDLING
+// ═══════════════════════════════════════════════════════════════
+$inp.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    e.preventDefault();
+    const v=$inp.value;
+    if(v){cmdHist.push(v); histIdx=cmdHist.length;}
+    handle(v);
+    $inp.value=''; cur=''; refresh(); $ghost.textContent='';
+    focus(); return;
+  }
+  if(e.key==='Tab'){e.preventDefault(); tabComplete(); return;}
+  if(e.key==='l'&&e.ctrlKey){e.preventDefault(); $hist.innerHTML=''; $boot.innerHTML=''; $sugg.style.display='none'; return;}
+  if(e.key==='c'&&e.ctrlKey){
+    e.preventDefault();
+    printPrompt($inp.value?$inp.value+'  ^C':'^C');
+    $inp.value=''; cur=''; refresh(); $ghost.textContent=''; return;
+  }
+  if(e.key==='Escape'){
+    if(matRunning) stopMatrix();
+    if($modal.classList.contains('active')) $modal.classList.remove('active');
+    return;
+  }
+  if(e.key==='ArrowUp'){
+    e.preventDefault();
+    if(histIdx>0){histIdx--; $inp.value=cmdHist[histIdx]||''; cur=$inp.value; refresh();}
+    return;
+  }
+  if(e.key==='ArrowDown'){
+    e.preventDefault();
+    if(histIdx<cmdHist.length-1){histIdx++; $inp.value=cmdHist[histIdx];}
+    else{histIdx=cmdHist.length; $inp.value='';}
+    cur=$inp.value; refresh(); return;
+  }
+  setTimeout(()=>{ cur=$inp.value; refresh(); },0);
+});
+$inp.addEventListener('input',()=>{ cur=$inp.value; refresh(); });
+
+// Focus management
+$body.addEventListener('click',()=>focus());
+document.querySelector('.max-w-4xl')?.addEventListener('click',e=>{ if(e.target.tagName!=='INPUT') focus(); });
+window.addEventListener('resize',()=>{
+  if(matRunning){$canvas.width=window.innerWidth; $canvas.height=window.innerHeight;}
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════════
+runBoot(()=>{ focus(); refresh(); });
+window.addEventListener('load',()=>setTimeout(focus,100));
+</script>
 </body>
 </html>
