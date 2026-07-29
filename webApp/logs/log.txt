@@ -1,0 +1,19 @@
+[  2026-07-29 11:54:22.806898  ] : [Error] : auth_view.dashboard the excepton(error): (sqlite3.OperationalError) no such column: service_linkes.visibility
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT service_linkes."ID" AS "service_linkes_ID", service_linkes.user_id AS service_linkes_user_id, service_linkes.service_link AS service_linkes_service_link, service_linkes.status AS service_linkes_status, service_linkes.visibility AS service_linkes_visibility, service_linkes.create_at AS service_linkes_create_at, service_linkes.update_at AS service_linkes_update_at 
+FROM service_linkes 
+WHERE service_linkes.user_id = ?) AS anon_1]
+[parameters: (1,)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[  2026-07-29 11:54:32.580010  ] : [Error] : auth_view.dashboard the excepton(error): (sqlite3.OperationalError) no such column: service_linkes.visibility
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT service_linkes."ID" AS "service_linkes_ID", service_linkes.user_id AS service_linkes_user_id, service_linkes.service_link AS service_linkes_service_link, service_linkes.status AS service_linkes_status, service_linkes.visibility AS service_linkes_visibility, service_linkes.create_at AS service_linkes_create_at, service_linkes.update_at AS service_linkes_update_at 
+FROM service_linkes 
+WHERE service_linkes.user_id = ?) AS anon_1]
+[parameters: (1,)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+[  2026-07-29 11:56:44.497505  ] : [Error] : auth_view.links_management the excepton(error): module 'requests' has no attribute 'form'
+[  2026-07-29 11:58:40.030317  ] : [Error] : auth_view.links_management the excepton(error): (sqlite3.IntegrityError) datatype mismatch
+[SQL: INSERT INTO service_linkes ("ID", user_id, service_link, status, visibility, create_at, update_at) VALUES (?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('Lrmq3kaCIN', 1, 'http://www.google.com', 'online', 'private', '2026-07-29 11:58:39.891051', '2026-07-29 11:58:39.891168')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)

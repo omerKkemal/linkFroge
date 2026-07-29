@@ -1,5 +1,6 @@
-from flask import Blueprint, flash, flash, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, flash, flash, render_template, request, redirect, url_for, session, flash, jsonify
 import traceback
+import requests
 
 from database.model import User, service_linkes
 from database.manage_db import get_engine as engine
@@ -119,4 +120,27 @@ def load_dynmic_link(ID):
         print(str(e))
         error = 'No such link ;('
         return render_template('index.html',error=error)
+
+
+@login_view.route('/<url>/<ID>')
+def cheack_if_the_url_alive(url, ID):
+    session_manager = Session()
+    try:
+        if session_manager.query(service_linkes).filter_by(service_linke=url, ID=ID).first():
+            r = requests.head(url, timeout=5, allow_redirects=True)
+            if r.status_code == 200:
+                return jsonify({"message": "the link stile alive(for now)"}), 200
+            else:
+                return jsonify({"message": "sudden the link is death my condolence"}),404 
+    except Exception as e:
+        print(traceback.format_exc())
+        config.log(f'[Error] : {request.endpoint} the excepton(error): {e}')
+        session_manager.rollback()
+        return redirect("login_view.index")
+    finally:
+        session_manager.close()
+
+@login_view.route('/public_links')
+def public_link():
+    pass
 

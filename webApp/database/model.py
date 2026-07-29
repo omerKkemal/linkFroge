@@ -47,21 +47,24 @@ class SESSION_LOGIN(Base):
 class service_linkes(Base):
     __tablename__ = "service_linkes"
 
-    ID = Column(Integer,primary_key=True)
+    ID = Column(String,primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     service_link = Column(String,nullable=False, unique=True)
     status = Column(String,nullable=False, default='offline')
+    visibility = Column(String,nullable=False)
     create_at = Column(DateTime,nullable=False)
     update_at = Column(DateTime,nullable=False)
 
-    def __init__(self, ID, user_id, service_link, status=None, create_at=None, update_at=None):
+
+    def __init__(self, ID, user_id, service_link, visibility, status=None, create_at=None, update_at=None):
         self.ID = ID
         self.user_id = user_id
         self.service_link = service_link
         self.status = status if status else 'offline'
+        self.visibility = visibility
         self.create_at = create_at if create_at else datetime.now()
         self.update_at = update_at if update_at else datetime.now()
     def __repr__(self):
-        return f"<service_linkes(ID='{self.ID}', user_id='{self.user_id}', service_link='{self.service_link}', status='{self.status}', create_at='{self.create_at}', update_at='{self.update_at}')>"
+        return f"<service_linkes(ID='{self.ID}', user_id='{self.user_id}', service_link='{self.service_link}', status='{self.status}', visibility={self.visibility} ,create_at='{self.create_at}', update_at='{self.update_at}')>"
 
 
