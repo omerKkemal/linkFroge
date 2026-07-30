@@ -140,21 +140,14 @@ def cheack_if_the_url_alive(url, ID):
     finally:
         session_manager.close()
 
+
 @login_view.route('/public_links')
 def public_link():
     """
     Displays all public links for users to view and access.
-    What it does:
-    - Queries the database for all links with visibility set to 'public'
-    - Renders the public_links.html template with the list of public links
-    - Only allows GET requests (POST/PUT/DELETE are rejected)
-    Returns:
-    - Rendered 'public_liks.html' template with public links for GET requests
-    - HTML error page for non-GET requests
     """
     session_manager = Session()
     
-    # Only allow GET requests
     if request.method != "GET":
         return """
         <!DOCTYPE html>
@@ -242,11 +235,16 @@ def public_link():
     
     try:
         all_public_link = session_manager.query(service_linkes).filter_by(visibility="public").all()
-        return render_template('public_liks.html', all_public_link=all_public_link)
+        return render_template('public_liks.html', 
+                             all_public_link=all_public_link, 
+                             catagory=config.CATEGORY)
     except Exception as e:
         print(f"Error fetching public links: {e}")
         flash("Error loading public links. Please try again.", "error")
-        return render_template('public_liks.html', all_public_link=[])
+        # Return empty list but still pass categories
+        return render_template('public_liks.html', 
+                             all_public_link=[], 
+                             catagory=config.CATEGORY)
     finally:
         session_manager.close()
 
