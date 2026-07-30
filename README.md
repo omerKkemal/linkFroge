@@ -59,14 +59,14 @@ FrogLink is a link management system that gives permanent, stable URLs for dynam
 <br><br>
 
 ### Community Links
-<img src="screen_shot/community_links.jpg" alt="Community Links" width="700">
+<img src="screen_shot/community_links.png" alt="Community Links" width="700">
 
 *Share with the world. Or don't. We're not your mom.*
 
 <br><br>
 
 ### Comment Section
-<img src="screen_shot/comments.jpg" alt="Comments" width="700">
+<img src="screen_shot/comments.png" alt="Comments" width="700">
 
 *"First" – Every comment section ever.*
 
