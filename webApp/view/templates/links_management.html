@@ -145,7 +145,7 @@
                     </a>
                 </div>
                 <div class="flex justify-between items-center text-xs text-green-600 mb-3">
-                    <span>Created: {{ link.create_at.strftime('%Y-%m-%d') if link.create_at else 'N/A' }}</span>
+                    <span>Category: <span class="font-semibold">{{ link.catagory|capitalize if link.catagory else 'Uncategorized' }}</span></span>
                     <span class="status-badge status-badge-mobile {% if link.status == 'online' %}status-online{% else %}status-offline{% endif %} text-xs" id="status-badge-mobile-{{ link.ID }}">
                         {% if link.status == 'online' %}
                             <i class="fas fa-check-circle"></i> ONLINE
@@ -155,7 +155,7 @@
                     </span>
                 </div>
                 <div class="flex justify-end space-x-2">
-                    <button onclick="openEditModal('{{ link.ID }}', '{{ link.service_link }}', '{{ link.visibility }}')" 
+                    <button onclick="openEditModal('{{ link.ID }}', '{{ link.service_link }}', '{{ link.visibility }}', '{{ link.catagory }}')" 
                             class="btn-warning inline-flex items-center space-x-1 text-xs px-3 py-1.5">
                         <i class="fas fa-edit"></i>
                         <span>Edit</span>
@@ -172,11 +172,12 @@
 
         <!-- Desktop Table View -->
         <div class="hidden sm:block overflow-x-auto">
-            <table class="w-full min-w-[600px]">
+            <table class="w-full min-w-[700px]">
                 <thead>
                     <tr class="border-b-2 border-green-200">
                         <th class="text-left py-3 px-3 text-xs md:text-sm font-semibold text-green-700">#</th>
                         <th class="text-left py-3 px-3 text-xs md:text-sm font-semibold text-green-700">Service Link</th>
+                        <th class="text-left py-3 px-3 text-xs md:text-sm font-semibold text-green-700">Category</th>
                         <th class="text-left py-3 px-3 text-xs md:text-sm font-semibold text-green-700">Visibility</th>
                         <th class="text-left py-3 px-3 text-xs md:text-sm font-semibold text-green-700">Status</th>
                         <th class="text-left py-3 px-3 text-xs md:text-sm font-semibold text-green-700">Created</th>
@@ -196,6 +197,12 @@
                                 {{ link.service_link }}
                                 <span class="sarcastic-xs block">(Click to test your luck)</span>
                             </a>
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="category-badge text-xs whitespace-nowrap">
+                                <i class="fas fa-tag"></i>
+                                {{ link.catagory|capitalize if link.catagory else 'Uncategorized' }}
+                            </span>
                         </td>
                         <td class="py-3 px-3">
                             <span class="visibility-badge {% if link.visibility == 'public' %}visibility-public{% else %}visibility-private{% endif %} text-xs whitespace-nowrap">
@@ -218,7 +225,7 @@
                         </td>
                         <td class="py-3 px-3">
                             <div class="flex items-center justify-end space-x-2">
-                                <button onclick="openEditModal('{{ link.ID }}', '{{ link.service_link }}', '{{ link.visibility }}')" 
+                                <button onclick="openEditModal('{{ link.ID }}', '{{ link.service_link }}', '{{ link.visibility }}', '{{ link.catagory }}')" 
                                         class="btn-warning inline-flex items-center space-x-1 text-xs px-3 py-1.5">
                                     <i class="fas fa-edit"></i>
                                     <span>Edit</span>
@@ -325,6 +332,24 @@
                 <p class="sarcastic-xs mt-1"><i class="fas fa-frog"></i> Pro tip: Copy-paste. Don't type. Trust me.</p>
             </div>
             
+            <!-- Category Dropdown for Add -->
+            <div class="mb-4">
+                <label class="form-label" for="catagory">
+                    <i class="fas fa-tags mr-2"></i>Category 
+                    <span class="sarcastic-sm">(What is this link about?)</span>
+                </label>
+                <select id="catagory" 
+                        name="catagory" 
+                        required
+                        class="form-input w-full">
+                    <option value="">Select a category...</option>
+                    {% for key, funny_comment in catagorys %}
+                        <option value="{{ key }}">{{ key|capitalize }}</option>
+                    {% endfor %}
+                </select>
+                <p class="sarcastic-xs mt-1"><i class="fas fa-frog"></i> Choose wisely. Or don't. We're not your mom.</p>
+            </div>
+            
             <!-- Visibility Dropdown for Add -->
             <div class="mb-4">
                 <label class="form-label" for="visibility">
@@ -378,6 +403,24 @@
                        placeholder="https://example.com/service"
                        class="form-input w-full border-yellow-300 focus:border-yellow-500">
                 <p class="sarcastic-xs mt-1"><i class="fas fa-frog"></i> Remember: With great power comes great responsibility... and broken URLs.</p>
+            </div>
+            
+            <!-- Category Dropdown for Edit -->
+            <div class="mb-4">
+                <label class="form-label" for="edit_catagory">
+                    <i class="fas fa-tags mr-2"></i>Category
+                    <span class="sarcastic-sm">(Change what this link is about)</span>
+                </label>
+                <select id="edit_catagory" 
+                        name="catagory" 
+                        required
+                        class="form-input w-full border-yellow-300 focus:border-yellow-500">
+                    <option value="">Select a category...</option>
+                    {% for key, funny_comment in catagorys %}
+                        <option value="{{ key }}">{{ key|capitalize }}</option>
+                    {% endfor %}
+                </select>
+                <p class="sarcastic-xs mt-1"><i class="fas fa-frog"></i> Categories are like labels. But funnier.</p>
             </div>
             
             <!-- Visibility Dropdown for Edit -->
@@ -496,6 +539,18 @@
         background: #f3e5f5;
         color: #4a148c;
         border: 1px solid #ba68c8;
+    }
+    
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 10px;
+        border-radius: 12px;
+        background: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffb74d;
+        font-weight: 500;
     }
     
     .status-code {
@@ -650,13 +705,14 @@
         document.body.style.overflow = 'hidden';
     }
 
-    function openEditModal(linkId, currentLink, currentVisibility) {
+    function openEditModal(linkId, currentLink, currentVisibility, currentCategory) {
         document.getElementById('editModal').classList.remove('hidden');
         document.getElementById('editModal').classList.add('flex');
         const form = document.getElementById('editForm');
         form.action = `/api/links_management/update/${linkId}`;
         document.getElementById('edit_service_link').value = currentLink;
         document.getElementById('edit_visibility').value = currentVisibility || 'private';
+        document.getElementById('edit_catagory').value = currentCategory || '';
         document.body.style.overflow = 'hidden';
     }
 
@@ -870,7 +926,7 @@
                         if (editBtn) {
                             const onclickAttr = editBtn.getAttribute('onclick');
                             if (onclickAttr) {
-                                const match = onclickAttr.match(/openEditModal\('([^']+)',\s*'([^']+)',\s*'([^']+)'\)/);
+                                const match = onclickAttr.match(/openEditModal\('([^']+)',\s*'([^']+)',\s*'([^']+)',\s*'([^']+)'\)/);
                                 if (match && match[2]) {
                                     linkUrl = match[2];
                                 }

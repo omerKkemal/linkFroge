@@ -17,3 +17,6 @@ WHERE service_linkes.user_id = ?) AS anon_1]
 [SQL: INSERT INTO service_linkes ("ID", user_id, service_link, status, visibility, create_at, update_at) VALUES (?, ?, ?, ?, ?, ?, ?)]
 [parameters: ('Lrmq3kaCIN', 1, 'http://www.google.com', 'online', 'private', '2026-07-29 11:58:39.891051', '2026-07-29 11:58:39.891168')]
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
+[  2026-07-29 16:12:55.093144  ] : [Error] : auth_view.update_link the excepton(error): Could not build url for endpoint 'auth_view.login'. Did you mean 'auth_view.delete_link' instead?
+[  2026-07-30 16:04:05.482339  ] : [Error] : auth_view.links_management the excepton(error): Could not build url for endpoint 'auth_view.login'. Did you mean 'auth_view.delete_link' instead?
+[  2026-07-30 16:07:09.066054  ] : [Error] : auth_view.links_management the excepton(error): Could not build url for endpoint 'auth_view.login'. Did you mean 'auth_view.delete_link' instead?

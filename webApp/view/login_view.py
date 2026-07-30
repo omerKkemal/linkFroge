@@ -142,5 +142,111 @@ def cheack_if_the_url_alive(url, ID):
 
 @login_view.route('/public_links')
 def public_link():
-    pass
+    """
+    Displays all public links for users to view and access.
+    What it does:
+    - Queries the database for all links with visibility set to 'public'
+    - Renders the public_links.html template with the list of public links
+    - Only allows GET requests (POST/PUT/DELETE are rejected)
+    Returns:
+    - Rendered 'public_liks.html' template with public links for GET requests
+    - HTML error page for non-GET requests
+    """
+    session_manager = Session()
+    
+    # Only allow GET requests
+    if request.method != "GET":
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Method Not Allowed - FrogLink</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background: linear-gradient(135deg, #1a1a2e, #16213e);
+                    min-height: 100vh;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin: 0;
+                    padding: 20px;
+                }
+                .error-container {
+                    background: rgba(255, 255, 255, 0.95);
+                    padding: 40px;
+                    border-radius: 20px;
+                    text-align: center;
+                    max-width: 500px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                    border: 2px solid #4CAF50;
+                }
+                .error-icon {
+                    font-size: 64px;
+                    margin-bottom: 20px;
+                }
+                .error-title {
+                    color: #c62828;
+                    font-size: 28px;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                }
+                .error-message {
+                    color: #555;
+                    font-size: 16px;
+                    margin-bottom: 20px;
+                    line-height: 1.6;
+                }
+                .error-frog {
+                    font-size: 48px;
+                    margin: 15px 0;
+                }
+                .back-btn {
+                    display: inline-block;
+                    background: linear-gradient(135deg, #4CAF50, #43A047);
+                    color: white;
+                    padding: 12px 30px;
+                    border-radius: 12px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+                }
+                .back-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+                }
+                .sarcastic {
+                    color: #888;
+                    font-style: italic;
+                    font-size: 14px;
+                    margin-top: 15px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="error-container">
+                <div class="error-icon">🚫</div>
+                <div class="error-title">Method Not Allowed</div>
+                <div class="error-message">
+                    Oops! You're not supposed to be here.<br>
+                    This page only accepts GET requests.<br>
+                    <span style="font-size: 14px; color: #999;">(What were you trying to do? Hack us? Nice try.)</span>
+                </div>
+                <div class="error-frog">🐸</div>
+                <a href="/public_links" class="back-btn">Go Back</a>
+                <div class="sarcastic">"Try again. But this time, don't break it."</div>
+            </div>
+        </body>
+        </html>
+        """, 405
+    
+    try:
+        all_public_link = session_manager.query(service_linkes).filter_by(visibility="public").all()
+        return render_template('public_liks.html', all_public_link=all_public_link)
+    except Exception as e:
+        print(f"Error fetching public links: {e}")
+        flash("Error loading public links. Please try again.", "error")
+        return render_template('public_liks.html', all_public_link=[])
+    finally:
+        session_manager.close()
 

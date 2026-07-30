@@ -1,0 +1,410 @@
+{% extends "base.html" %}
+
+{% block title %}Public Links - FrogLink{% endblock %}
+
+{% block content %}
+<div class="slide-in">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div class="w-full sm:w-auto">
+            <div class="flex items-center space-x-3">
+                <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+                     alt="Frog" 
+                     class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover object-position-center-30 border-4 border-green-400 frog-bounce shadow-xl flex-shrink-0">
+                <div class="min-w-0">
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-green-800 leading-tight">
+                        Public Links
+                        <span class="sarcastic-block text-sm sm:text-base">(Sharing is caring)</span>
+                    </h1>
+                    <p class="text-green-600 text-sm sm:text-base truncate">
+                        <i class="fas fa-globe"></i> Discover links shared by the community 
+                        <span class="sarcastic text-xs sm:text-sm">(Or don't. We're not your mom.)</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+            <a href="{{ url_for('auth_view.links_management') }}" 
+               class="btn-primary inline-flex items-center justify-center space-x-2 px-4 py-3 sm:px-6 sm:py-3 flex-1 sm:flex-none">
+                <i class="fas fa-arrow-left"></i>
+                <span>My Links</span>
+                <span class="sarcastic-xs hidden sm:inline">(Your private stuff)</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="glass-effect rounded-3xl p-4 sm:p-6 mb-6 border-2 border-green-200">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-4">
+                <div class="bg-gradient-to-r from-green-400 to-green-600 p-3 rounded-2xl">
+                    <i class="fas fa-link text-white text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-green-600">Total Public Links</p>
+                    <p class="text-2xl font-bold text-green-800">{{ all_public_link|length if all_public_link else 0 }}</p>
+                </div>
+            </div>
+            <div class="text-sm text-green-600">
+                <i class="fas fa-clock"></i> Updated: <span id="lastUpdated">today</span>
+                <span class="sarcastic-xs block text-center">(We try our best)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="glass-effect rounded-3xl p-4 sm:p-6 mb-6 border-2 border-green-200">
+        <div class="relative">
+            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-green-400"></i>
+            <input type="text" 
+                   id="searchPublicLinks" 
+                   placeholder="Search public links..." 
+                   class="form-input pl-12 w-full"
+                   onkeyup="filterPublicLinks()">
+            <span class="sarcastic-xs block mt-1">
+                <i class="fas fa-frog"></i> Pro tip: Search works. Sometimes. Maybe.
+            </span>
+        </div>
+    </div>
+
+    <!-- Public Links Grid -->
+    {% if all_public_link %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="publicLinksGrid">
+        {% for link in all_public_link %}
+        <div class="public-link-card glass-effect rounded-3xl p-4 border-2 border-green-200 hover:border-green-400 transition-all duration-300 hover:shadow-xl hover:scale-105"
+             data-search="{{ link.service_link|lower }} {{ link.catagory|lower if link.catagory else '' }}">
+            
+            <!-- Category Badge -->
+            <div class="flex justify-between items-start mb-3">
+                <span class="category-badge text-xs">
+                    <i class="fas fa-tag"></i>
+                    {{ link.catagory|capitalize if link.catagory else 'Uncategorized' }}
+                </span>
+                <span class="status-badge {% if link.status == 'online' %}status-online{% else %}status-offline{% endif %} text-xs">
+                    {% if link.status == 'online' %}
+                        <i class="fas fa-check-circle"></i> ONLINE
+                    {% else %}
+                        <i class="fas fa-times-circle"></i> OFFLINE
+                    {% endif %}
+                </span>
+            </div>
+            
+            <!-- Link Content -->
+            <a href="/{{ link.ID }}" 
+               target="_blank"
+               class="block group">
+                <div class="bg-green-50/50 rounded-xl p-3 mb-3 group-hover:bg-green-100/50 transition-colors duration-300">
+                    <p class="text-green-700 font-medium truncate text-sm">
+                        <i class="fas fa-link text-green-500 mr-1"></i>
+                        {{ link.service_link }}
+                    </p>
+                    <p class="sarcastic-xs block mt-1 text-center">
+                        <i class="fas fa-arrow-right text-green-400"></i> Click to visit
+                    </p>
+                </div>
+            </a>
+            
+            <!-- Link Metadata -->
+            <div class="flex justify-between items-center text-xs text-green-600">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-user text-green-400"></i>
+                    <span class="truncate max-w-[100px]">{{ link.user.username if link.user else 'Anonymous' }}</span>
+                </div>
+                <div>
+                    <i class="fas fa-calendar-alt text-green-400"></i>
+                    {{ link.create_at.strftime('%Y-%m-%d') if link.create_at else 'N/A' }}
+                </div>
+            </div>
+            
+            <!-- Quick Action Buttons -->
+            <div class="mt-3 flex gap-2">
+                <a href="/{{ link.ID }}" 
+                   target="_blank"
+                   class="flex-1 btn-primary text-xs py-2 px-3 text-center">
+                    <i class="fas fa-external-link-alt"></i> Visit
+                </a>
+                <button onclick="copyToClipboard('{{ request.base_url }}/{{ link.ID }}')" 
+                        class="btn-secondary text-xs py-2 px-3">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-12 glass-effect rounded-3xl border-2 border-green-200">
+        <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+             alt="Frog" 
+             class="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover object-position-center-30 border-4 border-green-300 frog-bounce mx-auto">
+        <h4 class="text-lg sm:text-xl font-semibold text-green-800 mb-2 mt-4">No public links yet</h4>
+        <p class="text-green-600 mb-4 px-4">
+            Be the first to share a link with the community!
+            <span class="sarcastic-sm block">(Or don't. We're not your mom.)</span>
+        </p>
+        <a href="{{ url_for('auth_view.links_management') }}" 
+           class="btn-primary inline-flex items-center space-x-2 px-6 py-3">
+            <i class="fas fa-plus"></i>
+            <span>Add Your Link</span>
+        </a>
+        <p class="sarcastic-xs mt-4"><i class="fas fa-frog"></i> Make it public. Make it count. Make it weird.</p>
+    </div>
+    {% endif %}
+
+    <!-- Motivational Message -->
+    <div class="mt-6 glass-effect rounded-3xl p-4 border-2 border-green-200">
+        <div class="flex items-center justify-center space-x-3 flex-wrap">
+            <img src="{{ url_for('static', filename='img/cute.jpg') }}" 
+                 alt="Frog" 
+                 class="w-8 h-8 rounded-full object-cover object-position-center-30 border-2 border-green-400 flex-shrink-0">
+            <div class="text-center">
+                <p class="text-green-700 text-sm">
+                    <i class="fas fa-frog"></i> Sharing is caring. 
+                    <span class="sarcastic-xs block">Unless it's your password. Don't share that.</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .public-link-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .public-link-card:hover {
+        transform: translateY(-4px);
+    }
+    
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 10px;
+        border-radius: 12px;
+        background: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffb74d;
+        font-weight: 500;
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.65rem;
+    }
+    
+    .status-online {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #81c784;
+    }
+    
+    .status-offline {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ef9a9a;
+    }
+    
+    .btn-primary, .btn-secondary {
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 8px 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        cursor: pointer;
+        border: none;
+        font-size: 0.8rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #4CAF50, #43A047);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #e0e0e0;
+        color: #333;
+    }
+    
+    .btn-secondary:hover {
+        background: #d0d0d0;
+        transform: translateY(-2px);
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        background: white;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #4CAF50;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+    
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .sarcastic-xs {
+        font-size: 0.65rem;
+        opacity: 0.6;
+        font-style: italic;
+    }
+    
+    .sarcastic-sm {
+        font-size: 0.75rem;
+        opacity: 0.6;
+        font-style: italic;
+    }
+    
+    .sarcastic-block {
+        opacity: 0.6;
+        font-style: italic;
+        font-weight: normal;
+    }
+    
+    .frog-bounce {
+        animation: frogBounce 2s ease-in-out infinite;
+    }
+    
+    @keyframes frogBounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    
+    .slide-in {
+        animation: slideIn 0.5s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .copy-toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #2e7d32;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: slideUp 0.3s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    // ============================================================
+    // SEARCH FILTER
+    // ============================================================
+    function filterPublicLinks() {
+        const searchTerm = document.getElementById('searchPublicLinks').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.public-link-card');
+        let visibleCount = 0;
+        
+        cards.forEach(card => {
+            const searchData = card.dataset.search || '';
+            const show = !searchTerm || searchData.includes(searchTerm);
+            card.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+        });
+        
+        // Update count if needed
+        const countElement = document.querySelector('.text-2xl.font-bold');
+        if (countElement) {
+            // Don't change the total count, it's static
+        }
+    }
+
+    // ============================================================
+    // COPY TO CLIPBOARD
+    // ============================================================
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Show toast notification
+            const toast = document.createElement('div');
+            toast.className = 'copy-toast';
+            toast.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Link copied to clipboard!';
+            document.body.appendChild(toast);
+            
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(function() {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 2000);
+        }).catch(function() {
+            // Fallback for older browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            const toast = document.createElement('div');
+            toast.className = 'copy-toast';
+            toast.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Link copied!';
+            document.body.appendChild(toast);
+            
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(function() {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 2000);
+        });
+    }
+
+    // ============================================================
+    // AUTO-REFRESH LAST UPDATED TIME
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        document.getElementById('lastUpdated').textContent = now.toLocaleString();
+    });
+</script>
+{% endblock %}

@@ -98,13 +98,14 @@ def links_management():
                     user = session_manager.query(User).filter_by(username=session.get('user')).first()
                     if user:
                         links = session_manager.query(service_linkes).filter_by(user_id=user.id).all()
-                        return render_template('links_management.html', links=links)
+                        return render_template('links_management.html', links=links, catagorys=list(config.CATEGORY.items()))
                     else:
                         return redirect(url_for('login_view.login'))
                 # adding new link
                 elif request.method == 'POST':
                     service_link = request.form.get('service_link')
                     visibility = request.form.get('visibility')
+                    catagory = request.form.get('catagory')
                     if service_link:
                         user = session_manager.query(User).filter_by(
                             username=session.get('user')
@@ -120,6 +121,7 @@ def links_management():
                                 user_id=user.id,
                                 service_link=service_link,
                                 visibility=visibility,
+                                catagory=catagory,
                                 status=status
                             )
                             session_manager.add(new_link)
@@ -133,8 +135,8 @@ def links_management():
                             error='Please provide a valid service link.'
                         )
             else:
-                return redirect(url_for('auth_view.login'))
-        return render_template('links_management.html')
+                return redirect(url_for('login_view.login'))
+        return redirect(url_for('login_view.login'))
     except Exception as e:
         print(traceback.format_exc())
         config.log(f'[Error] : {request.endpoint} the excepton(error): {e}')
@@ -191,7 +193,7 @@ def delete_link(link_id):
         session_manager.close()
 
 
-@auth_view.route('/api/links_management/update/<int:link_id>', methods=['POST'])
+@auth_view.route('/api/links_management/update/<link_id>', methods=['POST'])
 def update_link(link_id):
     """
     Handles the updating of a service link for authenticated users.
@@ -223,12 +225,16 @@ def update_link(link_id):
         
         # Get new service link from form
         new_service_link = request.form.get('service_link')
+        new_catagory = request.form.get('catagory')
+        new_visibility = request.form.get('visibility')
         if not new_service_link:
             flash('Please provide a valid service link.', 'error')
             return redirect(url_for('auth_view.links_management'))
         
         # Update the link
         link_to_update.service_link = new_service_link
+        link_to_update.catagory = new_catagory
+        link_to_update.visibility = new_visibility
         session_manager.commit()
         
         flash('Link updated successfully.', 'success')
