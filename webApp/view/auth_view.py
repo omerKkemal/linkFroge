@@ -519,9 +519,7 @@ def update_comment_reply(ID):
         session_manager.close()
 
 
-# ============================================================
-# GET COMMENTS FOR A LINK - ADD THIS ENDPOINT
-# ============================================================
+
 
 @auth_view.route("/api/comments/<string:link_id>", methods=['GET'])
 def get_comments(link_id):
@@ -564,3 +562,4 @@ def get_comments(link_id):
         return jsonify({'message': 'An error occurred while fetching comments'}), 500
     finally:
         session_manager.close()
+
