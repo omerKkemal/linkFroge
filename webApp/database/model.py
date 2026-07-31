@@ -7,7 +7,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True)
     username = Column(String(50), unique=True, nullable=False)
     display_name = Column(String(50), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
@@ -17,7 +17,8 @@ class User(Base):
     create_at = Column(DateTime,nullable=False)
     update_at = Column(DateTime,nullable=False)
 
-    def __init__(self, username, display_name, email, password_hash, token, create_at=None, update_at=None, bio=None):
+    def __init__(self, id, username, display_name, email, password_hash, token, create_at=None, update_at=None, bio=None):
+        self.id = id
         self.username = username
         self.display_name = display_name
         self.email = email
@@ -28,7 +29,7 @@ class User(Base):
         self.update_at = update_at if update_at else datetime.now()
 
     def __repr__(self):
-        return f"<User(username='{self.username}', display_name='{self.display_name}', email='{self.email}', token='{self.token}', create_at='{self.create_at}', update_at='{self.update_at}')>"
+        return f"<id={self.id} User(username='{self.username}', display_name='{self.display_name}', email='{self.email}', token='{self.token}', create_at='{self.create_at}', update_at='{self.update_at}')>"
 
 class SESSION_LOGIN(Base):
     __tablename__ = 'SESSION'
@@ -47,7 +48,7 @@ class SESSION_LOGIN(Base):
 class service_linkes(Base):
     __tablename__ = "service_linkes"
 
-    ID = Column(String,primary_key=True)
+    ID = Column(String,primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     service_link = Column(String,nullable=False, unique=True)
     status = Column(String,nullable=False, default='offline')
@@ -68,5 +69,47 @@ class service_linkes(Base):
         self.update_at = update_at if update_at else datetime.now()
     def __repr__(self):
         return f"<service_linkes(ID='{self.ID}', user_id='{self.user_id}', service_link='{self.service_link}', catagory={self.catagory},status='{self.status}', visibility={self.visibility} ,create_at='{self.create_at}', update_at='{self.update_at}')>"
+
+class comment(Base):
+    __tablename__ = "comment"
+
+    ID = Column(String, nullable=False, primary_key=True)
+    comment_content = Column(String, nullable=False)
+    link_id = Column(String, ForeignKey('service_linkes.ID', ondelete="CASCADE")) 
+    comment_by = Column(String, ForeignKey('users.id', ondelete="CASCADE"), nullable=False) # the owner of this comment can delelte or update
+    create_at = Column(DateTime,nullable=False)
+    update_at = Column(DateTime,nullable=False)
+
+    def __init__(self, ID, comment_content, link_id, comment_by, create_at=None, update_at=None):
+        self.ID = ID
+        self.comment_content = comment_content
+        self.link_id = link_id
+        self.comment_by = comment_by
+        self.create_at = create_at if create_at else datetime.now()
+        self.update_at = update_at if update_at else datetime.now()
+
+    def __repr__(self):
+        return f"<comment_content={self.comment_content}, link_id={self.link_id}, comment_by={self.comment_by}, create_at={self.create_at}, update_at={self.update_at}>"
+
+class comment_reply(Base):
+    __tablename__ = "commant_reply"
+    ID = Column(String, primary_key=True, nullable=False)
+    comment_ID = Column(String, ForeignKey("comment.ID", ondelete="CASCADE"))
+    replay_content = Column(String, nullable=False)
+    reply_comnntent_to = Column(String, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
+    create_at = Column(DateTime, nullable=False)
+    update_at = Column(DateTime, nullable=False)
+
+    def __init__(self, ID, comment_ID, replay_content, reply_comnntent_to, create_at=None, update_at=None):
+        self.ID = ID
+        self.comment_ID = comment_ID
+        self.replay_content = replay_content
+        self.reply_comnntent_to = reply_comnntent_to
+        self.create_at = create_at if create_at else datetime.now()
+        self.update_at = update_at if update_at else datetime.now()
+    def __repr__(self):
+        return f"<ID={self.ID}, comment_ID={self.comment_ID}, replay_content={self.replay_content}, reply_comnntent_to={self.reply_comnntent_to}, create_at={self.create_at}, update_at={self.update_at}>"
+    
+
 
 

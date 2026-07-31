@@ -2,7 +2,7 @@ from flask import Blueprint, flash, flash, render_template, request, redirect, u
 import traceback
 import requests
 
-from database.model import User, service_linkes
+from database.model import User, service_linkes, comment, comment_reply
 from database.manage_db import get_engine as engine
 from database.manage_db import Session
 from database.manage_db import config, SESSION
@@ -63,7 +63,7 @@ def register():
 
                 token = f"linkFrog-v1-sp{config.ID(30)}"  # Generate a random token for the user
                 try:
-                    new_user = User(username=username, display_name=display_name, email=email, password_hash=password, token=token)
+                    new_user = User(id=config.ID(), username=username, display_name=display_name, email=email, password_hash=password, token=token)
                     session.add(new_user)
                     session.commit()
                     welcom_email = 'Welcome to LinkFroge'
@@ -148,6 +148,7 @@ def public_link():
     """
     session_manager = Session()
     
+    # Only allow GET requests
     if request.method != "GET":
         return """
         <!DOCTYPE html>
@@ -235,16 +236,54 @@ def public_link():
     
     try:
         all_public_link = session_manager.query(service_linkes).filter_by(visibility="public").all()
+        
+        
+        # Query all comments and replies
+        comments = session_manager.query(comment).all()
+        replays = session_manager.query(comment_reply).all()
+        
+        # ============================================================
+        # FIX: Convert SQLAlchemy objects to dictionaries for JSON serialization
+        # ============================================================
+        comments_list = []
+        for c in comments:
+            comments_list.append({
+                "ID": c.ID,
+                "comment_content": c.comment_content,
+                "link_id": c.link_id,
+                "comment_by": c.comment_by,
+                "create_at": c.create_at.isoformat() if c.create_at else None,
+                "update_at": c.update_at.isoformat() if c.update_at else None
+            })
+        
+        replays_list = []
+        for r in replays:
+            replays_list.append({
+                "ID": r.ID,
+                "comment_ID": r.comment_ID,
+                "replay_content": r.replay_content,
+                "reply_comnntent_to": r.reply_comnntent_to,
+                "create_at": r.create_at.isoformat() if r.create_at else None,
+                "update_at": r.update_at.isoformat() if r.update_at else None
+            })
+        
+        print(f"Comments list: {comments_list}")
+        print(f"Replies list: {replays_list}")
+        
         return render_template('public_liks.html', 
                              all_public_link=all_public_link, 
-                             catagory=config.CATEGORY)
+                             catagory=config.CATEGORY,
+                             comments=comments_list,  # Pass serialized comments
+                             replays=replays_list)    # Pass serialized replies
     except Exception as e:
         print(f"Error fetching public links: {e}")
+        print(traceback.format_exc())
         flash("Error loading public links. Please try again.", "error")
-        # Return empty list but still pass categories
         return render_template('public_liks.html', 
                              all_public_link=[], 
-                             catagory=config.CATEGORY)
+                             catagory=config.CATEGORY,
+                             comments=[],  # Empty list on error
+                             replays=[])   # Empty list on error
     finally:
         session_manager.close()
 
