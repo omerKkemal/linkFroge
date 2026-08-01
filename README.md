@@ -20,16 +20,19 @@ FrogLink is a link management system that gives permanent, stable URLs for dynam
 - **CLI Agent** – Auto-starts ngrok, detects URL changes, sends heartbeats. Like a digital heartbeat. Creepy.
 - **Web Dashboard** – User-friendly link management with statistics. Because numbers make you feel important.
 - **REST API** – Full CRUD operations with token authentication. For the nerds.
-- **Community Links** – Share your links with the world (or don't, we're not your mom)
-- **Comments** – Because everyone has an opinion. And now they can share it. (Placeholder for now, but it's there)
+- **Community Links** – Share your links with the world (or don't, we're not your mom).
+- **Comments & Replies** – Discuss links with the community. Reply to specific comments. Because everyone has an opinion.
 - **Category System** – Organize your links. Or don't. Chaos is also an option.
 - **Public/Private Visibility** – Share with everyone or keep it to yourself. Your secret is safe with us.
+- **Link Details Side Panel** – Click any link to open a detailed side panel with full information, comments, and quick actions.
+- **Live Comment Updates** – Comments appear instantly without page reload. Magic. Or JavaScript. Same thing.
 - **Sarcasm Engine** – Because every good tool needs personality. And we have plenty.
 - **Active Link Highlighting** – Know where you are. Or don't. We'll show you anyway.
 - **Link Status Checking** – See if a link is online or offline. (We check. Sometimes it works.)
 - **User Attribution** – See who shared what. (Probably a bot. Or not. Who knows?)
 - **Responsive Design** – Works on desktop, tablet, and mobile. Because you're always on something.
 - **Category Filtering** – Filter links by category. Because finding what you want is overrated.
+- **Search Functionality** – Find links by URL or category. Good luck. You'll need it.
 
 ---
 
@@ -47,7 +50,7 @@ FrogLink is a link management system that gives permanent, stable URLs for dynam
 ### Dashboard
 <img src="screen_shot/dashboard.jpg" alt="Dashboard" width="700">
 
-*Numbers Graphs Stuff You're basically a data analyst now*
+*Numbers. Graphs. Stuff. You're basically a data analyst now.*
 
 <br><br>
 
@@ -62,6 +65,13 @@ FrogLink is a link management system that gives permanent, stable URLs for dynam
 <img src="screen_shot/community_links.png" alt="Community Links" width="700">
 
 *Share with the world. Or don't. We're not your mom.*
+
+<br><br>
+
+### Link Details Panel
+<img src="screen_shot/link_panel.png" alt="Link Details Panel" width="700">
+
+*Click a link. Get a panel. Full details. Comments. Actions. It's like a pop-up. But classier.*
 
 <br><br>
 
@@ -99,7 +109,9 @@ It's for managing links. That's it. Don't use it for illegal stuff. I don't have
 
 ### Community Features
 - **Public Links** – Share your links with the community. Because sharing is caring.
-- **Comments Section** – Collapsible comments on every public link. (Placeholder – comments stay in your browser until we add backend)
+- **Comments & Replies** – Comment on links and reply to specific comments. Full thread support.
+- **Side Panel** – Click any public link to open a detailed side panel with link info, comments, and quick actions.
+- **Real-time Updates** – Comments appear instantly. No page reload needed. We're fancy like that.
 - **Category Filtering** – Filter links by category. Because finding what you want is overrated.
 - **Link Status** – See if a link is online or offline. (We check. Sometimes it works.)
 - **User Attribution** – See who shared what. (Probably a bot. Or not. Who knows?)
@@ -109,6 +121,7 @@ It's for managing links. That's it. Don't use it for illegal stuff. I don't have
 - **Responsive Design** – Works on desktop, tablet, and mobile. Because you're always on something.
 - **Sarcasm Integration** – Because every good tool needs personality.
 - **Loading Screen** – With frogs. Because why not.
+- **Toast Notifications** – Because you deserve feedback. Even if it's sarcastic.
 
 ---
 
@@ -119,8 +132,11 @@ It's for managing links. That's it. Don't use it for illegal stuff. I don't have
 3. Your permanent link always points to the right place
 4. Users never see the ugly URL
 5. Optional: Share links publicly with the community
-6. People can comment on your links (when we add the backend)
-7. Filter links by category. Or don't. We're not your mom.
+6. Click any public link to open the side panel
+7. View link details, status, and metadata
+8. Comment on links or reply to other comments
+9. Comments appear instantly (because we're not savages)
+10. Filter links by category. Or don't. We're not your mom.
 
 **It's like magic. But with more code. And less rabbits.**
 
@@ -216,6 +232,9 @@ python linkFroge.py --port 5000 --backend https://yourdomain.com/api/service/upd
 | PUT | `/api/links/{slug}` | Update a link | Yes (Token) |
 | DELETE | `/api/links/{slug}` | Delete a link | Yes (Token) |
 | GET | `/api/links/{slug}/stats` | Get link statistics | Yes (Token) |
+| POST | `/api/comment` | Post a comment | Yes (Session) |
+| POST | `/api/comment/reply/{id}` | Reply to a comment | Yes (Session) |
+| GET | `/api/comments/{link_id}` | Get comments for a link | No |
 | GET | `/{slug}` | Redirect to original URL | No |
 | GET | `/public_links` | View public links | No |
 | GET | `/is_the_like_alive` | Check link status | No |
@@ -266,7 +285,10 @@ LinkFroge/
 - [x] Public/Private Links – Share with the world or keep it secret
 - [x] Category System – Organize your links
 - [x] Community Links Page – See what others are sharing
-- [x] Comments Section – Discuss links with the community (frontend placeholder)
+- [x] Comments Section – Discuss links with the community
+- [x] Reply System – Reply to specific comments
+- [x] Side Panel – Detailed link view with comments
+- [x] Real-time Comment Updates – No page reload needed
 - [x] Sarcastic UI – Because serious tools are boring
 - [x] Active Link Highlighting – Know where you are
 - [ ] User Ratings – Rate links (coming soon)
