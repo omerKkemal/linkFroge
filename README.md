@@ -343,9 +343,7 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 
 ## Contact
 
-- **GitHub Issues:** [Report a bug](https://github.com/yourusername/linkfroge/issues)
-- **Email:** your.email@example.com
-- **Twitter:** @yourhandle
+- **Email:** omerkemal2019@gmail.com
 
 ---
 
