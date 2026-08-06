@@ -54,13 +54,15 @@ def register_service():
         valid_token = session_manager.query(User).filter_by(token=token).first()
         if not valid_token:
             return jsonify({'error': 'Invalid token'}), 401
-
+        link = request.json.get('link')
+        if not link:
+            return jsonify({'error': 'Link is missing in the request body'}), 400
         new_service_link_id = secrets.token_hex(16)
         new_service_link = service_linkes(
             id=new_service_link_id,
-            link="",
-            created_at=datetime.now(),
-            updated_at=datetime.now()
+            service_link=link if link.startswith("http://") or link.startswith("https://") else f"http://{link}",
+            create_at=datetime.now(),
+            update_at=datetime.now()
         )
         session_manager.add(new_service_link)
         session_manager.commit()

@@ -107,13 +107,12 @@ def DownloadNgrok(url, path):
         ngrok_path = Path(path) / ngrok_executable
         if ngrok_path.exists():
             try:
+                subprocess.run('chmod +x ' + str(ngrok_path), shell=True, check=True)
                 ngrok_path.chmod(0o755)
             except Exception:
                 pass
 
         print("[+] Ngrok downloaded and extracted successfully.")
-
-        subprocess.run('chmod +x ' + str(ngrok_path), shell=True, check=True)
 
     except requests.RequestException as e:
         print(f"[!] Download failed: {e}")
