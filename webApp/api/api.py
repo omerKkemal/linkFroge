@@ -1,3 +1,5 @@
+import traceback
+
 from flask import Blueprint, request, jsonify
 from database.manage_db import get_session, SESSION, Session
 from database.model import User, service_linkes
@@ -18,7 +20,7 @@ def get_link():
         auth_token = request.headers.get('Authorization')
         if not auth_token:
             return jsonify({'error': 'Authorization header is missing'}), 400
-        valid_link = session_manager.query(service_linkes).filter_by(id=service_link_id).first()
+        valid_link = session_manager.query(service_linkes).filter_by(ID=service_link_id).first()
         if not valid_link:
             return jsonify({'error': 'Service link not found'}), 404
 
@@ -28,14 +30,15 @@ def get_link():
             return jsonify({'error': 'Invalid token'}), 401
 
         service_link = session_manager.query(service_linkes).filter_by(
-            id=service_link_id
+            ID=service_link_id
         ).first()
         if not service_link:
             return jsonify({'error': 'Service link not found'}), 404
 
-        return jsonify({'link': service_link.link}), 200
+        return jsonify({'link': service_link.service_link}), 200
     except Exception as e:
         session_manager.rollback()
+        print(f"Error in get_link: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
     finally:
@@ -59,7 +62,7 @@ def register_service():
             return jsonify({'error': 'Link is missing in the request body'}), 400
         new_service_link_id = secrets.token_hex(16)
         new_service_link = service_linkes(
-            id=new_service_link_id,
+            ID=new_service_link_id,
             service_link=link if link.startswith("http://") or link.startswith("https://") else f"http://{link}",
             create_at=datetime.now(),
             update_at=datetime.now()
@@ -86,7 +89,7 @@ def update_link():
         auth_token = request.headers.get('Authorization')
         if not auth_token:
             return jsonify({'error': 'Authorization header is missing'}), 400
-        valid_link = session_manager.query(service_linkes).filter_by(id=service_link_id).first()
+        valid_link = session_manager.query(service_linkes).filter_by(ID=service_link_id).first()
         if not valid_link:
             return jsonify({'error': 'Service link not found'}), 404
 
@@ -100,12 +103,12 @@ def update_link():
             return jsonify({'error': 'New link is missing in the request body'}), 400
 
         service_link = session_manager.query(service_linkes).filter_by(
-            id=service_link_id
+            ID=service_link_id
         ).first()
         if not service_link:
             return jsonify({'error': 'Service link not found'}), 404
 
-        service_link.link = new_link
+        service_link.service_link = new_link
         service_link.updated_at = datetime.now()
         session_manager.commit()
 
