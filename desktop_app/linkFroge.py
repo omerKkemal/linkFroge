@@ -5,6 +5,7 @@ It also checks if ngrok is installed and downloads it if necessary.
 """
 
 import io
+from operator import ne
 import zipfile
 from pathlib import Path
 import argparse
@@ -24,19 +25,21 @@ ngrok_executable = "ngrok.exe" if __import__("platform").system() == "Windows" e
 config = {
     "ngpath": str(ngpath),
     "verbose": False,
+    "port": 55555,
     "linkfroge_api": "https://127.0.0.1:5000/api",
     "localng-api": "http://127.0.0.1:4040/api/tunnels",
-    "service-id": False,
-    "service-token": False,
+    "service-id": None,
+    "service-token": None,
+    "thrade_flage": False,
     "ng-auth-token": any(ngpath.glob("*.yml")),
-    "download-ngrok": "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip",
+    "download-ngrok": "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip" if __import__("platform").system() == "Linux" else "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip",
 }
 
 
 onStartInfo = {
-    "service_id": False,
-    "service_token": False,
-    "service_link": False,
+    "service_id": None,
+    "service_token": None,
+    "service_link": None,
     "args": []
 }
 
@@ -163,7 +166,8 @@ def is_ng_auth_token_valid():
                         str(ngpath / ngrok_executable),
                         "add-authtoken", promppt_auth_token,
                         "--config", str(ngpath / "ngrok.yml")
-                    ]
+                    ],
+                    check=True
                 )
                 return True
             except Exception as e:
