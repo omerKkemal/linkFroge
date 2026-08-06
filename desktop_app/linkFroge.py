@@ -22,6 +22,21 @@ ngpath = Path.home() / ".linkfroge"
 ngrok_executable = "ngrok.exe" if __import__("platform").system() == "Windows" else "ngrok"
 
 
+def get_platform():
+    """Determine the platform for downloading ngrok."""
+    plat = __import__("platform").system()
+    if plat == "Windows":
+        return "windows-amd64"
+    elif plat == "Linux":
+        return "linux-amd64"
+    elif plat == "Darwin":
+        return "darwin-amd64"
+    else:
+        raise Exception("Unsupported platform")
+
+plat = get_platform()
+
+
 config = {
     "ngpath": str(ngpath),
     "verbose": False,
@@ -31,8 +46,9 @@ config = {
     "service-id": None,
     "service-token": None,
     "thrade_flage": False,
+    "config_file": str(ngpath / "ngrok.yml"),
     "ng-auth-token": any(ngpath.glob("*.yml")),
-    "download-ngrok": "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip" if __import__("platform").system() == "Linux" else "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip",
+    "download-ngrok": f"https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-{plat}.zip",
 }
 
 
@@ -40,7 +56,7 @@ onStartInfo = {
     "service_id": None,
     "service_token": None,
     "service_link": None,
-    "args": []
+    "args": {}
 }
 
 
@@ -96,6 +112,8 @@ def DownloadNgrok(url, path):
                 pass
 
         print("[+] Ngrok downloaded and extracted successfully.")
+
+        subprocess.run('chmod +x ' + str(ngrok_path), shell=True, check=True)
 
     except requests.RequestException as e:
         print(f"[!] Download failed: {e}")
@@ -179,6 +197,6 @@ def is_ng_auth_token_valid():
 
 
 
-# if __name__ == "__main__":
-#     if not does_ngrok_exist():
-#         DownloadNgrok(config["download-ngrok"], config["ngpath"])
+if __name__ == "__main__":
+    if not does_ngrok_exist():
+        DownloadNgrok(config["download-ngrok"], config["ngpath"])
