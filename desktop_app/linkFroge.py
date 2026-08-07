@@ -247,6 +247,22 @@ def get_ngrok_link():
         return False, None
 
 def main():
+    """"
+    Main function to handle the linkFroge process.
+    It checks for ngrok, starts it, retrieves the public URL, and updates the LinkFroge service link if necessary.
+    HOW TO USE:
+    1. Ensure you have Python installed on your system.
+    2. Save this script as linkFroge.py.
+    3. Open a terminal and navigate to the directory where linkFroge.py is located.
+    4. Run the script using the command: python linkFroge.py
+    5. Follow the prompts to provide your ngrok auth token if required.
+    6. The script will start ngrok, retrieve the public URL, and update the LinkFroge service link if you have provided the service ID and token.
+    7. To stop the ngrok tunnel, press Ctrl+C in the terminal.
+    8. You can also use command-line arguments to specify options like port, service ID, and service token. Use --help to see all available options.
+    9. For example, to specify a custom port and service ID, you can run: python linkFroge.py --port 8080 --service-id your_service_id --service-token your_service_token
+    10. The script will handle the rest, including checking for ngrok, starting it, and updating the LinkFroge service link
+    11. Enjoy using linkFroge to create a link for your local server!
+    """
     import time
     import sys
 
