@@ -4,7 +4,6 @@ from flask import Blueprint, request, jsonify
 from database.manage_db import get_session, SESSION, Session, config
 from database.model import User, service_linkes
 from datetime import datetime
-import secrets
 
 api = Blueprint('api', __name__)
 
