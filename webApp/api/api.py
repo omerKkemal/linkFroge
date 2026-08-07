@@ -1,7 +1,7 @@
 import traceback
 
 from flask import Blueprint, request, jsonify
-from database.manage_db import get_session, SESSION, Session
+from database.manage_db import get_session, SESSION, Session, config
 from database.model import User, service_linkes
 from datetime import datetime
 import secrets
@@ -60,19 +60,25 @@ def register_service():
         link = request.json.get('link')
         if not link:
             return jsonify({'error': 'Link is missing in the request body'}), 400
-        new_service_link_id = secrets.token_hex(16)
+        user = session_manager.query(User).filter_by(token=token).first()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
         new_service_link = service_linkes(
-            ID=new_service_link_id,
+            ID=config.ID(10),
             service_link=link if link.startswith("http://") or link.startswith("https://") else f"http://{link}",
+            user_id=user.id,
+            visibility='private',
+            catagory='frontend',
             create_at=datetime.now(),
             update_at=datetime.now()
         )
         session_manager.add(new_service_link)
         session_manager.commit()
 
-        return jsonify({'service_link_id': new_service_link_id}), 201
+        return jsonify({'service_link_id': new_service_link.ID}), 200
     except Exception as e:
         session_manager.rollback()
+        print(f"Error in register_service: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
     finally:
@@ -108,6 +114,9 @@ def update_link():
         if not service_link:
             return jsonify({'error': 'Service link not found'}), 404
 
+        if service_link.user_id != valid_token.ID:
+            return jsonify({'error': 'Unauthorized to update this link'}), 403
+
         service_link.service_link = new_link
         service_link.updated_at = datetime.now()
         session_manager.commit()
@@ -115,6 +124,7 @@ def update_link():
         return jsonify({'message': 'Link updated successfully'}), 200
     except Exception as e:
         session_manager.rollback()
+        print(f"Error in update_link: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
     finally:
