@@ -21,7 +21,7 @@ FrogLink is a link management system that gives permanent, stable URLs for dynam
 - **Web Dashboard** – User-friendly link management with statistics. Because numbers make you feel important.
 - **REST API** – Full CRUD operations with token authentication. For the nerds.
 - **Community Links** – Share your links with the world (or don't, we're not your mom).
-- **Comments & Replies** – Discuss links with the community. Reply to specific comments. Because everyone has an opinion.
+- **Comments & Replies** – Full comment system with threaded replies. Because everyone has an opinion.
 - **Category System** – Organize your links. Or don't. Chaos is also an option.
 - **Public/Private Visibility** – Share with everyone or keep it to yourself. Your secret is safe with us.
 - **Link Details Side Panel** – Click any link to open a detailed side panel with full information, comments, and quick actions.
@@ -78,7 +78,7 @@ FrogLink is a link management system that gives permanent, stable URLs for dynam
 ### Comment Section
 <img src="screen_shot/comments.png" alt="Comments" width="700">
 
-*"First" – Every comment section ever.*
+*"First" – Every comment section ever. Now with replies. Because one comment isn't enough.*
 
 <br><br>
 
@@ -109,9 +109,9 @@ It's for managing links. That's it. Don't use it for illegal stuff. I don't have
 
 ### Community Features
 - **Public Links** – Share your links with the community. Because sharing is caring.
-- **Comments & Replies** – Comment on links and reply to specific comments. Full thread support.
+- **Comments & Replies** – Full comment system with threaded replies. Post comments, reply to specific comments, and engage with the community.
 - **Side Panel** – Click any public link to open a detailed side panel with link info, comments, and quick actions.
-- **Real-time Updates** – Comments appear instantly. No page reload needed. We're fancy like that.
+- **Real-time Updates** – Comments and replies appear instantly. No page reload needed. We're fancy like that.
 - **Category Filtering** – Filter links by category. Because finding what you want is overrated.
 - **Link Status** – See if a link is online or offline. (We check. Sometimes it works.)
 - **User Attribution** – See who shared what. (Probably a bot. Or not. Who knows?)
@@ -134,8 +134,8 @@ It's for managing links. That's it. Don't use it for illegal stuff. I don't have
 5. Optional: Share links publicly with the community
 6. Click any public link to open the side panel
 7. View link details, status, and metadata
-8. Comment on links or reply to other comments
-9. Comments appear instantly (because we're not savages)
+8. Post comments on links or reply to specific comments
+9. Comments and replies appear instantly (because we're not savages)
 10. Filter links by category. Or don't. We're not your mom.
 
 **It's like magic. But with more code. And less rabbits.**
@@ -183,20 +183,38 @@ cd webApp
 python -c "from app import app, db; app.app_context().push(); db.create_all()"
 ```
 
-### 6. Run Web Application
+### 6. Deploy the Web App – **IMPORTANT!**
+For permanent links to work, the web app **must be hosted on a public server**. Running it locally is fine for testing, but the CLI agent needs a public endpoint to send updates. **PythonAnywhere** is free and works great.
+
+**Quick PythonAnywhere setup:**
+1. Create an account at pythonanywhere.com.
+2. Upload your project files or clone from GitHub.
+3. Set up a web app with Flask and point it to `webApp/app.py`.
+4. Configure your `.env` with production settings.
+5. Note your public URL (e.g., `https://yourusername.pythonanywhere.com`).
+
+**Alternative:** Use a VPS, Heroku, or any cloud provider.
+
+### 7. Run the Web Application Locally (for development only)
 ```bash
+cd webApp
 python app.py
 ```
 Open `http://localhost:5000` in your browser.
 
-### 7. Run CLI Agent (Optional)
+### 8. Run CLI Agent (with your public web app URL)
 ```bash
 cd desktop_app
-python linkFroge.py --port 5000 --backend https://yourdomain.com/api/service/update --service-id YOUR_ID --token YOUR_TOKEN
+
+# Register a new service ID (first time only)
+python linkFroge.py --register-service-id --linkfroge-api https://yourusername.pythonanywhere.com/api/service/register
+
+# Run the agent with your credentials
+python linkFroge.py --port 5000 --service-id YOUR_SERVICE_ID --service-token YOUR_TOKEN --linkfroge-api https://yourusername.pythonanywhere.com/api/service/update
 ```
 
-### 8. Create Your First Link
-1. Register an account
+### 9. Create Your First Link
+1. Register an account on your hosted web app
 2. Log in
 3. Go to "My Links"
 4. Click "Add New Link"
@@ -209,15 +227,33 @@ python linkFroge.py --port 5000 --backend https://yourdomain.com/api/service/upd
 
 ---
 
+## 🐸 The "I'll Just Run It Locally" Trap
+
+Look, I get it. You're clever. You think you can just run the web app on `localhost` and call it a day. You'll point the CLI agent to `http://localhost:5000` and everything will work, right?
+
+**Wrong.** Unless you're on the same machine as the CLI agent, `localhost` means YOUR computer. If you try to give someone else a permanent link like `http://localhost:5000/abc123`, they'll get a connection refused. Because they're not you. And your computer isn't a public server. *Yet.*
+
+If you want to run this for fun on your own machine and never share your links, go ahead. Knock yourself out. But don't come crying to me when your friends can't access your "permanent" link because they're not on your Wi-Fi. At least buy them a coffee and explain networking basics.
+
+So, if you plan to actually **use** FrogLink, **deploy it**. PythonAnywhere is free and takes 5 minutes. Stop pretending you're running a production service from a laptop under your bed.
+
+You've been warned. Now go deploy it. 😉
+
+---
+
 ## CLI Options (For The Brave)
 
 | Option | What It Does | Default |
 |--------|--------------|---------|
-| `--port` | Local port to expose | 5000 |
-| `--backend` | Backend API URL | https://yourdomain.com/api/service/update |
-| `--service-id` | Unique service identifier | abc123 |
-| `--token` | Authentication token | your_secure_token |
-| `--verbose` | Enable verbose logging | False |
+| `-h, --help` | Show help message and exit | - |
+| `--port PORT` | Local port to expose via ngrok | 5000 |
+| `--verbose` | Enable verbose output (see everything) | False |
+| `--service-id SERVICE_ID` | Your service ID from LinkFroge | None |
+| `--service-token SERVICE_TOKEN` | Your service token for authentication | None |
+| `--download-ngrok DOWNLOAD_NGROK` | Custom URL to download ngrok | Official ngrok download |
+| `--ngrok-auth-token NGROK_AUTH_TOKEN` | Ngrok auth token (required for authenticated tunnels) | None |
+| `--linkfroge-api LINKFROGE_API` | LinkFroge API endpoint | https://yourdomain.com/api/service/update |
+| `--register-service-id` | Register a new service ID with LinkFroge | False |
 
 **Pro tip:** Don't lose your token. I'm not making you another one.
 
@@ -234,7 +270,10 @@ python linkFroge.py --port 5000 --backend https://yourdomain.com/api/service/upd
 | GET | `/api/links/{slug}/stats` | Get link statistics | Yes (Token) |
 | POST | `/api/comment` | Post a comment | Yes (Session) |
 | POST | `/api/comment/reply/{id}` | Reply to a comment | Yes (Session) |
+| PUT | `/api/comment/update/{id}` | Update a comment | Yes (Session) |
 | GET | `/api/comments/{link_id}` | Get comments for a link | No |
+| POST | `/api/service/register` | Register a new service ID | Yes (Token) |
+| POST | `/api/service/update` | Update service URL | Yes (Token) |
 | GET | `/{slug}` | Redirect to original URL | No |
 | GET | `/public_links` | View public links | No |
 | GET | `/is_the_like_alive` | Check link status | No |
@@ -263,20 +302,41 @@ LinkFroge/
 │   ├── app.py                  # Start here
 │   ├── api/                    # REST API (the talking part)
 │   ├── database/               # Models & DB (where data sleeps)
+│   │   ├── model.py            # Database models (the important stuff)
+│   │   └── manage_db.py        # DB management (the boring stuff)
 │   ├── utility/                # Helpers (the helpful bits)
 │   │   ├── email_temp.py       # Email templates (fancy)
 │   │   ├── setting.py          # Config (the boring but important part)
 │   │   ├── token_auth.py       # Token auth (the guard dog)
 │   │   └── link_manager.py     # Link logic (the brain)
 │   ├── view/                   # Routes (the actual bits)
+│   │   ├── auth_view.py        # Auth routes (who you are)
+│   │   ├── login_view.py       # Login routes (getting in)
+│   │   └── public_view.py      # Public routes (everyone else)
 │   └── templates/              # HTML files (the pretty bits)
 │
-├── templates/                  # More HTML files (we like options)
 ├── screen_shot/                # Screenshots (you're looking at them)
 ├── requirements.txt            # Things you need
 ├── .env.example                # Copy this. Don't skip it.
 └── README.md                   # You're reading this
 ```
+
+---
+
+## Deployment
+
+To make the CLI agent work, you **must host the web app on a public server** like PythonAnywhere, Heroku, or a VPS. The CLI agent needs a public URL to send updates to.
+
+**PythonAnywhere is the easiest free option:**
+
+1. Sign up at [pythonanywhere.com](https://pythonanywhere.com).
+2. Upload your project files (or clone from GitHub).
+3. Create a new web app with Flask and set the source code path.
+4. Set the WSGI file to point to `webApp/app.py`.
+5. Configure environment variables in the "Web" tab.
+6. Your app will be live at `https://yourusername.pythonanywhere.com`.
+
+**Then use that URL as the `--linkfroge-api` when running the CLI agent.**
 
 ---
 
@@ -292,7 +352,6 @@ LinkFroge/
 - [x] Sarcastic UI – Because serious tools are boring
 - [x] Active Link Highlighting – Know where you are
 - [ ] User Ratings – Rate links (coming soon)
-- [ ] Comment Backend – Persistent comments (coming soon)
 - [ ] API Rate Limiting – Because too many requests are annoying
 - [ ] Dark Mode – For the night owls
 - [ ] Link Analytics – See who clicked what (creepy, but useful)
@@ -343,7 +402,9 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 
 ## Contact
 
+- **GitHub Issues:** [Report a bug](https://github.com/omerKkemal/linkfroge/issues)
 - **Email:** omerkemal2019@gmail.com
+- **Twitter:** @yourhandle
 
 ---
 

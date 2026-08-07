@@ -46,6 +46,7 @@ config = {
     "linkfroge_api": "http://127.0.0.1:5000/api",
     "localng-api": "http://127.0.0.1:4040/api/tunnels",
     "service-id": None,
+    "Register-service-id": True,
     "service-token": None,
     "config_file": str(ngpath / "ngrok.yml"),
     "ng-auth-token": any(ngpath.glob("*.yml")),
@@ -257,6 +258,7 @@ def main():
     parser.add_argument("--download-ngrok", type=str, default=config["download-ngrok"], help="URL to download ngrok if not present")
     parser.add_argument("--ngrok-auth-token", type=str, help="Ngrok auth token to authenticate with ngrok")
     parser.add_argument("--linkfroge-api", type=str, default=config["linkfroge_api"], help="LinkFroge API endpoint")
+    parser.add_argument("--register-service-id", action="store_true", help="Register a new service ID with LinkFroge")
 
     args = parser.parse_args()
 
@@ -273,7 +275,8 @@ def main():
         config["ng-auth-token"] = args.ngrok_auth_token
     if args.linkfroge_api:
         config["linkfroge_api"] = args.linkfroge_api
-
+    if args.register_service_id:
+        config["Register-service-id"] = True
     # If the LinkFroge API is on localhost with HTTPS, switch to HTTP (local dev servers usually don't have SSL)
     url = config["linkfroge_api"]
     if url.startswith("https://127.0.0.1") or url.startswith("https://localhost"):
@@ -325,25 +328,28 @@ def main():
     if service_id and service_token:
         exists, current_link = check_if_service_id_exists()
         if exists:
-            # Direct update because the helper `update_service_link` sends Service‑Link‑Id in the body,
-            # but the Flask endpoint expects it in the headers.
-            headers = {
-                "Authorization": f"Bearer {service_token}",
-                "Service-Link-Id": service_id,
-            }
-            body = {"link": public_url}
-            try:
-                response = requests.post(
-                    f"{config['linkfroge_api']}/update_link",
-                    headers=headers,
-                    json=body
-                )
-                if response.status_code == 200:
-                    print(f"[+] Service link updated to: {public_url}")
-                else:
-                    print(f"[!] Failed to update service link. Status: {response.status_code}, Response: {response.text}")
-            except Exception as e:
-                print(f"[!] Error updating service link: {e}")
+            if current_link != public_url:
+                # Direct update because the helper `update_service_link` sends Service‑Link‑Id in the body,
+                # but the Flask endpoint expects it in the headers.
+                headers = {
+                    "Authorization": f"Bearer {service_token}",
+                    "Service-Link-Id": service_id,
+                }
+                body = {"link": public_url}
+                try:
+                    response = requests.post(
+                        f"{config['linkfroge_api']}/update_link",
+                        headers=headers,
+                        json=body
+                    )
+                    if response.status_code == 200:
+                        print(f"[+] Service link updated to: {public_url}")
+                    else:
+                        print(f"[!] Failed to update service link. Status: {response.status_code}, Response: {response.text}")
+                except Exception as e:
+                    print(f"[!] Error updating service link: {e}")
+            else:
+                print(f"[!] No need to update. the link is not changed. Current link: {current_link}, New link: {public_url}")
         else:
             print("[!] Service ID does not exist. Please create the service first via the LinkFroge API.")
             print(f"    Then update the link manually with: {public_url}")
@@ -355,7 +361,36 @@ def main():
     # Store the link for later reference
     onStartInfo["service_link"] = public_url
 
-    # 6. Keep the script alive until interrupted
+    # 6. Register the service ID if requested
+    if config["service-token"] and config["port"]:
+        print("[+] Registering service ID with LinkFroge...")
+        headers = {
+            "Authorization": f"Bearer {config['service-token']}",
+        }
+        body = { 
+            "link": public_url,
+        }
+        try:
+            response = requests.post(
+                f"{config['linkfroge_api']}/register_service",
+                headers=headers,
+                json=body
+            )
+            if response.status_code == 200:
+
+                print("[+] Service ID registered successfully.")
+                response_data = response.json()
+                service_link_id = response_data.get("service_link_id")
+                onStartInfo["service_id"] = service_link_id
+                if service_link_id:
+                    print(f"[+] Service Link ID: {service_link_id}")
+                    config["service-id"] = service_link_id
+            else:
+                print(f"[!] Failed to register service ID. Status: {response.status_code}, Response: {response.text}")
+        except Exception as e:
+            print(f"[!] Error registering service ID: {e}")
+
+    # 7. Keep the script alive until interrupted
     print("\n[+] Ngrok tunnel is running. Press Ctrl+C to stop.")
     try:
         while True:
