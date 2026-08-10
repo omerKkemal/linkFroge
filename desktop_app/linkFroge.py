@@ -43,7 +43,7 @@ config = {
     "ngpath": str(ngpath),
     "verbose": False,
     "port": 55555,
-    "linkfroge_api": "http://127.0.0.1:5000/api",
+    "linkfroge_api": "https://linkfroge.pythonanywhere.com/api",
     "localng-api": "http://127.0.0.1:4040/api/tunnels",
     "service-id": None,
     "Register-service-id": False,
