@@ -190,11 +190,11 @@
         </div>
     </div>
 
-    <!-- CLI Commands -->
+    <!-- CLI Commands & Download Buttons -->
     <div class="glass-effect rounded-3xl p-8 border-2 border-green-200">
         <h3 class="text-2xl font-bold text-green-800 mb-4 text-center">
             <i class="fas fa-terminal mr-2 text-green-500"></i>
-            CLI Agent Commands <span class="sarcastic-sm">(The Fun Part)</span>
+            CLI Agent Options <span class="sarcastic-sm">(The Fun Part)</span>
         </h3>
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -207,28 +207,48 @@
                 </thead>
                 <tbody>
                     <tr class="border-b border-green-100">
-                        <td class="py-3 px-4 text-sm font-mono text-green-700">--port</td>
-                        <td class="py-3 px-4 text-sm text-green-600">Local port to expose <span class="sarcastic-xs block">(Where the magic happens)</span></td>
-                        <td class="py-3 px-4 text-sm text-green-600">5000</td>
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">-h, --help</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Show help message and exit <span class="sarcastic-xs block">(Read it. Or don't. I'm not your mom.)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">—</td>
                     </tr>
                     <tr class="border-b border-green-100">
-                        <td class="py-3 px-4 text-sm font-mono text-green-700">--backend</td>
-                        <td class="py-3 px-4 text-sm text-green-600">Backend API URL <span class="sarcastic-xs block">(Where the data goes)</span></td>
-                        <td class="py-3 px-4 text-sm text-green-600">https://yourdomain.com/api/service/update</td>
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--port PORT</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Local port to expose via ngrok <span class="sarcastic-xs block">(Where the magic happens)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">55555</td>
                     </tr>
                     <tr class="border-b border-green-100">
-                        <td class="py-3 px-4 text-sm font-mono text-green-700">--service-id</td>
-                        <td class="py-3 px-4 text-sm text-green-600">Unique service identifier <span class="sarcastic-xs block">(Like a name tag for your app)</span></td>
-                        <td class="py-3 px-4 text-sm text-green-600">abc123</td>
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--verbose</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Enable verbose output – shows every retry, status check, and internal thought. <span class="sarcastic-xs block">(You'll feel like a hacker. You're just watching logs.)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">False</td>
                     </tr>
                     <tr class="border-b border-green-100">
-                        <td class="py-3 px-4 text-sm font-mono text-green-700">--token</td>
-                        <td class="py-3 px-4 text-sm text-green-600">Authentication token <span class="sarcastic-xs block">(Shh... it's a secret)</span></td>
-                        <td class="py-3 px-4 text-sm text-green-600">your_secure_token</td>
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--service-id SERVICE_ID</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Your service ID from LinkFroge <span class="sarcastic-xs block">(Like a name tag for your app)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">None</td>
+                    </tr>
+                    <tr class="border-b border-green-100">
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--service-token SERVICE_TOKEN</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Your service token for authentication <span class="sarcastic-xs block">(Shh... it's a secret)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">None</td>
+                    </tr>
+                    <tr class="border-b border-green-100">
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--download-ngrok URL</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Custom URL to download ngrok if missing <span class="sarcastic-xs block">(Because the default is too mainstream)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">Official ngrok download</td>
+                    </tr>
+                    <tr class="border-b border-green-100">
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--ngrok-auth-token TOKEN</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Ngrok auth token (required for authenticated tunnels) <span class="sarcastic-xs block">(Don't lose it. We won't find it for you.)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">None</td>
+                    </tr>
+                    <tr class="border-b border-green-100">
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--linkfroge-api URL</td>
+                        <td class="py-3 px-4 text-sm text-green-600">LinkFroge API endpoint <span class="sarcastic-xs block">(Where the data goes)</span></td>
+                        <td class="py-3 px-4 text-sm text-green-600">http://127.0.0.1:5000/api</td>
                     </tr>
                     <tr>
-                        <td class="py-3 px-4 text-sm font-mono text-green-700">--verbose</td>
-                        <td class="py-3 px-4 text-sm text-green-600">Enable verbose logging <span class="sarcastic-xs block">(Because who doesn't love logs?)</span></td>
+                        <td class="py-3 px-4 text-sm font-mono text-green-700">--register-service-id</td>
+                        <td class="py-3 px-4 text-sm text-green-600">Register a new service ID with LinkFroge <span class="sarcastic-xs block">(First time setup – do this once)</span></td>
                         <td class="py-3 px-4 text-sm text-green-600">False</td>
                     </tr>
                 </tbody>
@@ -236,9 +256,47 @@
         </div>
         <div class="mt-4 bg-gray-900 rounded-xl p-4">
             <code class="text-sm text-green-300">
-                python linkFroge.py --port 5000 --backend https://linkFlroge.com/update --service-id abc123 --token your_secure_token
+                # Register a new service ID (first time only)<br>
+                ./linkfroge --register-service-id --linkfroge-api https://yourdomain.com/api/service/register<br><br>
+                # Run the agent with your credentials<br>
+                ./linkfroge --port 5000 --service-id YOUR_SERVICE_ID --service-token YOUR_TOKEN --linkfroge-api https://yourdomain.com/api/service/update
             </code>
-            <p class="sarcastic-xs mt-2"><i class="fas fa-lightbulb"></i> Pro tip: Copy-paste this. Don't type it manually. You'll thank me later.</p>
+            <p class="sarcastic-xs mt-2"><i class="fas fa-lightbulb"></i> Pro tip: On Windows, use <code class="bg-gray-700 px-1 py-0.5 rounded text-green-300">linkfroge.exe</code> instead of <code class="bg-gray-700 px-1 py-0.5 rounded text-green-300">./linkfroge</code>.</p>
+        </div>
+
+        <!-- Download CLI Binaries -->
+        <div class="mt-8 pt-6 border-t-2 border-green-200">
+            <h4 class="text-xl font-bold text-green-800 mb-4 text-center">
+                <i class="fas fa-download mr-2 text-green-500"></i>
+                Download CLI Agent <span class="sarcastic-sm">(No Python Required – Just Run It)</span>
+            </h4>
+            <p class="text-center text-green-600 text-sm mb-6">
+                Pre-built binaries for Linux and Windows. Because compiling from source is for masochists.
+                <span class="sarcastic-xs block">Just download, run, and pretend you know what you're doing.</span>
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{{ url_for('static', filename='app/linkfroge') }}" 
+                   download
+                   class="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-bold text-sm hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center gap-2">
+                    <i class="fab fa-linux text-lg"></i>
+                    <span>Download for Linux</span>
+                    <span class="text-xs opacity-75">(linkfroge)</span>
+                </a>
+                <a href="{{ url_for('static', filename='app/linkfroge.exe') }}" 
+                   download
+                   class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-bold text-sm hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center gap-2">
+                    <i class="fab fa-windows text-lg"></i>
+                    <span>Download for Windows</span>
+                    <span class="text-xs opacity-75">(linkfroge.exe)</span>
+                </a>
+            </div>
+            <div class="mt-3 text-center text-xs text-green-500">
+                <i class="fas fa-info-circle"></i> 
+                Linux: <code class="bg-gray-100 px-1 py-0.5 rounded">chmod +x linkfroge</code> then run <code class="bg-gray-100 px-1 py-0.5 rounded">./linkfroge --help</code>
+                <br>
+                Windows: Just double-click or run from Command Prompt: <code class="bg-gray-100 px-1 py-0.5 rounded">linkfroge.exe --help</code>
+                <span class="sarcastic-xs block">If it doesn't work, it's probably your fault. Or Windows. Probably Windows.</span>
+            </div>
         </div>
     </div>
 </section>
